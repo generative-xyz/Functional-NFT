@@ -28,8 +28,12 @@ contract FunctionalNFT is ERC721URIStorage, ReentrancyGuard, Ownable {
         // minting fee, if any
         uint256 private _fee;
 
-        constructor(string memory name, string memory symbol, uint256 fee) ERC721(name, symbol) {
+        // max supply
+        uint256 private _supply;
+
+        constructor(string memory name, string memory symbol, uint256 fee, uint256 supply) ERC721(name, symbol) {
                 _fee = fee;
+                _supply = supply;
         }
 
         function setCode(string memory code) public onlyOwner {
@@ -55,8 +59,12 @@ contract FunctionalNFT is ERC721URIStorage, ReentrancyGuard, Ownable {
 
                 uint256 id = _counter.current();
 
+                require(id < _supply);
+
                 _randomize(id);
-                _setTokenURI(id, "TODO"); // TODO: link to the metadata that opensea can uderstand
+
+                // TODO: link to metadata https://docs.opensea.io/docs/metadata-standards
+                _setTokenURI(id, "TODO"); 
 
                 _mint(msg.sender, id);
 
@@ -82,7 +90,7 @@ contract FunctionalNFT is ERC721URIStorage, ReentrancyGuard, Ownable {
                 return uint(keccak256(abi.encodePacked(block.difficulty, msg.sender, block.timestamp))) % n;
         }
 
-        // TODO: test this one carefully
+        // TODO: test this one very carefully
         function withdraw() public onlyOwner {
                 payable(msg.sender).transfer(address(this).balance);
         }
