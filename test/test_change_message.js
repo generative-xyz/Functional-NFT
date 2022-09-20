@@ -14,14 +14,32 @@ contract("FunctionFactory", function(accounts) {
         const name = "voronoi";
         var contractInstance;
 
-        it("should change the default message", function() {
+        it("Should add function", function() {
                 return FunctionFactory.deployed().then(function(instance) {
                         contractInstance = instance;
                         return instance.setFunction(name, code, {from: accounts[1]});
                 }).then(function() {
                         return contractInstance.getFunction(name);
                 }).then(function(result) {
-                        console.log(result);
+                        fs.writeFile('output/' + name, result, err => {
+                                if (err) {
+                                        console.error(err);
+                                }
+                        })
+                        assert.equal(result, code);
+                });
+        });
+
+        it("Should retrieve function", function() {
+                return FunctionFactory.deployed().then(function(instance) {
+                        contractInstance = instance;
+                        return contractInstance.getFunction(name);
+                }).then(function(result) {
+                        fs.writeFile('output/' + name, result, err => {
+                                if (err) {
+                                        console.error(err);
+                                }
+                        })
                         assert.equal(result, code);
                 });
         });
