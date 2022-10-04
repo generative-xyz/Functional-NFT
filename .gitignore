@@ -34,3 +34,9 @@ logs
 
 # macOS
 .DS_Store
+
+artifacts
+
+cache
+
+yarn.lock
