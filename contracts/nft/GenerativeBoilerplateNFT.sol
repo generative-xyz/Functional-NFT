@@ -238,7 +238,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         string[] memory uris,
         string[] memory paramTemplateValues
     ) public nonReentrant payable returns (address newContract) {
-        require(uris.length == 0, "EMPTY");
+        require(uris.length > 0, "EMPTY");
         require(uris.length != paramTemplateValues.length, "INV_PARAMS");
         require(_mintTotalSupply[fromProjectId] + uris.length <= _mintMaxSupply[fromProjectId], "REACH_MAX");
 
