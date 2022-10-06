@@ -196,11 +196,11 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
                 require(tokenERC20.allowance(msg.sender, address(this)) >= _mintFee, "NOT_ALLOW");
                 require(tokenERC20.balanceOf(msg.sender) >= _mintFee, "INSUFF");
 
-                // transfer erc-20 token to this contract
+                // transfer all fee erc-20 token to this contract
                 bool success = tokenERC20.transferFrom(
                     msg.sender,
                     address(this),
-                    (_mintFee * operationFee / 10000)
+                    _mintFee
                 );
                 require(success == true, "TRANSFER_FAIL_ERC20_FEE");
 
