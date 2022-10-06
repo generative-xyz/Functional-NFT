@@ -13,15 +13,15 @@ import {GenerativeBoilerplateNFT} from "./GenerativeBoilerplateNFT";
         const nft = new GenerativeBoilerplateNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
         const projectId = 1;
         let a: any = {};
-        // a.getTokenURI = await nft.getTokenURI(contract, projectId);
+        a.getTokenURI = await nft.getTokenURI(contract, projectId);
         // a.getScript = await nft.getScript(contract, projectId);
         // a.getScriptType = await nft.getScriptType(contract, projectId);
         // a.getFee = await nft.getFee(contract, projectId);
         // a.getFeeTokens = await nft.getFeeTokens(contract, projectId);
         // a.getNFTContract = await nft.getNFTContract(contract, projectId);
-        a.get_mintTotalSupply = await nft.get_mintTotalSupply(contract, projectId);
-        a.get_mintMaxSupply = await nft.get_mintMaxSupply(contract, projectId);
-        a.get_nftContracts = await nft.get_nftContracts(contract, process.env.PUBLIC_KEY, projectId);
+        // a.get_mintTotalSupply = await nft.get_mintTotalSupply(contract, projectId);
+        // a.get_mintMaxSupply = await nft.get_mintMaxSupply(contract, projectId);
+        // a.get_nftContracts = await nft.get_nftContracts(contract, process.env.PUBLIC_KEY, projectId);
         console.log({a});
     } catch (e) {
         // Deal with the fact the chain failed
