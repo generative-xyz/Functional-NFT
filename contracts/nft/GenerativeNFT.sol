@@ -32,38 +32,36 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
     constructor(
         string memory _name,
         string memory _symbol,
-        string memory _baseuri,
-        address boilerplateAdd
+        string memory _baseuri
     ) ERC721PresetMinterPauserAutoId(_name, _symbol, _baseuri) {
-        require(boilerplateAdd != address(0x0), "INV_ADD");
-        grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     function initAdmin(address _newAdmin) internal {
-        require(msg.sender == _boilerplateAdd, "INV_SENDER");
+        require(msg.sender == _boilerplateAdd, "INV_SENDER_INIT_ADMIN");
         require(_newAdmin != address(0x0), "INV_ADD");
 
         _admin = _newAdmin;
-
-        grantRole(DEFAULT_ADMIN_ROLE, _admin);
-        grantRole(MINTER_ROLE, _admin);
-        grantRole(PAUSER_ROLE, _admin);
+        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
+        _grantRole(MINTER_ROLE, _admin);
+        _grantRole(PAUSER_ROLE, _admin);
     }
 
     function init(
         string memory name,
         string memory symbol,
         address admin,
+        address boilerplateAdd,
         uint256 boilerplateId
     ) public {
-        require(msg.sender == _boilerplateAdd, "INV_SENDER");
+        require(boilerplateAdd != address(0x0), "INV_ADD");
         require(admin != address(0x0), "INV_ADD");
         require(_boilerplateId == 0, "EXISTED");
 
-        _boilerplateId = boilerplateId;
-        initAdmin(admin);
         _name = name;
         _symbol = symbol;
+        _boilerplateAdd = boilerplateAdd;
+        _boilerplateId = boilerplateId;
+        initAdmin(admin);
     }
 
     function name() public view override returns (string memory) {
@@ -99,7 +97,7 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
     }
 
     function mint(address mintTo, address creator, string memory uri, string memory _paramsTemplateValue) external {
-        require(msg.sender == _boilerplateAdd, "INV_SENDER");
+        require(msg.sender == _boilerplateAdd, "INV_SENDER_MINT");
         require(_boilerplateAdd != address(0x0), "INV_BOILERPLATE");
         require(_boilerplateId > 0, "INV_BOILERPLATE_ID");
 
