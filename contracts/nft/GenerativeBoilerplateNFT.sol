@@ -215,16 +215,16 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
             // deploy new by clone from template address
             address template = _p.getAddress(GENERATIVE_NFT_TEMPLATE);
             generativeNFTAdd = ClonesUpgradeable.clone(template);
-            GenerativeNFT nft = GenerativeNFT(generativeNFTAdd);
-            nft.init(_projectName[fromProjectId], "", msg.sender, address(this), fromProjectId);
-            nft.mint(mintTo, msg.sender, uri, paramTemplateValue);
-            _nftContracts[msg.sender][fromProjectId] = address(nft);
+            _nftContracts[msg.sender][fromProjectId] = generativeNFTAdd;
             _nftContractProject[generativeNFTAdd] = fromProjectId;
+
+            GenerativeNFT nft = GenerativeNFT(generativeNFTAdd);
+            string memory initName = string(abi.encodePacked(_projectName[fromProjectId], " by ", Strings.toHexString(uint256(uint160(msg.sender)), 20)));
+            nft.init(initName, "", msg.sender, address(this), fromProjectId);
+            nft.mint(mintTo, msg.sender, uri, paramTemplateValue);
         } else {
             GenerativeNFT nft = GenerativeNFT(generativeNFTAdd);
             nft.mint(mintTo, msg.sender, uri, paramTemplateValue);
-            _nftContractProject[generativeNFTAdd] = fromProjectId;
-            return generativeNFTAdd;
         }
         _mintTotalSupply[fromProjectId] += 1;
         return generativeNFTAdd;
