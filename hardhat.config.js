@@ -36,6 +36,10 @@ module.exports = {
             url: process.env.RINKEBY_API_URL,
             accounts: [`0x${process.env.PRIVATE_KEY}`],
         },
+        goerli: {
+            url: process.env.GOERLI_API_URL,
+            accounts: [`0x${process.env.PRIVATE_KEY}`],
+        },
         ropsten: {
             url: process.env.ROPSTEN_API_URL,
             accounts: [`0x${process.env.PRIVATE_KEY}`],
@@ -84,7 +88,7 @@ module.exports = {
         aurora_testnet: {
             url: process.env.AURORA_TESTNET_API_URL,
             accounts: [`0x${process.env.PRIVATE_KEY}`],
-        }, 
+        },
         bsc_mainnet: {
             url: process.env.BSC_MAINNET_API_URL,
             accounts: [`0x${process.env.PRIVATE_KEY}`],
