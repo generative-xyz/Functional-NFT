@@ -183,6 +183,21 @@ class GenerativeBoilerplateNFT {
         return val;
     }
 
+    async get_nftContracts(contractAddress: any, deployer: any, tokenId: number) {
+        let temp = this.getContract(contractAddress);
+        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
+
+        //the transaction
+        const tx = {
+            from: this.senderPublicKey,
+            to: contractAddress,
+            nonce: nonce,
+        }
+
+        const val: any = await temp?.nftContract.methods._nftContracts(deployer, tokenId).call(tx);
+        return val;
+    }
+
     async getNFTContract(contractAddress: any, tokenID: number) {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce

@@ -13,13 +13,15 @@ import {GenerativeBoilerplateNFT} from "./GenerativeBoilerplateNFT";
         const nft = new GenerativeBoilerplateNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
         const tokenId = 1;
         let a: any = {};
-        a.getTokenURI = await nft.getTokenURI(contract, tokenId);
-        a.getScript = await nft.getScript(contract, tokenId);
-        a.getScriptType = await nft.getScriptType(contract, tokenId);
-        a.getFee = await nft.getFee(contract, tokenId);
-        a.getFeeTokens = await nft.getFeeTokens(contract, tokenId);
-        a.getNFTContract = await nft.getNFTContract(contract, tokenId);
-        a.get_mintTotalSupply = await nft.get_mintTotalSupply(contract, tokenId);
+        // a.getTokenURI = await nft.getTokenURI(contract, tokenId);
+        // a.getScript = await nft.getScript(contract, tokenId);
+        // a.getScriptType = await nft.getScriptType(contract, tokenId);
+        // a.getFee = await nft.getFee(contract, tokenId);
+        // a.getFeeTokens = await nft.getFeeTokens(contract, tokenId);
+        // a.getNFTContract = await nft.getNFTContract(contract, tokenId);
+        // a.get_mintTotalSupply = await nft.get_mintTotalSupply(contract, tokenId);
+        // a.get_mintMaxSupply = await nft.get_mintMaxSupply(contract, tokenId);
+        a.get_nftContracts = await nft.get_nftContracts(contract, process.env.PUBLIC_KEY, tokenId);
         console.log({a});
     } catch (e) {
         // Deal with the fact the chain failed
