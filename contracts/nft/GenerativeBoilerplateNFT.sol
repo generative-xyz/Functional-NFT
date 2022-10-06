@@ -176,6 +176,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         require(_exists(fromProjectId), "INVALID_PROJECT");
         require(_mintTotalSupply[fromProjectId] < _mintMaxSupply[fromProjectId], "REACH_MAX");
         ParameterControl _p = ParameterControl(_paramsAddress);
+
         // get payable
         uint256 _mintFee = _fees[fromProjectId];
         if (_mintFee > 0) {
@@ -213,8 +214,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         address generativeNFTAdd = _nftContracts[msg.sender][fromProjectId];
         if (generativeNFTAdd == address(0x0)) {
             // deploy new by clone from template address
-            address template = _p.getAddress(GENERATIVE_NFT_TEMPLATE);
-            generativeNFTAdd = ClonesUpgradeable.clone(template);
+            generativeNFTAdd = ClonesUpgradeable.clone(_p.getAddress(GENERATIVE_NFT_TEMPLATE));
             _nftContracts[msg.sender][fromProjectId] = generativeNFTAdd;
             _nftContractProject[generativeNFTAdd] = fromProjectId;
 
@@ -241,23 +241,62 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         require(uris.length > 0, "EMPTY");
         require(uris.length == paramTemplateValues.length, "INV_PARAMS");
         require(_mintTotalSupply[fromProjectId] + uris.length <= _mintMaxSupply[fromProjectId], "REACH_MAX");
+        ParameterControl _p = ParameterControl(_paramsAddress);
 
-        // check payable
+        // get payable
         uint256 _mintFee = _fees[fromProjectId];
-        bool isNative = _feeTokens[fromProjectId] == address(0);
-        if (isNative) {
-            require(msg.value >= _mintFee * uris.length, "TRANSFER_FAIL");
-        } else {
-            ERC20Upgradeable tokenERC20 = ERC20Upgradeable(_feeTokens[fromProjectId]);
-            require(tokenERC20.allowance(msg.sender, address(this)) >= _mintFee * uris.length, "NOT_ALLOW");
-            require(tokenERC20.balanceOf(msg.sender) >= _mintFee * uris.length, "INSUFF");
+        if (_mintFee > 0) {
+            _mintFee *= uris.length;
+            uint256 operationFee = _p.getUInt256(MINT_NFT_FEE);
+            if (operationFee == 0) {
+                operationFee = 500;
+                // default 5% getting, 95% pay for owner of project
+            }
+            bool isNative = _feeTokens[fromProjectId] == address(0);
+            if (isNative) {
+                require(msg.value >= _fees[fromProjectId], "TRANSFER_FAIL_FEE_ETH");
+
+                // pay for owner project
+                (bool success,) = ownerOf(fromProjectId).call{value : _mintFee - (_mintFee * operationFee / 10000)}("");
+                require(success, "FAIL");
+            } else {
+                ERC20Upgradeable tokenERC20 = ERC20Upgradeable(_feeTokens[fromProjectId]);
+                require(tokenERC20.allowance(msg.sender, address(this)) >= _mintFee, "NOT_ALLOW");
+                require(tokenERC20.balanceOf(msg.sender) >= _mintFee, "INSUFF");
+
+                // transfer all fee erc-20 token to this contract
+                bool success = tokenERC20.transferFrom(
+                    msg.sender,
+                    address(this),
+                    _mintFee
+                );
+                require(success == true, "TRANSFER_FAIL_ERC20_FEE");
+
+                // pay for owner project
+                success = tokenERC20.transfer(ownerOf(fromProjectId), _mintFee - (_mintFee * operationFee / 10000));
+                require(success == true, "TRANSFER_FAIL_ERC20_OWNER");
+            }
         }
 
-        address nftAddress;
+        address generativeNFTAdd = _nftContracts[msg.sender][fromProjectId];
         for (uint256 i = 0; i < paramTemplateValues.length; i++) {
-            nftAddress = mintUniqueNFT(fromProjectId, mintTo, uris[i], paramTemplateValues[i]);
+            if (generativeNFTAdd == address(0x0)) {
+                // deploy new by clone from template address
+                generativeNFTAdd = ClonesUpgradeable.clone(_p.getAddress(GENERATIVE_NFT_TEMPLATE));
+                _nftContracts[msg.sender][fromProjectId] = generativeNFTAdd;
+                _nftContractProject[generativeNFTAdd] = fromProjectId;
+
+                GenerativeNFT nft = GenerativeNFT(generativeNFTAdd);
+                string memory initName = string(abi.encodePacked(_projectName[fromProjectId], " by ", Strings.toHexString(uint256(uint160(msg.sender)), 20)));
+                nft.init(initName, "", msg.sender, address(this), fromProjectId);
+                nft.mint(mintTo, msg.sender, uris[i], paramTemplateValues[i]);
+            } else {
+                GenerativeNFT nft = GenerativeNFT(generativeNFTAdd);
+                nft.mint(mintTo, msg.sender, uris[i], paramTemplateValues[i]);
+            }
+            _mintTotalSupply[fromProjectId] += 1;
         }
-        return nftAddress;
+        return generativeNFTAdd;
     }
 
     function burn(uint256 tokenId) public override {
