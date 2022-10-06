@@ -280,6 +280,30 @@ class GenerativeBoilerplateNFT {
 
         return await this.signedAndSendTx(temp?.web3, tx);
     }
+
+    async mintBatchUniqueNFT(contractAddress: any, projectId: any,
+                             mintTo: any, uris: string[], paramsValues: string[],
+                             gas: any) {
+        let temp = this.getContract(contractAddress);
+        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
+
+        console.log({uris});
+        const fun = temp?.nftContract.methods.mintBatchUniqueNFT(projectId, mintTo, uris, paramsValues);
+        //the transaction
+        const tx = {
+            from: this.senderPublicKey,
+            to: contractAddress,
+            nonce: nonce,
+            gas: gas,
+            data: fun.encodeABI(),
+        }
+
+        if (tx.gas == 0) {
+            tx.gas = await fun.estimateGas(tx);
+        }
+
+        return await this.signedAndSendTx(temp?.web3, tx);
+    }
 }
 
 export {GenerativeBoilerplateNFT};

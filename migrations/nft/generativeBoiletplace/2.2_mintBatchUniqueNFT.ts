@@ -14,17 +14,23 @@ import * as fs from "fs";
         const nft = new GenerativeBoilerplateNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
         const uri = {
-            name: "Test Algo NFT ",
-            description: "Test Algo NFT ",
+            name: "Test Algo NFT 2",
+            description: "Test Algo NFT 2",
             image: "https://live.staticflickr.com/6076/6055860219_b5be1b6b19_z.jpg"
         }
         const encodedString = "data:application/json;base64," + btoa(JSON.stringify(uri)) // Base64 encode the String
-        const tx = await nft.mintUniqueNFT(
+        let uris = [];
+        let paramValues = [];
+        for (let i = 1; i <= 3; i++) {
+            uris.push(encodedString);
+            paramValues.push("");
+        }
+        const tx = await nft.mintBatchUniqueNFT(
                 contract,
-                1,
+                2,
                 process.env.PUBLIC_KEY,
-                encodedString,
-                "",
+                uris,
+                paramValues,
                 0
             )
         ;
