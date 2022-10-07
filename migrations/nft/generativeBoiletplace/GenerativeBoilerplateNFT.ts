@@ -93,7 +93,7 @@ class GenerativeBoilerplateNFT {
         return val;
     }
 
-    async getScript(contractAddress: any, tokenID: number) {
+    async getProject(contractAddress: any, tokenID: number) {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
 
@@ -104,82 +104,7 @@ class GenerativeBoilerplateNFT {
             nonce: nonce,
         }
 
-        const val: any = await temp?.nftContract.methods._scripts(tokenID).call(tx);
-        return val;
-    }
-
-    async getScriptType(contractAddress: any, tokenID: number) {
-        let temp = this.getContract(contractAddress);
-        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
-
-        //the transaction
-        const tx = {
-            from: this.senderPublicKey,
-            to: contractAddress,
-            nonce: nonce,
-        }
-
-        const val: any = await temp?.nftContract.methods._scriptsTypes(tokenID).call(tx);
-        return val;
-    }
-
-    async getFee(contractAddress: any, tokenID: number) {
-        let temp = this.getContract(contractAddress);
-        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
-
-        //the transaction
-        const tx = {
-            from: this.senderPublicKey,
-            to: contractAddress,
-            nonce: nonce,
-        }
-
-        const val: any = await temp?.nftContract.methods._fees(tokenID).call(tx);
-        return val;
-    }
-
-    async getFeeTokens(contractAddress: any, tokenID: number) {
-        let temp = this.getContract(contractAddress);
-        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
-
-        //the transaction
-        const tx = {
-            from: this.senderPublicKey,
-            to: contractAddress,
-            nonce: nonce,
-        }
-
-        const val: any = await temp?.nftContract.methods._feeTokens(tokenID).call(tx);
-        return val;
-    }
-
-    async get_mintTotalSupply(contractAddress: any, tokenID: number) {
-        let temp = this.getContract(contractAddress);
-        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
-
-        //the transaction
-        const tx = {
-            from: this.senderPublicKey,
-            to: contractAddress,
-            nonce: nonce,
-        }
-
-        const val: any = await temp?.nftContract.methods._mintTotalSupply(tokenID).call(tx);
-        return val;
-    }
-
-    async get_mintMaxSupply(contractAddress: any, tokenID: number) {
-        let temp = this.getContract(contractAddress);
-        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
-
-        //the transaction
-        const tx = {
-            from: this.senderPublicKey,
-            to: contractAddress,
-            nonce: nonce,
-        }
-
-        const val: any = await temp?.nftContract.methods._mintMaxSupply(tokenID).call(tx);
+        const val: any = await temp?.nftContract.methods._projects(tokenID).call(tx);
         return val;
     }
 

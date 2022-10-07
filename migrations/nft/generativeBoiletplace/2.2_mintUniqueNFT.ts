@@ -10,7 +10,7 @@ import * as fs from "fs";
             console.log("wrong network");
             return;
         }
-        const contract = '0x19CbE1721a63Dd4F391Fc6F0A75596fe98C2301a';
+        const contract = '0x54532D116f126690913da39dEa2DFD608a6f2D92';
         const nft = new GenerativeBoilerplateNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
         const uri = {

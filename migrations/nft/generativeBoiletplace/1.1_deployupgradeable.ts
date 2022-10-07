@@ -22,8 +22,8 @@ const {getContractAddress} = require('@ethersproject/address');
         const chainID = "5";
         const baseUrl = "";
         const address = await nft.deployUpgradeable(
-            "Test1",
-            "Test1",
+            "Boiler NFT",
+            "Boiler NFT",
             baseUrl,
             process.env.PUBLIC_KEY,
             "0x9a63ff46dfa34296a2cbd5a0f0a3ab28d27ebc07");
