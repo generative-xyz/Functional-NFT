@@ -9,6 +9,8 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
+import "../lib/helpers/Errors.sol";
+import "../lib/configurations/GenerativeBoilerplateNFTConfiguration.sol";
 import "../governance/ParameterControl.sol";
 import "./GenerativeNFT.sol";
 
@@ -16,12 +18,6 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using ClonesUpgradeable for *;
     using SafeMathUpgradeable for uint256;
-
-    // const
-    string public constant FEE_TOKEN = "FEE_TOKEN"; // currency using for create project fee
-    string public constant CREATE_PROJECT_FEE = "CREATE_PROJECT_FEE"; // fee for user mint project id
-    string public constant MINT_NFT_FEE = "MINT_NFT_FEE"; // % will pay for this contract when minter use project id for mint nft
-    string public constant GENERATIVE_NFT_TEMPLATE = "GENERATIVE_NFT_TEMPLATE";// address of Generative NFT erc-721 contract
 
     // super admin
     address public _admin;
@@ -69,8 +65,8 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         address admin,
         address paramsAddress
     ) initializer public {
-        require(admin != address(0x0), "INV_ADD");
-        require(paramsAddress != address(0x0), "INV_ADD");
+        require(admin != address(0x0), Errors.INV_ADD);
+        require(paramsAddress != address(0x0), Errors.INV_ADD);
         __ERC721PresetMinterPauserAutoId_init(name, symbol, baseUri);
         _paramsAddress = paramsAddress;
         _admin = admin;
@@ -117,9 +113,9 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         uint256 currentTokenId = _nextProjectId.current();
 
         ParameterControl _p = ParameterControl(_paramsAddress);
-        uint256 operationFee = _p.getUInt256(CREATE_PROJECT_FEE);
+        uint256 operationFee = _p.getUInt256(GenerativeBoilerplateNFTConfiguration.CREATE_PROJECT_FEE);
         if (operationFee > 0) {
-            address operationFeeToken = _p.getAddress(FEE_TOKEN);
+            address operationFeeToken = _p.getAddress(GenerativeBoilerplateNFTConfiguration.FEE_TOKEN);
             bool isNative = operationFeeToken == address(0x0);
             if (!isNative) {
                 ERC20Upgradeable tokenERC20 = ERC20Upgradeable(operationFeeToken);
@@ -173,7 +169,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         // get payable
         uint256 _mintFee = _projects[fromProjectId]._fee;
         if (_mintFee > 0) {
-            uint256 operationFee = _p.getUInt256(MINT_NFT_FEE);
+            uint256 operationFee = _p.getUInt256(GenerativeBoilerplateNFTConfiguration.MINT_NFT_FEE);
             if (operationFee == 0) {
                 operationFee = 500;
                 // default 5% getting, 95% pay for owner of project
@@ -207,7 +203,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         address generativeNFTAdd = _nftContracts[msg.sender][fromProjectId];
         if (generativeNFTAdd == address(0x0)) {
             // deploy new by clone from template address
-            generativeNFTAdd = ClonesUpgradeable.clone(_p.getAddress(GENERATIVE_NFT_TEMPLATE));
+            generativeNFTAdd = ClonesUpgradeable.clone(_p.getAddress(GenerativeBoilerplateNFTConfiguration.GENERATIVE_NFT_TEMPLATE));
             _nftContracts[msg.sender][fromProjectId] = generativeNFTAdd;
             _nftContractProject[generativeNFTAdd] = fromProjectId;
 
@@ -240,7 +236,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         uint256 _mintFee = _projects[fromProjectId]._fee;
         if (_mintFee > 0) {
             _mintFee *= uris.length;
-            uint256 operationFee = _p.getUInt256(MINT_NFT_FEE);
+            uint256 operationFee = _p.getUInt256(GenerativeBoilerplateNFTConfiguration.MINT_NFT_FEE);
             if (operationFee == 0) {
                 operationFee = 500;
                 // default 5% getting, 95% pay for owner of project
@@ -275,7 +271,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         for (uint256 i = 0; i < paramTemplateValues.length; i++) {
             if (generativeNFTAdd == address(0x0)) {
                 // deploy new by clone from template address
-                generativeNFTAdd = ClonesUpgradeable.clone(_p.getAddress(GENERATIVE_NFT_TEMPLATE));
+                generativeNFTAdd = ClonesUpgradeable.clone(_p.getAddress(GenerativeBoilerplateNFTConfiguration.GENERATIVE_NFT_TEMPLATE));
                 _nftContracts[msg.sender][fromProjectId] = generativeNFTAdd;
                 _nftContractProject[generativeNFTAdd] = fromProjectId;
 
