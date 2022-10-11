@@ -11,6 +11,7 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "../lib/helpers/Errors.sol";
 import "../lib/configurations/GenerativeBoilerplateNFTConfiguration.sol";
 import "../lib/helpers/Random.sol";
+import "../lib/helpers/StringUtils.sol";
 import "../lib/helpers/BoilerplateParam.sol";
 import "../governance/ParameterControl.sol";
 import "./GenerativeNFT.sol";
@@ -167,8 +168,9 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         return currentTokenId;
     }
 
+    // preMintUniqueNFT - random seed from chain in case project require
     function preMintUniqueNFT(uint256 projectId, uint256 amount) external {
-        require(!_projects[projectId]._clientSeed, "");
+        require(!_projects[projectId]._clientSeed, Errors.SEED_CLIENT);
         for (uint256 i = _minterInfos[msg.sender]._seeds[projectId].length; i < _minterInfos[msg.sender]._seeds[projectId].length + amount; i++) {
             _minterInfos[msg.sender]._seeds[projectId].push(Random.randomSeed(msg.sender, projectId, i));
         }
@@ -234,7 +236,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
                 _minterInfos[msg.sender]._minting[mintBatch.fromProjectId] = generativeNFTAdd;
 
                 nft = GenerativeNFT(generativeNFTAdd);
-                nft.init(string(abi.encodePacked(project._projectName, " by ", Strings.toHexString(uint256(uint160(msg.sender)), 20))),
+                nft.init(StringUtils.generateCollectionName(project._projectName, msg.sender),
                     "",
                     msg.sender,
                     address(this),
@@ -294,8 +296,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
     }
 
     function tokenURI(uint256 _tokenId) override public view returns (string memory) {
-        bytes memory customUriBytes = bytes(_projects[_tokenId]._customUri);
-        if (customUriBytes.length > 0) {
+        if (bytes(_projects[_tokenId]._customUri).length > 0) {
             return _projects[_tokenId]._customUri;
         } else {
             return string(abi.encodePacked(baseTokenURI(), StringsUpgradeable.toString(_tokenId)));

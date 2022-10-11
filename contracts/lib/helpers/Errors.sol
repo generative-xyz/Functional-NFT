@@ -28,4 +28,5 @@ library Errors {
     string public constant REACH_MAX = "303";
     string public constant INV_PARAMS = "304";
     string public constant SEED_INV = "305";
+    string public constant SEED_CLIENT = "306";
 }
