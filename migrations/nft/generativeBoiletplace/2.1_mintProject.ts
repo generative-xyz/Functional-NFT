@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import {ethers} from "ethers";
 import {GenerativeBoilerplateNFT} from "./GenerativeBoilerplateNFT";
 import * as fs from "fs";
+import {keccak256} from "ethers/lib/utils";
 
 (async () => {
     try {
@@ -10,27 +11,36 @@ import * as fs from "fs";
             console.log("wrong network");
             return;
         }
-        const contract = '0x54532D116f126690913da39dEa2DFD608a6f2D92';
+        const contract = '0xD72bb082698FcA9778b2887a9Da41c458F4B544b';
         const nft = new GenerativeBoilerplateNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
         const uri = {
-            name: "Test Algo 2",
-            description: "Test Algo 2",
+            name: "Test Algo",
+            description: "Test Algo",
             image: "https://live.staticflickr.com/6076/6055860219_b5be1b6b19_z.jpg"
         }
         const encodedString = "data:application/json;base64," + btoa(JSON.stringify(uri)) // Base64 encode the String
 
         let scriptContent = fs.readFileSync("/Users/autonomous/Documents/autonomous-vr/rendering-machine/rendering_scripts/blender/voronoi_sphere.py")
+        // 1: python, 2: js, 3: ts;
+        const scriptType = 1;
+        const params = JSON.parse(JSON.stringify({
+            _seedIndex: 0,
+            _seed: keccak256([]),
+            _params: [],
+        }));
+        // console.log(params);
+        // return
         const tx = await nft.mintProject(
                 contract, process.env.PUBLIC_KEY,
-                "Test Algo 2",
-                3,
+                "Test Algo",
+                10,
                 scriptContent.toString(),
-                "python",
+                1,
                 encodedString,
                 ethers.utils.parseEther("1.0"),
                 "0xBA62BCfcAaFc6622853cca2BE6Ac7d845BC0f2Dc",
-                "",
+                params,
                 0
             )
         ;

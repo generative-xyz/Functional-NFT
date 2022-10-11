@@ -161,7 +161,7 @@ class GenerativeBoilerplateNFT {
 
     async mintProject(contractAddress: any, to: any,
                       projectName: string, maxSupply: number, script: string,
-                      scriptType: string, uri: string, fee: any, feeAdd: any, paramsTemplate: string,
+                      scriptType: 1, uri: string, fee: any, feeAdd: any, paramsTemplate: any,
                       gas: any) {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
