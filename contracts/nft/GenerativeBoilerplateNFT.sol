@@ -40,14 +40,14 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         string _customUri; // project info nft view
         string _projectName;
         bool _clientSeed;
-        BoilerplateParam.projectParams _paramsTemplate;
+        BoilerplateParam.ParamsOfProject _paramsTemplate;
     }
 
     struct MintRequest {
         uint256 _fromProjectId;
         address _mintTo;
-        string[] _uris;
-        BoilerplateParam.projectParams[] _paramTemplateValues;
+        string[] _uriBatch;
+        BoilerplateParam.ParamsOfProject[] _paramsBatch;
     }
 
     mapping(uint256 => ProjectInfo) public _projects;
@@ -126,10 +126,11 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         uint256 maxSupply,
         string memory script,
         uint32 scriptType,
+        bool clientSeed,
         string memory uri,
         uint256 fee,
         address feeAdd,
-        BoilerplateParam.projectParams calldata paramsTemplate
+        BoilerplateParam.ParamsOfProject calldata paramsTemplate
     ) public nonReentrant payable returns (uint256) {
         require(bytes(projectName).length > 0, Errors.MISSING_NAME);
         _nextProjectId.increment();
@@ -168,6 +169,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         _projects[currentTokenId]._paramsTemplate = paramsTemplate;
         _projects[currentTokenId]._script = script;
         _projects[currentTokenId]._scriptType = scriptType;
+        _projects[currentTokenId]._clientSeed = clientSeed;
 
         _safeMint(to, currentTokenId);
 
@@ -199,16 +201,16 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         MintRequest memory mintBatch
     ) public nonReentrant payable returns (address newContract) {
         ProjectInfo memory project = _projects[mintBatch._fromProjectId];
-        require(mintBatch._uris.length > 0, Errors.EMPTY_LIST);
-        require(mintBatch._uris.length == mintBatch._paramTemplateValues.length, Errors.INV_PARAMS);
-        require(project._mintMaxSupply == 0 || project._mintTotalSupply + mintBatch._uris.length <= project._mintMaxSupply, Errors.REACH_MAX);
+        require(mintBatch._uriBatch.length > 0, Errors.EMPTY_LIST);
+        require(mintBatch._uriBatch.length == mintBatch._paramsBatch.length, Errors.INV_PARAMS);
+        require(project._mintMaxSupply == 0 || project._mintTotalSupply + mintBatch._uriBatch.length <= project._mintMaxSupply, Errors.REACH_MAX);
         ParameterControl _p = ParameterControl(_paramsAddress);
 
         // get payable
         bool success;
         uint256 _mintFee = project._fee;
         if (_mintFee > 0) {
-            _mintFee *= mintBatch._uris.length;
+            _mintFee *= mintBatch._uriBatch.length;
             uint256 operationFee = _p.getUInt256(GenerativeBoilerplateNFTConfiguration.MINT_NFT_FEE);
             if (operationFee == 0) {
                 operationFee = 500;
@@ -235,9 +237,9 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         }
 
         address generativeNFTAdd = _minterNFTInfos[msg.sender][mintBatch._fromProjectId];
-        for (uint256 i = 0; i < mintBatch._paramTemplateValues.length; i++) {
-            BoilerplateParam.projectParams memory projectParams = mintBatch._paramTemplateValues[i];
-            bytes32 seed = mintBatch._paramTemplateValues[i]._seed;
+        for (uint256 i = 0; i < mintBatch._paramsBatch.length; i++) {
+            BoilerplateParam.ParamsOfProject memory projectParams = mintBatch._paramsBatch[i];
+            bytes32 seed = mintBatch._paramsBatch[i]._seed;
             require(ownerOfSeed(seed, mintBatch._fromProjectId) == msg.sender // owner of seed
                 && _seedToTokens[seed][mintBatch._fromProjectId] == 0 // seed not already used
             , Errors.SEED_INV);
@@ -257,7 +259,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
             } else {
                 nft = GenerativeNFT(generativeNFTAdd);
             }
-            nft.mint(seed, mintBatch._mintTo, msg.sender, mintBatch._uris[i], projectParams, project._clientSeed);
+            nft.mint(seed, mintBatch._mintTo, msg.sender, mintBatch._uriBatch[i], projectParams, project._clientSeed);
             project._mintTotalSupply += 1;
             _seedToTokens[seed][mintBatch._fromProjectId] = project._mintTotalSupply;
         }

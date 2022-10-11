@@ -2,7 +2,7 @@
 pragma solidity 0.8.12;
 
 library BoilerplateParam {
-    struct param {
+    struct ParamTemplate {
         uint8 _typeValue;
         uint8 _max;
         uint8 _min;
@@ -12,10 +12,9 @@ library BoilerplateParam {
         uint8 _value;// index of available array value or value of range min,max
     }
 
-    struct projectParams {
-        uint256 _seedIndex;
+    struct ParamsOfProject {
         bytes32 _seed;
-        param[] _params;
+        ParamTemplate[] _params;
     }
 
 

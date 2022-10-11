@@ -22,7 +22,7 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
     // linked projectId in boilerplate
     uint256 public _boilerplateId;
     // params value for rendering -> mapping with tokenId of NFT
-    mapping(uint256 => BoilerplateParam.projectParams) _paramsValues;
+    mapping(uint256 => BoilerplateParam.ParamsOfProject) _paramsValues;
 
     // 
     mapping(uint256 => string) _customUri;
@@ -101,7 +101,7 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
 
     function mint(address to) public override {}
 
-    function mint(bytes32 seed, address mintTo, address creator, string memory uri, BoilerplateParam.projectParams calldata _paramsTemplateValue, bool clientSeed) external {
+    function mint(bytes32 seed, address mintTo, address creator, string memory uri, BoilerplateParam.ParamsOfProject calldata _paramsTemplateValue, bool clientSeed) external {
         require(msg.sender == _boilerplateAdd, "INV_SENDER_MINT");
         require(_boilerplateAdd != address(0x0), "INV_BOILERPLATE");
         require(_boilerplateId > 0, "INV_BOILERPLATE_ID");
@@ -110,7 +110,7 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
         // verify seed
         if (!clientSeed) {
             for (uint256 i = 0; i < _paramsTemplateValue._params.length; i++) {
-                BoilerplateParam.param memory param = _paramsTemplateValue._params[i];
+                BoilerplateParam.ParamTemplate memory param = _paramsTemplateValue._params[i];
                 if (param._availableDecimal.length == 0 && param._availableString.length == 0) {
                     require(Random.randomValueRange(uint256(seed), param._min, param._max) == param._value, Errors.SEED_INV);
                 } else if (param._availableDecimal.length > 0) {
