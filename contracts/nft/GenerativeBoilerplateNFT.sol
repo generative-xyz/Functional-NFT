@@ -120,7 +120,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
     // fee: fee mint nft from this project
     // feeAdd: currency for mint nft fee
     // paramsTemplate: json format string for render view template
-    function mint(
+    function mintProject(
         address to,
         string memory projectName,
         uint256 maxSupply,
