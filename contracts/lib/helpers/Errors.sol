@@ -16,10 +16,9 @@ library Errors {
     string public constant EMPTY_LIST = "103";
 
     // transfer error
-    string public constant NOT_ALLOWANCE = "200";
-    string public constant INSUFF = "201";
-    string public constant TRANSFER_FAIL_ERC_20 = "202";
-    string public constant TRANSFER_FAIL_NATIVE = "203";
+    string public constant INSUFF = "200";
+    string public constant TRANSFER_FAIL_ERC_20 = "201";
+    string public constant TRANSFER_FAIL_NATIVE = "202";
 
     // validation error
     string public constant MISSING_NAME = "300";
