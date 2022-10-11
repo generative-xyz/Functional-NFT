@@ -11,7 +11,7 @@ import {keccak256} from "ethers/lib/utils";
             console.log("wrong network");
             return;
         }
-        const contract = '0xD72bb082698FcA9778b2887a9Da41c458F4B544b';
+        const contract = '0xE7e2736b8450e2D7937780232570dedceeF2229a';
         const nft = new GenerativeBoilerplateNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
         const uri = {
@@ -24,23 +24,21 @@ import {keccak256} from "ethers/lib/utils";
         let scriptContent = fs.readFileSync("/Users/autonomous/Documents/autonomous-vr/rendering-machine/rendering_scripts/blender/voronoi_sphere.py")
         // 1: python, 2: js, 3: ts;
         const scriptType = 1;
-        const params = JSON.parse(JSON.stringify({
-            _seedIndex: 0,
-            _seed: keccak256([]),
-            _params: [],
-        }));
-        // console.log(params);
-        // return
         const tx = await nft.mintProject(
                 contract, process.env.PUBLIC_KEY,
                 "Test Algo",
                 10,
                 scriptContent.toString(),
                 1,
+                false,
                 encodedString,
                 ethers.utils.parseEther("1.0"),
                 "0xBA62BCfcAaFc6622853cca2BE6Ac7d845BC0f2Dc",
-                params,
+                JSON.parse(JSON.stringify({
+                    _seedIndex: 0,
+                    _seed: keccak256([]),
+                    _params: [],
+                })),
                 0
             )
         ;

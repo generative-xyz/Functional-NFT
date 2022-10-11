@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import {ethers} from "ethers";
 import {GenerativeBoilerplateNFT} from "./GenerativeBoilerplateNFT";
 import * as fs from "fs";
+import {keccak256} from "ethers/lib/utils";
 
 (async () => {
     try {
@@ -10,7 +11,7 @@ import * as fs from "fs";
             console.log("wrong network");
             return;
         }
-        const contract = '0x54532D116f126690913da39dEa2DFD608a6f2D92';
+        const contract = '0xE7e2736b8450e2D7937780232570dedceeF2229a';
         const nft = new GenerativeBoilerplateNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
         const uri = {
@@ -21,16 +22,22 @@ import * as fs from "fs";
         const encodedString = "data:application/json;base64," + btoa(JSON.stringify(uri)) // Base64 encode the String
         let uris = [];
         let paramValues = [];
-        for (let i = 1; i <= 3; i++) {
+        for (let i = 1; i <= 1; i++) {
             uris.push(encodedString);
-            paramValues.push("");
+            paramValues.push({
+                _seedIndex: i,
+                _seed: keccak256([]),
+                _params: [],
+            });
         }
         const tx = await nft.mintBatchUniqueNFT(
                 contract,
-                2,
-                process.env.PUBLIC_KEY,
-                uris,
-                paramValues,
+                JSON.parse(JSON.stringify({
+                    _fromProjectId: 1,
+                    _mintTo: process.env.PUBLIC_KEY,
+                    _uriBatch: uris,
+                    _paramsBatch: paramValues,
+                })),
                 0
             )
         ;
