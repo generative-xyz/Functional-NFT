@@ -44,10 +44,10 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
     }
 
     struct MintRequest {
-        uint256 fromProjectId;
-        address mintTo;
-        string[] uris;
-        BoilerplateParam.projectParams[] paramTemplateValues;
+        uint256 _fromProjectId;
+        address _mintTo;
+        string[] _uris;
+        BoilerplateParam.projectParams[] _paramTemplateValues;
     }
 
     mapping(uint256 => ProjectInfo) public _projects;
@@ -58,7 +58,14 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         mapping(uint256 => address) _mintedNFTAddr;
     }
 
-    mapping(address => MinterInfo) _minterInfos;
+    mapping(address => MinterInfo)  _minterInfos;
+
+    struct SeedToProject {
+        uint256 _projectId;
+        address _minter;
+    }
+
+    mapping(bytes32 => SeedToProject) public _seedToProjects;
 
     modifier adminOnly() {
         require(_msgSender() == _admin, Errors.ONLY_ADMIN_ALLOWED);
@@ -190,17 +197,17 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
     function mintBatchUniqueNFT(
         MintRequest memory mintBatch
     ) public nonReentrant payable returns (address newContract) {
-        ProjectInfo memory project = _projects[mintBatch.fromProjectId];
-        require(mintBatch.uris.length > 0, Errors.EMPTY_LIST);
-        require(mintBatch.uris.length == mintBatch.paramTemplateValues.length, Errors.INV_PARAMS);
-        require(project._mintMaxSupply == 0 || project._mintTotalSupply + mintBatch.uris.length <= project._mintMaxSupply, Errors.REACH_MAX);
+        ProjectInfo memory project = _projects[mintBatch._fromProjectId];
+        require(mintBatch._uris.length > 0, Errors.EMPTY_LIST);
+        require(mintBatch._uris.length == mintBatch._paramTemplateValues.length, Errors.INV_PARAMS);
+        require(project._mintMaxSupply == 0 || project._mintTotalSupply + mintBatch._uris.length <= project._mintMaxSupply, Errors.REACH_MAX);
         ParameterControl _p = ParameterControl(_paramsAddress);
 
         // get payable
         bool success;
         uint256 _mintFee = project._fee;
         if (_mintFee > 0) {
-            _mintFee *= mintBatch.uris.length;
+            _mintFee *= mintBatch._uris.length;
             uint256 operationFee = _p.getUInt256(GenerativeBoilerplateNFTConfiguration.MINT_NFT_FEE);
             if (operationFee == 0) {
                 operationFee = 500;
@@ -210,7 +217,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
                 require(msg.value >= _mintFee, Errors.TRANSFER_FAIL_NATIVE);
 
                 // pay for owner project
-                (success,) = ownerOf(mintBatch.fromProjectId).call{value : _mintFee - (_mintFee * operationFee / 10000)}("");
+                (success,) = ownerOf(mintBatch._fromProjectId).call{value : _mintFee - (_mintFee * operationFee / 10000)}("");
                 require(success, Errors.TRANSFER_FAIL_NATIVE);
             } else {
                 ERC20Upgradeable tokenERC20 = ERC20Upgradeable(project._feeToken);
@@ -226,35 +233,37 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
                 require(success == true, Errors.TRANSFER_FAIL_ERC_20);
 
                 // pay for owner project
-                success = tokenERC20.transfer(ownerOf(mintBatch.fromProjectId), _mintFee - (_mintFee * operationFee / 10000));
+                success = tokenERC20.transfer(ownerOf(mintBatch._fromProjectId), _mintFee - (_mintFee * operationFee / 10000));
                 require(success == true, Errors.TRANSFER_FAIL_ERC_20);
             }
         }
 
-        address generativeNFTAdd = _minterInfos[msg.sender]._mintedNFTAddr[mintBatch.fromProjectId];
+        address generativeNFTAdd = _minterInfos[msg.sender]._mintedNFTAddr[mintBatch._fromProjectId];
         GenerativeNFT nft;
-        for (uint256 i = 0; i < mintBatch.paramTemplateValues.length; i++) {
-            BoilerplateParam.projectParams memory projectParams = mintBatch.paramTemplateValues[i];
-            bytes32 seed = _minterInfos[msg.sender]._seeds[mintBatch.fromProjectId][projectParams.seedIndex];
-            require(project._clientSeed // trust client seed
-                || seed == mintBatch.paramTemplateValues[i].seed // get seed from contract
+        for (uint256 i = 0; i < mintBatch._paramTemplateValues.length; i++) {
+            BoilerplateParam.projectParams memory projectParams = mintBatch._paramTemplateValues[i];
+            bytes32 seed = _minterInfos[msg.sender]._seeds[mintBatch._fromProjectId][projectParams.seedIndex];
+            require((project._clientSeed // trust client seed
+            || seed == mintBatch._paramTemplateValues[i].seed) // get seed from contract
+                && _seedToProjects[seed]._projectId == 0 // seed not already used
             , Errors.SEED_INV);
             if (generativeNFTAdd == address(0x0)) {
                 // deploy new by clone from template address
                 generativeNFTAdd = ClonesUpgradeable.clone(_p.getAddress(GenerativeBoilerplateNFTConfiguration.GENERATIVE_NFT_TEMPLATE));
-                _minterInfos[msg.sender]._mintedNFTAddr[mintBatch.fromProjectId] = generativeNFTAdd;
+                _minterInfos[msg.sender]._mintedNFTAddr[mintBatch._fromProjectId] = generativeNFTAdd;
 
                 nft = GenerativeNFT(generativeNFTAdd);
                 nft.init(StringUtils.generateCollectionName(project._projectName, msg.sender),
                     "",
                     msg.sender,
                     address(this),
-                    mintBatch.fromProjectId);
+                    mintBatch._fromProjectId);
 
             } else {
                 nft = GenerativeNFT(generativeNFTAdd);
             }
-            nft.mint(seed, mintBatch.mintTo, msg.sender, mintBatch.uris[i], projectParams, project._clientSeed);
+            nft.mint(seed, mintBatch._mintTo, msg.sender, mintBatch._uris[i], projectParams, project._clientSeed);
+            _seedToProjects[seed] = SeedToProject(mintBatch._fromProjectId, msg.sender);
             project._mintTotalSupply += 1;
         }
         return generativeNFTAdd;
