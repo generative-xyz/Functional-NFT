@@ -107,10 +107,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
     // disable unpause
     function unpause() public override {}
     // disable burn
-    function burn(uint256 tokenId) public override {
-        //        _projects[tokenId]._creator = address(0x0);
-        //        super.burn(tokenId);
-    }
+    function burn(uint256 tokenId) public override {}
 
     // mint a Project token id
     // to: owner
@@ -177,18 +174,22 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
     }
 
     // preMintUniqueNFT - random seed from chain in case project require
-    function generateSeeds(uint256 projectId, uint256 amount) external {
-        require(!_projects[projectId]._clientSeed, Errors.SEED_CLIENT);
+    function generateSeeds(uint256 projectId, uint256 amount) external returns (bytes32[] memory seeds) {
+        require(!_projects[projectId]._clientSeed);
+        require(_exists(projectId));
         for (uint256 i = 0; i < amount; i++) {
             bytes32 seed = Random.randomSeed(msg.sender, projectId, i);
             _seedOwners[seed][projectId] = msg.sender;
+            seeds[i] = seed;
         }
+        return seeds;
     }
 
     // registerSeed
     // set seed to chain from client
     function registerSeeds(uint256 projectId, bytes32[] memory seeds) external {
-        require(_projects[projectId]._clientSeed, Errors.SEED_CLIENT);
+        require(_projects[projectId]._clientSeed);
+        require(_exists(projectId));
         for (uint256 i = 0; i < seeds.length; i++) {
             require(_seedOwners[seeds[i]][projectId] == address(0x0), Errors.INV_ADD);
             _seedOwners[seeds[i]][projectId] = msg.sender;
