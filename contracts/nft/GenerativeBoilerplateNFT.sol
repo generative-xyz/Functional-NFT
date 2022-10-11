@@ -55,7 +55,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
     // owner generated NFT -> projectId -> deployed generated NFT
     struct MinterInfo {
         mapping(uint256 => bytes32[]) _seeds;
-        mapping(uint256 => address) _minting;
+        mapping(uint256 => address) _mintedNFTAddr;
     }
 
     mapping(address => MinterInfo) _minterInfos;
@@ -97,10 +97,19 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         _admin = newAdm;
 
         grantRole(DEFAULT_ADMIN_ROLE, _admin);
+        grantRole(PAUSER_ROLE, _admin);
+
         revokeRole(DEFAULT_ADMIN_ROLE, _previousAdmin);
+        revokeRole(PAUSER_ROLE, _previousAdmin);
     }
 
+    // disable old mint
     function mint(address to) public override {}
+    // disable pause
+    function pause() public override {}
+
+    // disable unpause
+    function unpause() public override {}
 
     // mint a Project token id
     // to: owner
@@ -222,7 +231,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
             }
         }
 
-        address generativeNFTAdd = _minterInfos[msg.sender]._minting[mintBatch.fromProjectId];
+        address generativeNFTAdd = _minterInfos[msg.sender]._mintedNFTAddr[mintBatch.fromProjectId];
         GenerativeNFT nft;
         for (uint256 i = 0; i < mintBatch.paramTemplateValues.length; i++) {
             BoilerplateParam.projectParams memory projectParams = mintBatch.paramTemplateValues[i];
@@ -233,7 +242,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
             if (generativeNFTAdd == address(0x0)) {
                 // deploy new by clone from template address
                 generativeNFTAdd = ClonesUpgradeable.clone(_p.getAddress(GenerativeBoilerplateNFTConfiguration.GENERATIVE_NFT_TEMPLATE));
-                _minterInfos[msg.sender]._minting[mintBatch.fromProjectId] = generativeNFTAdd;
+                _minterInfos[msg.sender]._mintedNFTAddr[mintBatch.fromProjectId] = generativeNFTAdd;
 
                 nft = GenerativeNFT(generativeNFTAdd);
                 nft.init(StringUtils.generateCollectionName(project._projectName, msg.sender),
@@ -251,13 +260,13 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         return generativeNFTAdd;
     }
 
+    // 
     function burn(uint256 tokenId) public override {
-        _projects[tokenId]._creator = address(0x0);
-        super.burn(tokenId);
+        //        _projects[tokenId]._creator = address(0x0);
+        //        super.burn(tokenId);
     }
 
-    function _setCreator(address _to, uint256 _id) internal creatorOnly(_id)
-    {
+    function _setCreator(address _to, uint256 _id) internal creatorOnly(_id) {
         _projects[_id]._creator = _to;
     }
 
@@ -266,7 +275,6 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         uint256[] memory _ids
     ) public {
         require(_to != address(0), Errors.INV_ADD);
-        _grantRole(MINTER_ROLE, _to);
         for (uint256 i = 0; i < _ids.length; i++) {
             _setCreator(_to, _ids[i]);
         }
