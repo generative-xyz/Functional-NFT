@@ -6,6 +6,9 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/interfaces/IERC2981.sol";
+import "../lib/helpers/Random.sol";
+import "../lib/helpers/Errors.sol";
+import "../lib/helpers/BoilerplateParam.sol";
 import "./GenerativeBoilerplateNFT.sol";
 
 contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2981 {
@@ -19,7 +22,7 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
     // linked projectId in boilerplate
     uint256 public _boilerplateId;
     // params value for rendering -> mapping with tokenId of NFT
-    mapping(uint256 => string) _paramsValues;
+    mapping(uint256 => BoilerplateParam.projectParams) _paramsValues;
 
     // 
     mapping(uint256 => string) _customUri;
@@ -96,10 +99,29 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
         revokeRole(PAUSER_ROLE, _previousAdmin);
     }
 
-    function mint(address mintTo, address creator, string memory uri, string memory _paramsTemplateValue) external {
+    function mint(address to) public override {}
+
+    function mint(bytes32 seed, address mintTo, address creator, string memory uri, BoilerplateParam.projectParams calldata _paramsTemplateValue, bool clientSeed) external {
         require(msg.sender == _boilerplateAdd, "INV_SENDER_MINT");
         require(_boilerplateAdd != address(0x0), "INV_BOILERPLATE");
         require(_boilerplateId > 0, "INV_BOILERPLATE_ID");
+
+
+        // verify seed
+        if (!clientSeed) {
+            for (uint256 i = 0; i < _paramsTemplateValue.Params.length; i++) {
+                BoilerplateParam.param memory param = _paramsTemplateValue.Params[i];
+                if (param.availableDecimal.length == 0 && param.availableString.length == 0) {
+                    require(Random.randomValueRange(uint256(seed), param.min, param.max) == param.value, Errors.SEED_INV);
+                } else if (param.availableDecimal.length > 0) {
+                    require(Random.randomValueIndexArray(uint256(seed), param.availableDecimal.length) == param.value, Errors.SEED_INV);
+                } else if (param.availableString.length > 0) {
+                    require(Random.randomValueIndexArray(uint256(seed), param.availableString.length) == param.value, Errors.SEED_INV);
+                } else {
+                    require(1 == 0, "");
+                }
+            }
+        }
 
         GenerativeBoilerplateNFT boilerplateNFT = GenerativeBoilerplateNFT(_boilerplateAdd);
         require(boilerplateNFT.exists(_boilerplateId), "NOT_EXIST_BOILERPLATE");
@@ -113,6 +135,7 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
         _creators[currentTokenId] = creator;
         _paramsValues[currentTokenId] = _paramsTemplateValue;
         _safeMint(mintTo, currentTokenId);
+
     }
 
     function _setCreator(address _to, uint256 _id) internal creatorOnly(_id)

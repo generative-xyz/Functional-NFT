@@ -12,7 +12,8 @@ library Errors {
     // common errors
     string public constant INV_ADD = "100";
     string public constant ONLY_ADMIN_ALLOWED = "101";
-    string public constant EMPTY_LIST = "102";
+    string public constant ONLY_CREATOR = "102";
+    string public constant EMPTY_LIST = "103";
 
     // transfer error
     string public constant NOT_ALLOWANCE = "200";
@@ -25,5 +26,6 @@ library Errors {
     string public constant INV_FEE_PROJECT = "301";
     string public constant INVALID_PROJECT = "302";
     string public constant REACH_MAX = "303";
-    string public constant INV_PARAMS = "103";
+    string public constant INV_PARAMS = "304";
+    string public constant SEED_INV = "305";
 }
