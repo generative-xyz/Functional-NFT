@@ -109,14 +109,14 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
 
         // verify seed
         if (!clientSeed) {
-            for (uint256 i = 0; i < _paramsTemplateValue.Params.length; i++) {
-                BoilerplateParam.param memory param = _paramsTemplateValue.Params[i];
-                if (param.availableDecimal.length == 0 && param.availableString.length == 0) {
-                    require(Random.randomValueRange(uint256(seed), param.min, param.max) == param.value, Errors.SEED_INV);
-                } else if (param.availableDecimal.length > 0) {
-                    require(Random.randomValueIndexArray(uint256(seed), param.availableDecimal.length) == param.value, Errors.SEED_INV);
-                } else if (param.availableString.length > 0) {
-                    require(Random.randomValueIndexArray(uint256(seed), param.availableString.length) == param.value, Errors.SEED_INV);
+            for (uint256 i = 0; i < _paramsTemplateValue._params.length; i++) {
+                BoilerplateParam.param memory param = _paramsTemplateValue._params[i];
+                if (param._availableDecimal.length == 0 && param._availableString.length == 0) {
+                    require(Random.randomValueRange(uint256(seed), param._min, param._max) == param._value, Errors.SEED_INV);
+                } else if (param._availableDecimal.length > 0) {
+                    require(Random.randomValueIndexArray(uint256(seed), param._availableDecimal.length) == param._value, Errors.SEED_INV);
+                } else if (param._availableString.length > 0) {
+                    require(Random.randomValueIndexArray(uint256(seed), param._availableString.length) == param._value, Errors.SEED_INV);
                 } else {
                     require(1 == 0, "");
                 }

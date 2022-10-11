@@ -237,7 +237,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         address generativeNFTAdd = _minterNFTInfos[msg.sender][mintBatch._fromProjectId];
         for (uint256 i = 0; i < mintBatch._paramTemplateValues.length; i++) {
             BoilerplateParam.projectParams memory projectParams = mintBatch._paramTemplateValues[i];
-            bytes32 seed = mintBatch._paramTemplateValues[i].seed;
+            bytes32 seed = mintBatch._paramTemplateValues[i]._seed;
             require(ownerOfSeed(seed, mintBatch._fromProjectId) == msg.sender // owner of seed
                 && _seedToTokens[seed][mintBatch._fromProjectId] == 0 // seed not already used
             , Errors.SEED_INV);
