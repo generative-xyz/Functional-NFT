@@ -16,7 +16,7 @@ import {GenerativeBoilerplateNFT} from "./GenerativeBoilerplateNFT";
         // a.getTokenURI = await nft.getTokenURI(contract, projectId);
         a.project = await nft.getProject(contract, projectId);
         a.get_minterNFTInfos = await nft.get_minterNFTInfos(contract, process.env.PUBLIC_KEY, projectId);
-        console.log({a});
+        console.log(a.project._mintTotalSupply);
     } catch (e) {
         // Deal with the fact the chain failed
         console.log(e);

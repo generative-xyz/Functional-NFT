@@ -106,8 +106,7 @@ class GenerativeBoilerplateNFT {
             nonce: nonce,
         }
 
-        const val: any = await temp?.nftContract.methods._projects(tokenID).call(tx);
-        return val;
+        return await temp?.nftContract.methods._projects(tokenID).call(tx);
     }
 
     async get_minterNFTInfos(contractAddress: any, deployer: any, tokenId: number) {
@@ -121,8 +120,7 @@ class GenerativeBoilerplateNFT {
             nonce: nonce,
         }
 
-        const val: any = await temp?.nftContract.methods._minterNFTInfos(deployer, tokenId).call(tx);
-        return val;
+        return await temp?.nftContract.methods._minterNFTInfos(deployer, tokenId).call(tx);
     }
 
     async setCustomURI(contractAddress: any, tokenId: number, uri: string, gas: number) {
