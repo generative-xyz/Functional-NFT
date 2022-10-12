@@ -173,12 +173,14 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         return currentTokenId;
     }
 
-    // preMintUniqueNFT - random seed from chain in case project require
-    function generateSeeds(uint256 projectId, uint256 amount) external returns (bytes32[] memory seeds) {
-        require(!_projects[projectId]._clientSeed);
-        require(_exists(projectId));
+    // generateSeeds - random seed from chain in case project require
+    function generateSeeds(uint256 projectId, uint256 amount) external returns (bytes32[] memory) {
+        require(!_projects[projectId]._clientSeed && _exists(projectId));
+        bytes32 seed;
+        bytes32[] memory seeds = new bytes32[](amount);
         for (uint256 i = 0; i < amount; i++) {
-            bytes32 seed = Random.randomSeed(msg.sender, projectId, i);
+            seed = Random.randomSeed(msg.sender, projectId, i);
+            require(_seedOwners[seed][projectId] == address(0));
             _seedOwners[seed][projectId] = msg.sender;
             seeds[i] = seed;
         }
@@ -188,10 +190,9 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
     // registerSeed
     // set seed to chain from client
     function registerSeeds(uint256 projectId, bytes32[] memory seeds) external {
-        require(_projects[projectId]._clientSeed);
-        require(_exists(projectId));
+        require(_projects[projectId]._clientSeed && _exists(projectId));
         for (uint256 i = 0; i < seeds.length; i++) {
-            require(_seedOwners[seeds[i]][projectId] == address(0x0), Errors.INV_ADD);
+            require(_seedOwners[seeds[i]][projectId] == address(0x0));
             _seedOwners[seeds[i]][projectId] = msg.sender;
         }
     }
