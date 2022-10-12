@@ -14,10 +14,10 @@ import "../lib/helpers/Random.sol";
 import "../lib/helpers/StringUtils.sol";
 import "../lib/helpers/BoilerplateParam.sol";
 import "../governance/ParameterControl.sol";
-import "./GenerativeNFT.sol";
+import "../interfaces/IGenerativeBoilerplateNFT.sol";
+import "../interfaces/IGenerativeNFT.sol";
 
-contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAutoIdUpgradeable, ReentrancyGuardUpgradeable, IERC2981Upgradeable {
-    event GenerateSeeds(address sender, uint256 projectId, bytes32[] seeds);
+contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAutoIdUpgradeable, ReentrancyGuardUpgradeable, IERC2981Upgradeable, IGenerativeBoilerplateNFT {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using ClonesUpgradeable for *;
     using SafeMathUpgradeable for uint256;
@@ -245,13 +245,13 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
             require(ownerOfSeed(seed, mintBatch._fromProjectId) == msg.sender // owner of seed
                 && _seedToTokens[seed][mintBatch._fromProjectId] == 0 // seed not already used
             , Errors.SEED_INV);
-            GenerativeNFT nft;
+            IGenerativeNFT nft;
             if (generativeNFTAdd == address(0x0)) {
                 // deploy new by clone from template address
                 generativeNFTAdd = ClonesUpgradeable.clone(_p.getAddress(GenerativeBoilerplateNFTConfiguration.GENERATIVE_NFT_TEMPLATE));
                 _minterNFTInfos[msg.sender][mintBatch._fromProjectId] = generativeNFTAdd;
 
-                nft = GenerativeNFT(generativeNFTAdd);
+                nft = IGenerativeNFT(generativeNFTAdd);
                 nft.init(StringUtils.generateCollectionName(project._projectName, msg.sender),
                     "",
                     msg.sender,
@@ -259,7 +259,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
                     mintBatch._fromProjectId);
 
             } else {
-                nft = GenerativeNFT(generativeNFTAdd);
+                nft = IGenerativeNFT(generativeNFTAdd);
             }
             nft.mint(seed, mintBatch._mintTo, msg.sender, mintBatch._uriBatch[i], projectParams, project._clientSeed);
             project._mintTotalSupply += 1;

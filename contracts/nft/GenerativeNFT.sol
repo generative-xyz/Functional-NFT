@@ -10,8 +10,9 @@ import "../lib/helpers/Random.sol";
 import "../lib/helpers/Errors.sol";
 import "../lib/helpers/BoilerplateParam.sol";
 import "./GenerativeBoilerplateNFT.sol";
+import "../interfaces/IGenerativeNFT.sol";
 
-contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2981 {
+contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2981, IGenerativeNFT {
     using Counters for Counters.Counter;
     Counters.Counter private _nextTokenId;
 
@@ -55,7 +56,7 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
         address admin,
         address boilerplateAdd,
         uint256 boilerplateId
-    ) public {
+    ) external {
         require(boilerplateAdd != address(0x0), "INV_ADD");
         require(admin != address(0x0), "INV_ADD");
         require(_boilerplateId == 0, "EXISTED");
