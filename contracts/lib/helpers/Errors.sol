@@ -13,7 +13,6 @@ library Errors {
     string public constant INV_ADD = "100";
     string public constant ONLY_ADMIN_ALLOWED = "101";
     string public constant ONLY_CREATOR = "102";
-    string public constant EMPTY_LIST = "103";
 
     // transfer error
     string public constant INSUFF = "200";
