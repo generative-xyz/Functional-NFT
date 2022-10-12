@@ -179,7 +179,12 @@ class GenerativeBoilerplateNFT {
             tx.gas = await fun.estimateGas(tx);
         }
 
-        return await this.signedAndSendTx(temp?.web3, tx);
+        const txS = await this.signedAndSendTx(temp?.web3, tx);
+        const events = await temp?.nftContract.getPastEvents("GenerateSeeds");
+        if (events != null) {
+            console.log("seeds", events[0].returnValues.seeds);
+        }
+        return txS;
     }
 
     async cancelTx() {
