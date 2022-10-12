@@ -11,7 +11,7 @@ import {keccak256} from "ethers/lib/utils";
             console.log("wrong network");
             return;
         }
-        const contract = '0xE7e2736b8450e2D7937780232570dedceeF2229a';
+        const contract = '0x58603fce93009536D4267bAd9A55f5fdB54aCD24';
         const nft = new GenerativeBoilerplateNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
         const uri = {
@@ -22,11 +22,17 @@ import {keccak256} from "ethers/lib/utils";
         const encodedString = "data:application/json;base64," + btoa(JSON.stringify(uri)) // Base64 encode the String
         let uris = [];
         let paramValues = [];
-        for (let i = 1; i <= 1; i++) {
+        const seeds = [
+            '0x5bd7a6ab661be303dd7a826e8f1dd61e5aa5c33cb7efea07f296a18276ba2348',
+            '0x001901d635a0d9f53d177257e8bfacbe42b3d8cfb0ab0050d90df1938815a376',
+            // '0xfc137f62771f2faffb1f1b7c983c04478827b7dfe5a4421500cfa09e093f982a',
+            // '0xb869539e0a9d752c4e33cdf795a5f4c221d811b81af4924f6c51176a8e7f5700'
+        ];
+
+        for (let i = 0; i < 2; i++) {
             uris.push(encodedString);
             paramValues.push({
-                _seedIndex: i,
-                _seed: keccak256([]),
+                _seed: seeds[i],
                 _params: [],
             });
         }
