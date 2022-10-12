@@ -255,6 +255,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
             }
             nft.mint(seed, mintBatch._mintTo, msg.sender, mintBatch._uriBatch[i], projectParams, project._clientSeed);
             project._mintTotalSupply += 1;
+            _projects[mintBatch._fromProjectId]._mintTotalSupply = project._mintTotalSupply;
             _seedToTokens[seed][mintBatch._fromProjectId] = project._mintTotalSupply;
         }
         return generativeNFTAdd;
