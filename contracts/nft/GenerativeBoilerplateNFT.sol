@@ -59,6 +59,11 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
     // mapping seed -> project -> owner
     mapping(bytes32 => mapping(uint256 => address)) _seedOwners;
 
+    /// If seed approval is given, then the approved party may claim rights for any
+    /// seed.
+    // map owner -> operator -> projectId
+    mapping(address => mapping(address => uint256)) public _approvalForAllSeeds;
+
     // mapping seed already minting
     mapping(bytes32 => mapping(uint256 => uint256)) _seedToTokens;
 
@@ -261,13 +266,26 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         return generativeNFTAdd;
     }
 
+    function approveForAllSeeds(address operator, uint256 projectId) external {
+        _approvalForAllSeeds[msg.sender][operator] = projectId;
+    }
+
+    function isApprovedOrOwnerForSeed(address operator, bytes32 seed, uint256 projectId) public view returns (bool)
+    {
+        if (ownerOfSeed(seed, projectId) == operator) {
+            return true;
+        }
+        return _approvalForAllSeeds[ownerOfSeed(seed, projectId)][operator] == projectId;
+    }
+
     function transferSeed(
         address from,
         address to,
         bytes32 seed, uint256 projectId
     ) external {
-        require(ownerOfSeed(seed, projectId) != from, Errors.INV_ADD);
-        require(to == address(0), Errors.INV_ADD);
+        require(!isApprovedOrOwnerForSeed(msg.sender, seed, projectId));
+        require(ownerOfSeed(seed, projectId) != from);
+        require(to == address(0));
         _seedOwners[seed][projectId] = to;
     }
 
