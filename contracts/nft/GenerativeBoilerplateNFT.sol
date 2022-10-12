@@ -17,6 +17,7 @@ import "../governance/ParameterControl.sol";
 import "./GenerativeNFT.sol";
 
 contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAutoIdUpgradeable, ReentrancyGuardUpgradeable, IERC2981Upgradeable {
+    event GenerateSeeds(address sender, uint256 projectId, bytes32[] seeds);
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using ClonesUpgradeable for *;
     using SafeMathUpgradeable for uint256;
@@ -174,7 +175,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
     }
 
     // generateSeeds - random seed from chain in case project require
-    function generateSeeds(uint256 projectId, uint256 amount) external returns (bytes32[] memory) {
+    function generateSeeds(uint256 projectId, uint256 amount) external {
         require(!_projects[projectId]._clientSeed && _exists(projectId));
         bytes32 seed;
         bytes32[] memory seeds = new bytes32[](amount);
@@ -184,7 +185,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
             _seedOwners[seed][projectId] = msg.sender;
             seeds[i] = seed;
         }
-        return seeds;
+        emit GenerateSeeds(msg.sender, projectId, seeds);
     }
 
     // registerSeed
@@ -203,8 +204,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         MintRequest memory mintBatch
     ) public nonReentrant payable returns (address newContract) {
         ProjectInfo memory project = _projects[mintBatch._fromProjectId];
-        require(mintBatch._uriBatch.length > 0, Errors.EMPTY_LIST);
-        require(mintBatch._uriBatch.length == mintBatch._paramsBatch.length, Errors.INV_PARAMS);
+        require(mintBatch._uriBatch.length > 0 && mintBatch._uriBatch.length == mintBatch._paramsBatch.length, Errors.INV_PARAMS);
         require(project._mintMaxSupply == 0 || project._mintTotalSupply + mintBatch._uriBatch.length <= project._mintMaxSupply, Errors.REACH_MAX);
         ParameterControl _p = ParameterControl(_paramsAddress);
 
