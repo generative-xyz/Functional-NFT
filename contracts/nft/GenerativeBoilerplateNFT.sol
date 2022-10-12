@@ -57,21 +57,10 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
     mapping(address => mapping(uint256 => address)) public  _minterNFTInfos;
 
     // mapping seed -> project -> owner
-    mapping(bytes32 => mapping(uint256 => address)) public _seedOwners;
+    mapping(bytes32 => mapping(uint256 => address)) _seedOwners;
 
     // mapping seed already minting
-    mapping(bytes32 => mapping(uint256 => uint256)) public _seedToTokens;
-
-    modifier adminOnly() {
-        require(_msgSender() == _admin, Errors.ONLY_ADMIN_ALLOWED);
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), Errors.ONLY_ADMIN_ALLOWED);
-        _;
-    }
-
-    modifier creatorOnly(uint256 _id) {
-        require(_projects[_id]._creator == msg.sender, Errors.ONLY_CREATOR);
-        _;
-    }
+    mapping(bytes32 => mapping(uint256 => uint256)) _seedToTokens;
 
     function initialize(
         string memory name,
@@ -92,7 +81,10 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         revokeRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
-    function changeAdmin(address newAdm) public adminOnly {
+    function changeAdmin(address newAdm) external {
+        require(_msgSender() == _admin, Errors.ONLY_ADMIN_ALLOWED);
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), Errors.ONLY_ADMIN_ALLOWED);
+
         address _previousAdmin = _admin;
         _admin = newAdm;
 
@@ -286,7 +278,8 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         return explicitOwner;
     }
 
-    function _setCreator(address _to, uint256 _id) internal creatorOnly(_id) {
+    function _setCreator(address _to, uint256 _id) internal {
+        require(_projects[_id]._creator == msg.sender, Errors.ONLY_CREATOR);
         _projects[_id]._creator = _to;
     }
 
@@ -305,10 +298,11 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
     }
 
     function setCustomURI(
-        uint256 _tokenId,
+        uint256 _id,
         string memory _newURI
-    ) public creatorOnly(_tokenId) {
-        _projects[_tokenId]._customUri = _newURI;
+    ) public {
+        require(_projects[_id]._creator == msg.sender, Errors.ONLY_CREATOR);
+        _projects[_id]._customUri = _newURI;
     }
 
     function baseTokenURI() virtual public view returns (string memory) {
@@ -350,7 +344,9 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         uint256 _tokenId,
         address _recipient,
         uint256 _value
-    ) public adminOnly {
+    ) external {
+        require(_msgSender() == _admin, Errors.ONLY_ADMIN_ALLOWED);
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), Errors.ONLY_ADMIN_ALLOWED);
         require(_value <= 10000, Errors.REACH_MAX);
         royalties[_tokenId] = RoyaltyInfo(_recipient, uint24(_value), true);
     }
@@ -374,7 +370,9 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
     // receiver: receiver address
     // erc20Addr: currency address
     // amount: amount
-    function withdraw(address receiver, address erc20Addr, uint256 amount) external nonReentrant adminOnly {
+    function withdraw(address receiver, address erc20Addr, uint256 amount) external nonReentrant {
+        require(_msgSender() == _admin, Errors.ONLY_ADMIN_ALLOWED);
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), Errors.ONLY_ADMIN_ALLOWED);
         bool success;
         if (erc20Addr == address(0x0)) {
             require(address(this).balance >= amount, Errors.INSUFF);
