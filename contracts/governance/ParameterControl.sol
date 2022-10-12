@@ -2,6 +2,7 @@
 pragma solidity 0.8.12;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "../interfaces/IParameterControl.sol";
 
 /*
  * @dev Implementation of a programmable parameter control.
@@ -11,7 +12,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
  *
  */
 
-contract ParameterControl is AccessControl {
+contract ParameterControl is AccessControl, IParameterControl {
     event AdminChanged (address previousAdmin, address newAdmin);
     event SetEvent (string key, string value);
 

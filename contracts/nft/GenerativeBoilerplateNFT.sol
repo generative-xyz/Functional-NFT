@@ -3,7 +3,7 @@ pragma solidity 0.8.12;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/presets/ERC721PresetMinterPauserAutoIdUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
@@ -13,9 +13,9 @@ import "../lib/configurations/GenerativeBoilerplateNFTConfiguration.sol";
 import "../lib/helpers/Random.sol";
 import "../lib/helpers/StringUtils.sol";
 import "../lib/helpers/BoilerplateParam.sol";
-import "../governance/ParameterControl.sol";
 import "../interfaces/IGenerativeBoilerplateNFT.sol";
 import "../interfaces/IGenerativeNFT.sol";
+import "../interfaces/IParameterControl.sol";
 
 contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAutoIdUpgradeable, ReentrancyGuardUpgradeable, IERC2981Upgradeable, IGenerativeBoilerplateNFT {
     using CountersUpgradeable for CountersUpgradeable.Counter;
@@ -126,13 +126,13 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         _nextProjectId.increment();
         uint256 currentTokenId = _nextProjectId.current();
         require(!_exists(currentTokenId), Errors.INVALID_PROJECT);
-        ParameterControl _p = ParameterControl(_paramsAddress);
+        IParameterControl _p = IParameterControl(_paramsAddress);
         uint256 operationFee = _p.getUInt256(GenerativeBoilerplateNFTConfiguration.CREATE_PROJECT_FEE);
         if (operationFee > 0) {
             address operationFeeToken = _p.getAddress(GenerativeBoilerplateNFTConfiguration.FEE_TOKEN);
             bool isNative = operationFeeToken == address(0x0);
             if (!isNative) {
-                ERC20Upgradeable tokenERC20 = ERC20Upgradeable(operationFeeToken);
+                IERC20Upgradeable tokenERC20 = IERC20Upgradeable(operationFeeToken);
                 // transfer erc-20 token to this contract
                 require(tokenERC20.transferFrom(
                         msg.sender,
@@ -198,7 +198,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         ProjectInfo memory project = _projects[mintBatch._fromProjectId];
         require(mintBatch._uriBatch.length > 0 && mintBatch._uriBatch.length == mintBatch._paramsBatch.length, Errors.INV_PARAMS);
         require(project._mintMaxSupply == 0 || project._mintTotalSupply + mintBatch._uriBatch.length <= project._mintMaxSupply, Errors.REACH_MAX);
-        ParameterControl _p = ParameterControl(_paramsAddress);
+        IParameterControl _p = IParameterControl(_paramsAddress);
 
         // get payable
         bool success;
@@ -217,7 +217,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
                 (success,) = ownerOf(mintBatch._fromProjectId).call{value : _mintFee - (_mintFee * operationFee / 10000)}("");
                 require(success, Errors.TRANSFER_FAIL_NATIVE);
             } else {
-                ERC20Upgradeable tokenERC20 = ERC20Upgradeable(project._feeToken);
+                IERC20Upgradeable tokenERC20 = IERC20Upgradeable(project._feeToken);
                 // transfer all fee erc-20 token to this contract
                 require(tokenERC20.transferFrom(
                         msg.sender,
@@ -379,7 +379,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
             (success,) = receiver.call{value : amount}("");
             require(success, Errors.TRANSFER_FAIL_NATIVE);
         } else {
-            ERC20Upgradeable tokenERC20 = ERC20Upgradeable(erc20Addr);
+            IERC20Upgradeable tokenERC20 = IERC20Upgradeable(erc20Addr);
             // transfer erc-20 token
             require(tokenERC20.transfer(receiver, amount), Errors.TRANSFER_FAIL_ERC_20);
         }
