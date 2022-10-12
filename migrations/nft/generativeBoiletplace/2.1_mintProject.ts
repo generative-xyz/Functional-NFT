@@ -11,7 +11,7 @@ import {keccak256} from "ethers/lib/utils";
             console.log("wrong network");
             return;
         }
-        const contract = '0xE7e2736b8450e2D7937780232570dedceeF2229a';
+        const contract = '0x081bB2bD266D95A1787da8916BcAF1235EDC2080';
         const nft = new GenerativeBoilerplateNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
         const uri = {

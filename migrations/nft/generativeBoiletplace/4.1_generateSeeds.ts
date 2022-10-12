@@ -1,4 +1,9 @@
+import * as dotenv from 'dotenv';
+
+import {ethers} from "ethers";
 import {GenerativeBoilerplateNFT} from "./GenerativeBoilerplateNFT";
+import * as fs from "fs";
+import {keccak256} from "ethers/lib/utils";
 
 (async () => {
     try {
@@ -6,10 +11,17 @@ import {GenerativeBoilerplateNFT} from "./GenerativeBoilerplateNFT";
             console.log("wrong network");
             return;
         }
-
+        const contract = '0x081bB2bD266D95A1787da8916BcAF1235EDC2080';
         const nft = new GenerativeBoilerplateNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
-        const address = await nft.upgradeContract("0x081bB2bD266D95A1787da8916BcAF1235EDC2080");
-        console.log({address});
+
+        const tx = await nft.generateSeeds(
+                contract,
+                1,
+                1,
+                0
+            )
+        ;
+        console.log("tx:", tx);
     } catch (e) {
         // Deal with the fact the chain failed
         console.log(e);

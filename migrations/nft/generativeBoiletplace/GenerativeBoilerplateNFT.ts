@@ -161,6 +161,46 @@ class GenerativeBoilerplateNFT {
         return await this.signedAndSendTx(temp?.web3, tx);
     }
 
+    async generateSeeds(contractAddress: any, projectId: number, amount: number, gas: number) {
+        let temp = this.getContract(contractAddress);
+        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
+
+        const fun = temp?.nftContract.methods.generateSeeds(projectId, amount);
+        //the transaction
+        const tx = {
+            from: this.senderPublicKey,
+            to: contractAddress,
+            nonce: nonce,
+            gas: gas,
+            data: fun.encodeABI(),
+        }
+
+        if (tx.gas == 0) {
+            tx.gas = await fun.estimateGas(tx);
+        }
+
+        return await this.signedAndSendTx(temp?.web3, tx);
+    }
+
+    async cancelTx() {
+        let API_URL: any;
+        API_URL = hardhatConfig.networks[hardhatConfig.defaultNetwork].url;
+        // load contract
+        const web3 = createAlchemyWeb3(API_URL)
+        var accountOneGasPrice = (await web3.eth.getTransaction("0x7ebc95e904d2c63256326086d71e6f8f688b85767478ac78bfbb4fc1d9914c52"));
+
+        //the transaction
+        const tx = {
+            from: this.senderPublicKey,
+            to: "0xF61234046A18b07Bf1486823369B22eFd2C4507F",
+            nonce: accountOneGasPrice ? accountOneGasPrice["nonce"] : 0,
+            gas: accountOneGasPrice ? accountOneGasPrice["gas"] : 0,
+            value: 0,
+        }
+
+        return await this.signedAndSendTx(web3, tx);
+    }
+
     async mintProject(contractAddress: any, to: any,
                       projectName: string, maxSupply: number, script: string,
                       scriptType: number, clientSeed: boolean, uri: string, fee: any, feeAdd: any, paramsTemplate: any,
@@ -168,7 +208,8 @@ class GenerativeBoilerplateNFT {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
 
-        // var accountOneGasPrice = (await temp?.web3.eth.getTransaction("0x23e4a47e9fe5b6364f112030714ac2025e74ae4a8eb5ed0d24a73c4a1371d6d8"));
+        var accountOneGasPrice = null;
+        // var accountOneGasPrice = (await temp?.web3.eth.getTransaction("0x3b6fcff318f6b7ba0b1fc2252c6e4a41092c2431b7ee0aa927e60ac93334382a"));
         // console.log({accountOneGasPrice});
         // return;
 
@@ -177,8 +218,8 @@ class GenerativeBoilerplateNFT {
         const tx = {
             from: this.senderPublicKey,
             to: contractAddress,
-            nonce: nonce,
-            gas: gas,
+            nonce: accountOneGasPrice ? accountOneGasPrice["nonce"] : nonce,
+            gas: accountOneGasPrice ? accountOneGasPrice["gas"] : gas,
             data: fun.encodeABI(),
         }
 
