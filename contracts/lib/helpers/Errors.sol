@@ -14,16 +14,11 @@ library Errors {
     string public constant ONLY_ADMIN_ALLOWED = "101";
     string public constant ONLY_CREATOR = "102";
 
-    // transfer error
-    string public constant INSUFF = "200";
-    string public constant TRANSFER_FAIL_ERC_20 = "201";
-    string public constant TRANSFER_FAIL_NATIVE = "202";
-
     // validation error
-    string public constant MISSING_NAME = "300";
-    string public constant INV_FEE_PROJECT = "301";
-    string public constant INVALID_PROJECT = "302";
-    string public constant REACH_MAX = "303";
-    string public constant INV_PARAMS = "304";
-    string public constant SEED_INV = "305";
+    string public constant MISSING_NAME = "200";
+    string public constant INV_FEE_PROJECT = "201";
+    string public constant INVALID_PROJECT = "202";
+    string public constant REACH_MAX = "203";
+    string public constant INV_PARAMS = "204";
+    string public constant SEED_INV = "205";
 }
