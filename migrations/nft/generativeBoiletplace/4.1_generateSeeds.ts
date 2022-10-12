@@ -17,7 +17,7 @@ import {keccak256} from "ethers/lib/utils";
         const tx = await nft.generateSeeds(
                 contract,
                 1,
-                4,
+                20,
                 0
             )
         ;
