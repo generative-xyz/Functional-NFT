@@ -112,12 +112,13 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
         if (!clientSeed) {
             for (uint256 i = 0; i < _paramsTemplateValue._params.length; i++) {
                 BoilerplateParam.ParamTemplate memory param = _paramsTemplateValue._params[i];
-                if (param._availableDecimal.length == 0 && param._availableString.length == 0) {
+                if (param._typeValue == 0) {
+                    continue;
+                }
+                if (param._availableValues.length == 0) {
                     require(Random.randomValueRange(uint256(seed), param._min, param._max) == param._value, Errors.SEED_INV);
-                } else if (param._availableDecimal.length > 0) {
-                    require(Random.randomValueIndexArray(uint256(seed), param._availableDecimal.length) == param._value, Errors.SEED_INV);
-                } else if (param._availableString.length > 0) {
-                    require(Random.randomValueIndexArray(uint256(seed), param._availableString.length) == param._value, Errors.SEED_INV);
+                } else if (param._availableValues.length > 0) {
+                    require(Random.randomValueIndexArray(uint256(seed), param._availableValues.length) == param._value, Errors.SEED_INV);
                 } else {
                     require(1 == 0, Errors.SEED_INV);
                 }

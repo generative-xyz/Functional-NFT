@@ -39,9 +39,9 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         uint32 _scriptType; // script type: python, js, ....
         address _creator; // creator list for project, using for royalties
         string _customUri; // project info nft view
-        string _projectName;
-        bool _clientSeed;
-        BoilerplateParam.ParamsOfProject _paramsTemplate;
+        string _projectName; // name of project
+        bool _clientSeed; // accept seed from client if true -> contract will not verify value
+        BoilerplateParam.ParamsOfProject _paramsTemplate; // struct contains list params of project and random seed(registered) in case mint nft from project
     }
 
     mapping(uint256 => ProjectInfo) public _projects;
@@ -190,9 +190,8 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
 
     // mintBatchUniqueNFT
     // from projectId -> get algo and minting an batch unique nfr on GenerativeNFT contract collection
-    function mintBatchUniqueNFT(
-        MintRequest memory mintBatch
-    ) public nonReentrant payable {
+    // by default, contract should get 5% fee when minter pay for owner of project
+    function mintBatchUniqueNFT(MintRequest memory mintBatch) public nonReentrant payable {
         ProjectInfo memory project = _projects[mintBatch._fromProjectId];
         require(mintBatch._uriBatch.length > 0 && mintBatch._uriBatch.length == mintBatch._paramsBatch.length, Errors.INV_PARAMS);
         require(project._mintMaxSupply == 0 || project._mintTotalSupply + mintBatch._uriBatch.length <= project._mintMaxSupply, Errors.REACH_MAX);
@@ -228,6 +227,9 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
             }
         }
 
+        // minting NFT to other collection by minter
+        // in case minter still has not any collection address
+        // needing deploy an new one by cloning from GenerativeNFT(ERC-721) template
         address generativeNFTAdd = _minterNFTInfos[msg.sender][mintBatch._fromProjectId];
         for (uint256 i = 0; i < mintBatch._paramsBatch.length; i++) {
             BoilerplateParam.ParamsOfProject memory projectParams = mintBatch._paramsBatch[i];
@@ -252,18 +254,27 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
                 nft = IGenerativeNFT(generativeNFTAdd);
             }
             nft.mint(seed, mintBatch._mintTo, msg.sender, mintBatch._uriBatch[i], projectParams, project._clientSeed);
+            // increase total supply minting on project
             project._mintTotalSupply += 1;
             _projects[mintBatch._fromProjectId]._mintTotalSupply = project._mintTotalSupply;
+            // marked this seed is already used
             _seedToTokens[seed][mintBatch._fromProjectId] = project._mintTotalSupply;
         }
 
         emit MintBatchNFT(msg.sender, mintBatch);
     }
 
+    // approveForAllSeeds
+    // operator - address
+    // projectId - uint256
+    // sender approve for operator on a project
+    // operator can make a transferring seed of sender
     function approveForAllSeeds(address operator, uint256 projectId) external {
         _approvalForAllSeeds[msg.sender][operator] = projectId;
     }
 
+    // isApprovedOrOwnerForSeed
+    // return approved or not on projectId of operator on seed
     function isApprovedOrOwnerForSeed(address operator, bytes32 seed, uint256 projectId) public view returns (bool)
     {
         if (ownerOfSeed(seed, projectId) == operator) {
@@ -272,15 +283,22 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         return _approvalForAllSeeds[ownerOfSeed(seed, projectId)][operator] == projectId;
     }
 
+    // transferSeed
+    // sender can make a transferring seed from -> to on project as ERC-721
     function transferSeed(
         address from,
         address to,
         bytes32 seed, uint256 projectId
     ) external {
-        require(isApprovedOrOwnerForSeed(msg.sender, seed, projectId) && ownerOfSeed(seed, projectId) != from && to != address(0));
+        require(_seedToTokens[seed][projectId] != 0 &&
+        isApprovedOrOwnerForSeed(msg.sender, seed, projectId) &&
+        ownerOfSeed(seed, projectId) != from &&
+            to != address(0));
         _seedOwners[seed][projectId] = to;
     }
 
+    // ownerOfSeed
+    // get owner of seed on projectId
     function ownerOfSeed(bytes32 seed, uint256 projectId) public view returns (address) {
         address explicitOwner = _seedOwners[seed][projectId];
         if (explicitOwner == address(0)) {
@@ -289,15 +307,20 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         return explicitOwner;
     }
 
+    // _setCreator
+    // internal func for set new creator on projectId
+    // only creator on projectId can make this func
     function _setCreator(address _to, uint256 _id) internal {
         require(_projects[_id]._creator == msg.sender, Errors.ONLY_CREATOR);
         _projects[_id]._creator = _to;
     }
 
+    // setCreator
+    // set creator for list projectId 
     function setCreator(
         address _to,
         uint256[] memory _ids
-    ) public {
+    ) external {
         require(_to != address(0), Errors.INV_ADD);
         for (uint256 i = 0; i < _ids.length; i++) {
             _setCreator(_to, _ids[i]);
@@ -308,6 +331,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         return _nextProjectId.current() - 1;
     }
 
+    // creator update URI data on projectId
     function setCustomURI(
         uint256 _id,
         string memory _newURI
@@ -328,6 +352,9 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         return _projects[_tokenID]._mintTotalSupply;
     }
 
+    // tokenURI
+    // return URI data of project
+    // base on customUri of project of baseUri of erc-721
     function tokenURI(uint256 _tokenId) override public view returns (string memory) {
         if (bytes(_projects[_tokenId]._customUri).length > 0) {
             return _projects[_tokenId]._customUri;
