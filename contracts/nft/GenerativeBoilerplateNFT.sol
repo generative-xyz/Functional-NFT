@@ -277,9 +277,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         address to,
         bytes32 seed, uint256 projectId
     ) external {
-        require(!isApprovedOrOwnerForSeed(msg.sender, seed, projectId));
-        require(ownerOfSeed(seed, projectId) != from);
-        require(to == address(0));
+        require(isApprovedOrOwnerForSeed(msg.sender, seed, projectId) && ownerOfSeed(seed, projectId) != from && to != address(0));
         _seedOwners[seed][projectId] = to;
     }
 
