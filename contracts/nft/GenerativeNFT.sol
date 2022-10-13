@@ -103,10 +103,8 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
     function mint(address to) public override {}
 
     function mint(address mintTo, address creator, string memory uri, BoilerplateParam.ParamsOfProject calldata _paramsTemplateValue, bool clientSeed) external {
-        require(msg.sender == _boilerplateAddr, "INV_SENDER_MINT");
-        require(_boilerplateAddr != address(0x0), "INV_BOILERPLATE");
-        require(_boilerplateId > 0, "INV_BOILERPLATE_ID");
-
+        require(msg.sender == _boilerplateAddr, Errors.INV_BOILERPLATE_ADD);
+        require(_boilerplateAddr != address(0) && _boilerplateId > 0, Errors.INV_PROJECT);
 
         // verify seed
         if (!clientSeed) {
@@ -148,7 +146,7 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
         address _to,
         uint256[] memory _ids
     ) public {
-        require(_to != address(0), "INVALID_ADDRESS.");
+        require(_to != address(0), Errors.INV_ADD);
 
         _grantRole(MINTER_ROLE, _to);
         for (uint256 i = 0; i < _ids.length; i++) {
@@ -195,7 +193,7 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
         address _recipient,
         uint256 _value
     ) public adminOnly {
-        require(_value <= 10000, 'TOO_HIGH');
+        require(_value <= 10000, Errors.REACH_MAX);
         royalties[_tokenId] = RoyaltyInfo(_recipient, uint24(_value), true);
     }
 

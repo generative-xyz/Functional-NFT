@@ -23,4 +23,5 @@ library Errors {
     string public constant SEED_INV = "205";
     string public constant SEED_INV_1 = "206";
     string public constant SEED_INV_2 = "207";
+    string public constant INV_BOILERPLATE_ADD = "208";
 }
