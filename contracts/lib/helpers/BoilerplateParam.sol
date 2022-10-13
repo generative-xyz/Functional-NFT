@@ -10,11 +10,12 @@ library BoilerplateParam {
         // 4: bool
         uint8 _typeValue;
 
-        uint16 _max;
-        uint16 _min;
+        uint32 _max;
+        uint8 _min;
         uint8 _decimal;
         string[] _availableValues;
         uint16 _value;// index of available array value or value of range min,max
+        bool _editable;
     }
 
     struct ParamsOfProject {
