@@ -17,7 +17,7 @@ library Errors {
     // validation error
     string public constant MISSING_NAME = "200";
     string public constant INV_FEE_PROJECT = "201";
-    string public constant INVALID_PROJECT = "202";
+    string public constant INV_PROJECT = "202";
     string public constant REACH_MAX = "203";
     string public constant INV_PARAMS = "204";
     string public constant SEED_INV = "205";
