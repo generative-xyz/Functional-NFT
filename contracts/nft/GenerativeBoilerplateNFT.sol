@@ -123,7 +123,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         require(bytes(projectName).length > 0, Errors.MISSING_NAME);
         _nextProjectId.increment();
         uint256 currentTokenId = _nextProjectId.current();
-        require(!_exists(currentTokenId), Errors.INVALID_PROJECT);
+        require(!_exists(currentTokenId), Errors.INV_PROJECT);
 
         IParameterControl _p = IParameterControl(_paramsAddress);
         uint256 operationFee = _p.getUInt256(GenerativeBoilerplateNFTConfiguration.CREATE_PROJECT_FEE);
