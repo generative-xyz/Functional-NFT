@@ -19,11 +19,11 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
     // admin of collection -> owner, creator, ...
     address public _admin;
     // linked boilerplate address
-    address public _boilerplateAdd;
+    address public _boilerplateAddr;
     // linked projectId in boilerplate
     uint256 public _boilerplateId;
     // params value for rendering -> mapping with tokenId of NFT
-    mapping(uint256 => BoilerplateParam.ParamsOfProject) _paramsValues;
+    mapping(uint256 => BoilerplateParam.ParamsOfProject) public _paramsValues;
 
     // 
     mapping(uint256 => string) _customUri;
@@ -41,7 +41,7 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
     }
 
     function initAdmin(address _newAdmin) internal {
-        require(msg.sender == _boilerplateAdd, "INV_SENDER_INIT_ADMIN");
+        require(msg.sender == _boilerplateAddr, "INV_SENDER_INIT_ADMIN");
         require(_newAdmin != address(0x0), "INV_ADD");
 
         _admin = _newAdmin;
@@ -63,7 +63,7 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
 
         _name = name;
         _symbol = symbol;
-        _boilerplateAdd = boilerplateAdd;
+        _boilerplateAddr = boilerplateAdd;
         _boilerplateId = boilerplateId;
         initAdmin(admin);
     }
@@ -103,8 +103,8 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
     function mint(address to) public override {}
 
     function mint(address mintTo, address creator, string memory uri, BoilerplateParam.ParamsOfProject calldata _paramsTemplateValue, bool clientSeed) external {
-        require(msg.sender == _boilerplateAdd, "INV_SENDER_MINT");
-        require(_boilerplateAdd != address(0x0), "INV_BOILERPLATE");
+        require(msg.sender == _boilerplateAddr, "INV_SENDER_MINT");
+        require(_boilerplateAddr != address(0x0), "INV_BOILERPLATE");
         require(_boilerplateId > 0, "INV_BOILERPLATE_ID");
 
 
@@ -115,16 +115,16 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
                 BoilerplateParam.ParamTemplate memory param = _paramsTemplateValue._params[i];
                 if (param._typeValue != 0) {
                     if (param._availableValues.length == 0) {
-                        require(Random.randomValueRange(uint256(seed), param._min, param._max) == param._value, Errors.SEED_INV);
+                        require(Random.randomValueRange(uint256(seed), param._min, param._max) == param._value, Errors.SEED_INV_1);
                     } else {
-                        require(Random.randomValueIndexArray(uint256(seed), param._availableValues.length) == param._value, Errors.SEED_INV);
+                        require(Random.randomValueIndexArray(uint256(seed), param._availableValues.length) == param._value, Errors.SEED_INV_2);
                     }
                 }
                 seed = keccak256(abi.encodePacked(seed, param._value));
             }
         }
 
-        GenerativeBoilerplateNFT boilerplateNFT = GenerativeBoilerplateNFT(_boilerplateAdd);
+        GenerativeBoilerplateNFT boilerplateNFT = GenerativeBoilerplateNFT(_boilerplateAddr);
         require(boilerplateNFT.exists(_boilerplateId), "NOT_EXIST_BOILERPLATE");
         require(boilerplateNFT.mintMaxSupply(_boilerplateId) == 0 || boilerplateNFT.mintTotalSupply(_boilerplateId) < boilerplateNFT.mintMaxSupply(_boilerplateId), "REACH_MAX");
 

@@ -46,8 +46,8 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
 
     mapping(uint256 => ProjectInfo) public _projects;
 
-    // map user address -> projectId ->  NFT collection address mint from project
-    mapping(address => mapping(uint256 => address)) public  _minterNFTInfos;
+    // map projectId ->  NFT collection address mint from project
+    mapping(uint256 => address) public  _minterNFTInfos;
 
     // mapping seed -> project -> owner
     mapping(bytes32 => mapping(uint256 => address)) _seedOwners;
@@ -230,7 +230,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         // minting NFT to other collection by minter
         // in case minter still has not any collection address
         // needing deploy an new one by cloning from GenerativeNFT(ERC-721) template
-        address generativeNFTAdd = _minterNFTInfos[msg.sender][mintBatch._fromProjectId];
+        address generativeNFTAdd = _minterNFTInfos[mintBatch._fromProjectId];
         for (uint256 i = 0; i < mintBatch._paramsBatch.length; i++) {
             bytes32 seed = mintBatch._paramsBatch[i]._seed;
             require(ownerOfSeed(seed, mintBatch._fromProjectId) == msg.sender // owner of seed
@@ -240,7 +240,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
             if (generativeNFTAdd == address(0x0)) {
                 // deploy new by clone from template address
                 generativeNFTAdd = ClonesUpgradeable.clone(_p.getAddress(GenerativeBoilerplateNFTConfiguration.GENERATIVE_NFT_TEMPLATE));
-                _minterNFTInfos[msg.sender][mintBatch._fromProjectId] = generativeNFTAdd;
+                _minterNFTInfos[mintBatch._fromProjectId] = generativeNFTAdd;
 
                 nft = IGenerativeNFT(generativeNFTAdd);
                 nft.init(StringUtils.generateCollectionName(project._projectName, msg.sender),
