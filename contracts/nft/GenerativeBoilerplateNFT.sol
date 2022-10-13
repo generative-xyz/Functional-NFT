@@ -11,7 +11,6 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "../lib/helpers/Errors.sol";
 import "../lib/configurations/GenerativeBoilerplateNFTConfiguration.sol";
 import "../lib/helpers/Random.sol";
-import "../lib/helpers/StringUtils.sol";
 import "../lib/helpers/BoilerplateParam.sol";
 import "../interfaces/IGenerativeBoilerplateNFT.sol";
 import "../interfaces/IGenerativeNFT.sol";
@@ -243,9 +242,9 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
                 _minterNFTInfos[mintBatch._fromProjectId] = generativeNFTAdd;
 
                 nft = IGenerativeNFT(generativeNFTAdd);
-                nft.init(StringUtils.generateCollectionName(project._projectName, msg.sender),
+                nft.init(project._projectName,
                     "",
-                    msg.sender,
+                    _admin,
                     address(this),
                     mintBatch._fromProjectId);
 

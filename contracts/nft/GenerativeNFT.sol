@@ -125,8 +125,8 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
         }
 
         GenerativeBoilerplateNFT boilerplateNFT = GenerativeBoilerplateNFT(_boilerplateAddr);
-        require(boilerplateNFT.exists(_boilerplateId), "NOT_EXIST_BOILERPLATE");
-        require(boilerplateNFT.mintMaxSupply(_boilerplateId) == 0 || boilerplateNFT.mintTotalSupply(_boilerplateId) < boilerplateNFT.mintMaxSupply(_boilerplateId), "REACH_MAX");
+        require(boilerplateNFT.exists(_boilerplateId), Errors.INV_PROJECT);
+        require(boilerplateNFT.mintMaxSupply(_boilerplateId) == 0 || boilerplateNFT.mintTotalSupply(_boilerplateId) < boilerplateNFT.mintMaxSupply(_boilerplateId), Errors.REACH_MAX);
 
         _nextTokenId.increment();
         uint256 currentTokenId = _nextTokenId.current();

@@ -21,4 +21,6 @@ library Errors {
     string public constant REACH_MAX = "203";
     string public constant INV_PARAMS = "204";
     string public constant SEED_INV = "205";
+    string public constant SEED_INV_1 = "206";
+    string public constant SEED_INV_2 = "207";
 }
