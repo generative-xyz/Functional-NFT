@@ -232,7 +232,6 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         // needing deploy an new one by cloning from GenerativeNFT(ERC-721) template
         address generativeNFTAdd = _minterNFTInfos[msg.sender][mintBatch._fromProjectId];
         for (uint256 i = 0; i < mintBatch._paramsBatch.length; i++) {
-            BoilerplateParam.ParamsOfProject memory projectParams = mintBatch._paramsBatch[i];
             bytes32 seed = mintBatch._paramsBatch[i]._seed;
             require(ownerOfSeed(seed, mintBatch._fromProjectId) == msg.sender // owner of seed
                 && _seedToTokens[seed][mintBatch._fromProjectId] == 0 // seed not already used
@@ -253,7 +252,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
             } else {
                 nft = IGenerativeNFT(generativeNFTAdd);
             }
-            nft.mint(seed, mintBatch._mintTo, msg.sender, mintBatch._uriBatch[i], projectParams, project._clientSeed);
+            nft.mint(mintBatch._mintTo, msg.sender, mintBatch._uriBatch[i], mintBatch._paramsBatch[i], project._clientSeed);
             // increase total supply minting on project
             project._mintTotalSupply += 1;
             _projects[mintBatch._fromProjectId]._mintTotalSupply = project._mintTotalSupply;

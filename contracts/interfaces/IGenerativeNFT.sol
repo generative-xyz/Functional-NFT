@@ -4,7 +4,7 @@ pragma solidity 0.8.12;
 import "../lib/helpers/BoilerplateParam.sol";
 
 interface IGenerativeNFT {
-    function mint(bytes32 seed, address mintTo, address creator, string memory uri, BoilerplateParam.ParamsOfProject calldata _paramsTemplateValue, bool clientSeed) external;
+    function mint(address mintTo, address creator, string memory uri, BoilerplateParam.ParamsOfProject calldata _paramsTemplateValue, bool clientSeed) external;
 
     function init(
         string memory name,
