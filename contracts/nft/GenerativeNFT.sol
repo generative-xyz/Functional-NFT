@@ -4,7 +4,6 @@ pragma solidity 0.8.12;
 import "@openzeppelin/contracts/token/ERC721/presets/ERC721PresetMinterPauserAutoId.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import "../lib/helpers/Random.sol";
 import "../lib/helpers/Errors.sol";
@@ -168,7 +167,7 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
         if (customUriBytes.length > 0) {
             return _customUri[_tokenId];
         } else {
-            return string(abi.encodePacked(baseTokenURI(), Strings.toString(_tokenId)));
+            return string(abi.encodePacked(baseTokenURI(), StringsUpgradeable.toString(_tokenId)));
         }
     }
 
