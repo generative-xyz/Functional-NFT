@@ -35,7 +35,7 @@ logs
 # macOS
 .DS_Store
 
-artifacts
+#artifacts
 
 cache
 
