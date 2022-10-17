@@ -12,6 +12,7 @@ import "../lib/helpers/Errors.sol";
 import "../lib/configurations/GenerativeBoilerplateNFTConfiguration.sol";
 import "../lib/helpers/Random.sol";
 import "../lib/helpers/BoilerplateParam.sol";
+import "../lib/helpers/StringUtils.sol";
 import "../interfaces/IGenerativeBoilerplateNFT.sol";
 import "../interfaces/IGenerativeNFT.sol";
 import "../interfaces/IParameterControl.sol";
@@ -243,7 +244,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
 
                 nft = IGenerativeNFT(generativeNFTAdd);
                 nft.init(project._projectName,
-                    "",
+                    StringUtils.getSlice(0, 2, project._projectName),
                     _admin,
                     address(this),
                     mintBatch._fromProjectId);
