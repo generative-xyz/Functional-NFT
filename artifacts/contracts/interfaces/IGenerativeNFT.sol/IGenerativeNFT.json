@@ -1,0 +1,126 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IGenerativeNFT",
+  "sourceName": "contracts/interfaces/IGenerativeNFT.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "symbol",
+          "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "admin",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "boilerplateAdd",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "boilerplateId",
+          "type": "uint256"
+        }
+      ],
+      "name": "init",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "mintTo",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "creator",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "uri",
+          "type": "string"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "_seed",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint8",
+                  "name": "_typeValue",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_max",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_min",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "_decimal",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "string[]",
+                  "name": "_availableValues",
+                  "type": "string[]"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_value",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "_editable",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct BoilerplateParam.ParamTemplate[]",
+              "name": "_params",
+              "type": "tuple[]"
+            }
+          ],
+          "internalType": "struct BoilerplateParam.ParamsOfProject",
+          "name": "_paramsTemplateValue",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bool",
+          "name": "clientSeed",
+          "type": "bool"
+        }
+      ],
+      "name": "mint",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

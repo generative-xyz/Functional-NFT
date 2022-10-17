@@ -1,0 +1,154 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IGenerativeBoilerplateNFT",
+  "sourceName": "contracts/interfaces/IGenerativeBoilerplateNFT.sol",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "projectId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32[]",
+          "name": "seeds",
+          "type": "bytes32[]"
+        }
+      ],
+      "name": "GenerateSeeds",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "_fromProjectId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "_mintTo",
+              "type": "address"
+            },
+            {
+              "internalType": "string[]",
+              "name": "_uriBatch",
+              "type": "string[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "_seed",
+                  "type": "bytes32"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint8",
+                      "name": "_typeValue",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "_max",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "_min",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint8",
+                      "name": "_decimal",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "string[]",
+                      "name": "_availableValues",
+                      "type": "string[]"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "_value",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "_editable",
+                      "type": "bool"
+                    }
+                  ],
+                  "internalType": "struct BoilerplateParam.ParamTemplate[]",
+                  "name": "_params",
+                  "type": "tuple[]"
+                }
+              ],
+              "internalType": "struct BoilerplateParam.ParamsOfProject[]",
+              "name": "_paramsBatch",
+              "type": "tuple[]"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct IGenerativeBoilerplateNFT.MintRequest",
+          "name": "request",
+          "type": "tuple"
+        }
+      ],
+      "name": "MintBatchNFT",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "seed",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "projectId",
+          "type": "uint256"
+        }
+      ],
+      "name": "transferSeed",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
