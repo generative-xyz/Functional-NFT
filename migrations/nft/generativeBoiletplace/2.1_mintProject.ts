@@ -11,7 +11,7 @@ import {keccak256} from "ethers/lib/utils";
             console.log("wrong network");
             return;
         }
-        const contract = '0xae0C96BBD7733a1C7843af27e0683c74E182A3a7';
+        const contract = '0x95056d48b6DC390304e6d5c4638A413E7Bd931ce';
         const nft = new GenerativeBoilerplateNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
         const uri = {
@@ -21,23 +21,39 @@ import {keccak256} from "ethers/lib/utils";
         }
         const encodedString = "data:application/json;base64," + btoa(JSON.stringify(uri)) // Base64 encode the String
 
-        let scriptContent = fs.readFileSync("/Users/autonomous/Documents/autonomous-vr/rendering-machine/rendering_scripts/blender/voronoi_sphere.py")
+        let scriptContent = fs.readFileSync("/Users/autonomous/Documents/rendering-machine/demo/rendering_scripts/blender/voronoi_sphere.py")
         // 1: python, 2: js, 3: ts;
         const scriptType = 1;
         const tx = await nft.mintProject(
                 contract, process.env.PUBLIC_KEY,
                 "Test Algo",
-                10,
+                100,
                 scriptContent.toString(),
                 1,
                 false,
                 encodedString,
-                ethers.utils.parseEther("1.0"),
-                "0xBA62BCfcAaFc6622853cca2BE6Ac7d845BC0f2Dc",
+                ethers.utils.parseEther("0.0"),
+                "0x0000000000000000000000000000000000000000",
                 JSON.parse(JSON.stringify({
                     _seedIndex: 0,
                     _seed: keccak256([]),
-                    _params: [],
+                    _params: [{
+                        _typeValue: 0,
+                        _max: 5,
+                        _min: 1,
+                        _decimal: 0,
+                        _availableValues: [],
+                        _value: 0,
+                        _editable: 0
+                    }, {
+                        _typeValue: 1,
+                        _max: 65535,
+                        _min: 100,
+                        _decimal: 0,
+                        _availableValues: [],
+                        _value: 0,
+                        _editable: 0
+                    }],
                 })),
                 0
             )
