@@ -87,6 +87,7 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
     }
 
     function changeAdmin(address _newAdmin) public adminOnly {
+        require(_newAdmin != address(0), Errors.INV_ADD);
         address _previousAdmin = _admin;
         _admin = _newAdmin;
 
