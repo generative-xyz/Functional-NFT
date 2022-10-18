@@ -29,8 +29,8 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
     // creator of nft tokenID, set from boilerplate calling
     mapping(uint256 => address) public _creators;
 
-    string public _name;
-    string public _symbol;
+    string private _nameColl;
+    string private _symbolColl;
 
     constructor(
         string memory _name,
@@ -60,19 +60,19 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
         require(admin != address(0x0), "INV_ADD");
         require(_boilerplateId == 0, "EXISTED");
 
-        _name = name;
-        _symbol = symbol;
+        _nameColl = name;
+        _symbolColl = symbol;
         _boilerplateAddr = boilerplateAdd;
         _boilerplateId = boilerplateId;
         initAdmin(admin);
     }
 
     function name() public view override returns (string memory) {
-        return _name;
+        return _nameColl;
     }
 
     function symbol() public view override returns (string memory) {
-        return _symbol;
+        return _symbolColl;
     }
 
     modifier creatorOnly(uint256 _id) {
