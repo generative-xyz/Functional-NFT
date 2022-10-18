@@ -151,7 +151,6 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         }
         _projects[currentTokenId]._creator = msg.sender;
         _projects[currentTokenId]._mintMaxSupply = maxSupply;
-        require(fee >= 0, Errors.INV_FEE_PROJECT);
         _projects[currentTokenId]._fee = fee;
         _projects[currentTokenId]._feeToken = feeAdd;
         _projects[currentTokenId]._paramsTemplate = paramsTemplate;
