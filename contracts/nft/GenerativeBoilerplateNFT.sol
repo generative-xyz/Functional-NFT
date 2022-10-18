@@ -231,10 +231,22 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         // needing deploy an new one by cloning from GenerativeNFT(ERC-721) template
         address generativeNFTAdd = _minterNFTInfos[mintBatch._fromProjectId];
         for (uint256 i = 0; i < mintBatch._paramsBatch.length; i++) {
+            require(_projects[mintBatch._fromProjectId]._paramsTemplate._params.length == mintBatch._paramsBatch[i]._params.length, Errors.INV_PARAMS);
+
+            // verify seed
             bytes32 seed = mintBatch._paramsBatch[i]._seed;
-            require(ownerOfSeed(seed, mintBatch._fromProjectId) == msg.sender // owner of seed
-                && _seedToTokens[seed][mintBatch._fromProjectId] == 0 // seed not already used
-            , Errors.SEED_INV);
+            // seed not already used
+            require(_seedToTokens[seed][mintBatch._fromProjectId] == 0, Errors.SEED_INV);
+            if (!_projects[mintBatch._fromProjectId]._clientSeed) {// seed on chain
+                // owner of seed
+                require(ownerOfSeed(seed, mintBatch._fromProjectId) == msg.sender, Errors.SEED_INV);
+            } else {// seed of chain
+                // require seed still not registerSeeds
+                require(_seedOwners[seed][mintBatch._fromProjectId] == address(0));
+                _seedOwners[seed][mintBatch._fromProjectId] = msg.sender;
+            }
+
+            // get generative nft collection template
             IGenerativeNFT nft;
             if (generativeNFTAdd == address(0x0)) {
                 // deploy new by clone from template address
