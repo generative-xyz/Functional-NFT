@@ -42,6 +42,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         string _projectName; // name of project
         bool _clientSeed; // accept seed from client if true -> contract will not verify value
         BoilerplateParam.ParamsOfProject _paramsTemplate; // struct contains list params of project and random seed(registered) in case mint nft from project
+        address _minterNFTInfo;// map projectId ->  NFT collection address mint from project
     }
 
     mapping(uint256 => ProjectInfo) public _projects;
@@ -168,7 +169,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
             _admin,
             address(this),
             currentTokenId);
-        _minterNFTInfos[currentTokenId] = generativeNFTAdd;
+        _projects[currentTokenId]._minterNFTInfo = generativeNFTAdd;
 
         return currentTokenId;
     }
@@ -238,9 +239,8 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
 
         // minting NFT to other collection by minter
         // needing deploy an new one by cloning from GenerativeNFT(ERC-721) template when mint project
-        address generativeNFTAdd = _minterNFTInfos[mintBatch._fromProjectId];
         // get generative nft collection template
-        IGenerativeNFT nft = IGenerativeNFT(generativeNFTAdd);
+        IGenerativeNFT nft = IGenerativeNFT(_projects[mintBatch._fromProjectId]._minterNFTInfo);
         for (uint256 i = 0; i < mintBatch._paramsBatch.length; i++) {
             require(_projects[mintBatch._fromProjectId]._paramsTemplate._params.length == mintBatch._paramsBatch[i]._params.length, Errors.INV_PARAMS);
 
