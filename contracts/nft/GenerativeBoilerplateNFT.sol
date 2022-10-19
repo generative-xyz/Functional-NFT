@@ -160,6 +160,16 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
 
         _safeMint(to, currentTokenId);
 
+        // deploy new by clone from template address
+        address generativeNFTAdd = ClonesUpgradeable.clone(_p.getAddress(GenerativeBoilerplateNFTConfiguration.GENERATIVE_NFT_TEMPLATE));
+        IGenerativeNFT nft = IGenerativeNFT(generativeNFTAdd);
+        nft.init(_projects[currentTokenId]._projectName,
+            StringUtils.getSlice(0, 2, _projects[currentTokenId]._projectName),
+            _admin,
+            address(this),
+            currentTokenId);
+        _minterNFTInfos[currentTokenId] = generativeNFTAdd;
+
         return currentTokenId;
     }
 
@@ -227,9 +237,10 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         }
 
         // minting NFT to other collection by minter
-        // in case minter still has not any collection address
-        // needing deploy an new one by cloning from GenerativeNFT(ERC-721) template
+        // needing deploy an new one by cloning from GenerativeNFT(ERC-721) template when mint project
         address generativeNFTAdd = _minterNFTInfos[mintBatch._fromProjectId];
+        // get generative nft collection template
+        IGenerativeNFT nft = IGenerativeNFT(generativeNFTAdd);
         for (uint256 i = 0; i < mintBatch._paramsBatch.length; i++) {
             require(_projects[mintBatch._fromProjectId]._paramsTemplate._params.length == mintBatch._paramsBatch[i]._params.length, Errors.INV_PARAMS);
 
@@ -246,23 +257,6 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
                 _seedOwners[seed][mintBatch._fromProjectId] = msg.sender;
             }
 
-            // get generative nft collection template
-            IGenerativeNFT nft;
-            if (generativeNFTAdd == address(0x0)) {
-                // deploy new by clone from template address
-                generativeNFTAdd = ClonesUpgradeable.clone(_p.getAddress(GenerativeBoilerplateNFTConfiguration.GENERATIVE_NFT_TEMPLATE));
-                _minterNFTInfos[mintBatch._fromProjectId] = generativeNFTAdd;
-
-                nft = IGenerativeNFT(generativeNFTAdd);
-                nft.init(project._projectName,
-                    StringUtils.getSlice(0, 2, project._projectName),
-                    _admin,
-                    address(this),
-                    mintBatch._fromProjectId);
-
-            } else {
-                nft = IGenerativeNFT(generativeNFTAdd);
-            }
             nft.mint(mintBatch._mintTo, msg.sender, mintBatch._uriBatch[i], mintBatch._paramsBatch[i], project._clientSeed);
             // increase total supply minting on project
             project._mintTotalSupply += 1;
