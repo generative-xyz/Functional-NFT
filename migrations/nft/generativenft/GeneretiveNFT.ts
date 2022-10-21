@@ -15,14 +15,14 @@ class GeneretiveNFT {
         this.senderPublicKey = senderPublicKey;
     }
 
-    async deploy() {
+    async deploy(admin: any) {
         console.log("Network run", this.network, hardhatConfig.networks[this.network].url);
         if (this.network == "local") {
             console.log("not run local");
             return;
         }
         const nft = await ethers.getContractFactory("GenerativeNFT");
-        const nftDeployed = await nft.deploy("", "", "");
+        const nftDeployed = await nft.deploy("", "", "", admin);
 
         console.log("GenerativeNFT template contract deployed:", nftDeployed.address);
         return nftDeployed.address;

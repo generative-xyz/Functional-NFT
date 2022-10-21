@@ -2,6 +2,7 @@
 pragma solidity 0.8.12;
 
 import "@openzeppelin/contracts/token/ERC721/presets/ERC721PresetMinterPauserAutoId.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/interfaces/IERC2981.sol";
@@ -11,7 +12,7 @@ import "../lib/helpers/BoilerplateParam.sol";
 import "./GenerativeBoilerplateNFT.sol";
 import "../interfaces/IGenerativeNFT.sol";
 
-contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2981, IGenerativeNFT {
+contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2981, IGenerativeNFT, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _nextTokenId;
 
@@ -35,8 +36,18 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
     constructor(
         string memory _name,
         string memory _symbol,
-        string memory _baseuri
+        string memory _baseuri,
+        address admin
     ) ERC721PresetMinterPauserAutoId(_name, _symbol, _baseuri) {
+        _admin = admin;
+    }
+
+    function owner() public view override returns (address) {
+        return _admin;
+    }
+
+    function _checkOwner() internal view override {
+        require(owner() == msg.sender || msg.sender == _boilerplateAddr, "Ownable: caller is not the owner");
     }
 
     function initAdmin(address _newAdmin) internal {
@@ -65,6 +76,7 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
         _boilerplateAddr = boilerplateAdd;
         _boilerplateId = boilerplateId;
         initAdmin(admin);
+        transferOwnership(admin);
     }
 
     function name() public view override returns (string memory) {
