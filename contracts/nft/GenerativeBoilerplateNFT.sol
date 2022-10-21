@@ -48,7 +48,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
     mapping(uint256 => ProjectInfo) public _projects;
 
     // map projectId ->  NFT collection address mint from project
-    mapping(uint256 => address) public  _minterNFTInfos;
+    //    mapping(uint256 => address) public  _minterNFTInfos;
 
     // mapping seed -> project -> owner
     mapping(bytes32 => mapping(uint256 => address)) _seedOwners;
