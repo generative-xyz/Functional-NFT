@@ -330,7 +330,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
     }
 
     function totalSupply() public view override returns (uint256) {
-        return _nextProjectId.current() - 1;
+        return _nextProjectId.current();
     }
 
     // creator update URI data on projectId
