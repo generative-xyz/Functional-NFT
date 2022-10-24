@@ -13,12 +13,12 @@ import {createAlchemyWeb3} from "@alch/alchemy-web3";
             console.log("wrong network");
             return;
         }
-        const contract = '0x95056d48b6DC390304e6d5c4638A413E7Bd931ce';
+        const contract = '0xb1F4fb76648D77D4c3F69253e1fAE812178747b2';
         const nft = new GenerativeBoilerplateNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
         const uri = {
-            name: "Test Algo NFT 2",
-            description: "Test Algo NFT 2",
+            name: "Test Algo NFT",
+            description: "Test Algo NFT",
             image: "https://live.staticflickr.com/6076/6055860219_b5be1b6b19_z.jpg"
         }
         const encodedString = "data:application/json;base64," + btoa(JSON.stringify(uri)) // Base64 encode the String
