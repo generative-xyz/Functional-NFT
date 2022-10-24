@@ -16,7 +16,7 @@ import {ethers} from "ethers";
         const val: any = await nft.getAddress(contract, key);
         console.log("val", val);
 
-        let tx = await nft.setAddress(contract, key, '0xdb9DB23F58fb06ED41fa59997bAA9c50654A95BD', 0);
+        let tx = await nft.setAddress(contract, key, '0xE92b50Ca9C8fcbdcC291d597d2DfC70C7963b4D6', 0);
         console.log("%s ParamControl admin address: %s", process.env.NETWORK, tx);
 
 
