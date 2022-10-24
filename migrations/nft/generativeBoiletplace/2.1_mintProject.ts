@@ -21,16 +21,17 @@ import {keccak256} from "ethers/lib/utils";
         }
         const encodedString = "data:application/json;base64," + btoa(JSON.stringify(uri)) // Base64 encode the String
 
-        let scriptContent = fs.readFileSync("/Users/autonomous/Documents/rendering-machine/demo/rendering_scripts/blender/voronoi_sphere.py")
+        let scriptContent = fs.readFileSync("/Users/autonomous/Documents/generative-objs/Functional-NFT/test_script/voronoi.py")
         // 1: python, 2: js, 3: ts;
         const scriptType = 1;
+        const clientSeed = true;
         const tx = await nft.mintProject(
                 contract, process.env.PUBLIC_KEY,
                 "Test Algo",
                 100,
                 scriptContent.toString(),
-                1,
-                false,
+                scriptType,
+                clientSeed,
                 encodedString,
                 ethers.utils.parseEther("0.0"),
                 "0x0000000000000000000000000000000000000000",
