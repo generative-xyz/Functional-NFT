@@ -109,20 +109,6 @@ class GenerativeBoilerplateNFT {
         return await temp?.nftContract.methods._projects(tokenID).call(tx);
     }
 
-    async get_minterNFTInfos(contractAddress: any, tokenId: number) {
-        let temp = this.getContract(contractAddress);
-        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
-
-        //the transaction
-        const tx = {
-            from: this.senderPublicKey,
-            to: contractAddress,
-            nonce: nonce,
-        }
-
-        return await temp?.nftContract.methods._minterNFTInfos(tokenId).call(tx);
-    }
-
     async setCustomURI(contractAddress: any, tokenId: number, uri: string, gas: number) {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
