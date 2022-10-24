@@ -52,11 +52,19 @@ import {createAlchemyWeb3} from "@alch/alchemy-web3";
             let tempSeed = seeds[i];
             for (let j = 0; j < params.length; j++) {
                 if (params[j]._typeValue != 0) {
+                    // random from seed
                     const s = web3.utils.toBN(tempSeed);
-                    const a = web3.utils.toBN(params[j]._max - params[j]._min + 1);
-                    const mod = s.mod(a);
-                    let val = (web3.utils.toBN(params[j]._min)).add(mod);
-                    params[j]._value = val.toNumber();
+                    if (params[j]._availableValues.length == 0) {
+                        // [min, max]
+                        const a = web3.utils.toBN(params[j]._max - params[j]._min + 1);
+                        const mod = s.mod(a);
+                        let val = (web3.utils.toBN(params[j]._min)).add(mod);
+                        params[j]._value = val.toNumber();
+                    } else {
+                        // index of array
+                        const val = s.mod(web3.utils.toBN(params[j]._availableValues.length));
+                        params[j]._value = val.toNumber();
+                    }
                 }
                 console.log(tempSeed, params[j]._value);
                 const t = web3.utils.encodePacked(tempSeed, params[j]._value);
