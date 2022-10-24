@@ -76,7 +76,7 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
         _boilerplateAddr = boilerplateAdd;
         _boilerplateId = boilerplateId;
         initAdmin(admin);
-        //        transferOwnership(admin);
+        transferOwnership(admin);
     }
 
     function name() public view override returns (string memory) {
