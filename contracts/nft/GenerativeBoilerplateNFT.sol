@@ -121,7 +121,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         address feeAdd,
         BoilerplateParam.ParamsOfProject calldata paramsTemplate
     ) public nonReentrant payable returns (uint256) {
-        require(bytes(projectName).length > 0, Errors.MISSING_NAME);
+        require(bytes(projectName).length > 3, Errors.MISSING_NAME);
         _nextProjectId.increment();
         uint256 currentTokenId = _nextProjectId.current();
         require(!_exists(currentTokenId), Errors.INV_PROJECT);
@@ -147,7 +147,6 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         if (bytes(uri).length > 0) {
             _projects[currentTokenId]._customUri = uri;
         }
-        require(bytes(projectName).length >= 3);
         _projects[currentTokenId]._projectName = projectName;
         _projects[currentTokenId]._creator = msg.sender;
         _projects[currentTokenId]._mintMaxSupply = maxSupply;
