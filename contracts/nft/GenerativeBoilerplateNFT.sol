@@ -147,9 +147,8 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         if (bytes(uri).length > 0) {
             _projects[currentTokenId]._customUri = uri;
         }
-        if (bytes(projectName).length > 0) {
-            _projects[currentTokenId]._projectName = projectName;
-        }
+        require(bytes(projectName).length >= 3);
+        _projects[currentTokenId]._projectName = projectName;
         _projects[currentTokenId]._creator = msg.sender;
         _projects[currentTokenId]._mintMaxSupply = maxSupply;
         _projects[currentTokenId]._fee = fee;
@@ -165,7 +164,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         address generativeNFTAdd = ClonesUpgradeable.clone(_p.getAddress(GenerativeBoilerplateNFTConfiguration.GENERATIVE_NFT_TEMPLATE));
         IGenerativeNFT nft = IGenerativeNFT(generativeNFTAdd);
         nft.init(_projects[currentTokenId]._projectName,
-            StringUtils.getSlice(0, 2, _projects[currentTokenId]._projectName),
+            StringUtils.getSlice(1, 3, _projects[currentTokenId]._projectName),
             _admin,
             address(this),
             currentTokenId);
