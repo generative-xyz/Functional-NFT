@@ -3,7 +3,6 @@ pragma solidity 0.8.12;
 
 library BoilerplateParam {
     struct ParamTemplate {
-        // 0: not random-able from seed
         // 1: int
         // 2: float
         // 3: string
@@ -15,7 +14,7 @@ library BoilerplateParam {
         uint8 _decimal;
         string[] _availableValues;
         uint256 _value;// index of available array value or value of range min,max
-        bool _editable;
+        bool _editable; // false: random by seed, true: not random by seed
     }
 
     struct ParamsOfProject {
