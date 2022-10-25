@@ -59,7 +59,7 @@ class GeneretiveNFT {
         return val;
     }
 
-    async get_boilerplateAdd(contractAddress: any) {
+    async get_boilerplateAddr(contractAddress: any) {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
 
@@ -70,7 +70,7 @@ class GeneretiveNFT {
             nonce: nonce,
         }
 
-        const val: any = await temp?.nftContract.methods._boilerplateAdd().call(tx);
+        const val: any = await temp?.nftContract.methods._boilerplateAddr().call(tx);
         return val;
     }
 
@@ -86,6 +86,22 @@ class GeneretiveNFT {
         }
 
         const val: any = await temp?.nftContract.methods._boilerplateId().call(tx);
+        return val;
+    }
+
+    async get_paramsValues(contractAddress: any, tokenId: number) {
+        let temp = this.getContract(contractAddress);
+        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
+        console.log("asfafaf");
+        //the transaction
+        const tx = {
+            from: this.senderPublicKey,
+            to: contractAddress,
+            nonce: nonce,
+        }
+
+
+        const val: any = await temp?.nftContract.methods.getParamValues(tokenId).call(tx);
         return val;
     }
 }

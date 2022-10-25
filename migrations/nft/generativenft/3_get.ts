@@ -9,14 +9,15 @@ import {GeneretiveNFT} from "./GeneretiveNFT";
             console.log("wrong network");
             return;
         }
-        const contract = '0x32bdc06d8a5de3ade19359c1e768f2b1839aab27';
+        const contract = '0xBb96facC454257B320e9a70Fd7905bb159FC9981';
         const nft = new GeneretiveNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
         const tokenId = 1;
-        // const val: any = await nft.get_boilerplateAdd(contract);
-        // const val: any = await nft.getTokenURI(contract, tokenId);
-        const get_boilerplateAdd: any = await nft.get_boilerplateAdd(contract);
-        const get_boilerplateId: any = await nft.get_boilerplateId(contract);
-        console.log({get_boilerplateAdd}, {get_boilerplateId});
+        let a: any = {};
+        // a.getTokenURI = await nft.getTokenURI(contract, tokenId);
+        // a.get_boilerplateAdd = await nft.get_boilerplateAddr(contract);
+        // a.get_boilerplateId = await nft.get_boilerplateId(contract);
+        a.get_paramsValues = await nft.get_paramsValues(contract, tokenId);
+        console.log(a.get_paramsValues);
     } catch (e) {
         // Deal with the fact the chain failed
         console.log(e);
