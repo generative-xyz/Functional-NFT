@@ -16,26 +16,26 @@ import {keccak256} from "ethers/lib/utils";
 
 
         const contract = '0xb1F4fb76648D77D4c3F69253e1fAE812178747b2';
-        const candy = candyProject;
+        const projectTemplate = candyProject;
         const uri = "data:application/json;base64," + btoa(JSON.stringify({
-            name: candy.name,
-            description: candy.description,
-            image: candy.image,
+            name: projectTemplate.name,
+            description: projectTemplate.description,
+            image: projectTemplate.image,
         })) // Base64 encode the String
         let scriptContent = fs.readFileSync(candyProject.script)
         const tx = await nft.mintProject(
                 contract, process.env.PUBLIC_KEY,
-                candy.name,
-                candy.maxMint,
+                projectTemplate.name,
+                projectTemplate.maxMint,
                 scriptContent.toString(),
-                candy.scriptType,
-                candy.clientSeed,
+                projectTemplate.scriptType,
+                projectTemplate.clientSeed,
                 uri,
-                ethers.utils.parseEther(candy.fee),
-                candy.feeTokenAddr,
+                ethers.utils.parseEther(projectTemplate.fee),
+                projectTemplate.feeTokenAddr,
                 JSON.parse(JSON.stringify({
                     _seed: '0x0000000000000000000000000000000000000000',
-                    _params: candy.params,
+                    _params: projectTemplate.params,
                 })),
                 0
             )
