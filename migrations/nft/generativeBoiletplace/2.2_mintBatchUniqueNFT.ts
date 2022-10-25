@@ -38,6 +38,7 @@ import {createAlchemyWeb3} from "@alch/alchemy-web3";
                 _decimal: 0,
                 _availableValues: [],
                 _value: 4,
+                _editable: false,
             }, {
                 _typeValue: 1,
                 _max: 65535,
@@ -45,13 +46,14 @@ import {createAlchemyWeb3} from "@alch/alchemy-web3";
                 _decimal: 0,
                 _availableValues: [],
                 _value: 0,
+                _editable: false,
             }];
 
             const hardhatConfig = require("../../../hardhat.config");
             const web3 = createAlchemyWeb3(hardhatConfig.networks[hardhatConfig.defaultNetwork].url);
             let tempSeed = seeds[i];
             for (let j = 0; j < params.length; j++) {
-                if (params[j]._typeValue != 0) {
+                if (!params[j]._editable) {
                     // random from seed
                     const s = web3.utils.toBN(tempSeed);
                     if (params[j]._availableValues.length == 0) {
