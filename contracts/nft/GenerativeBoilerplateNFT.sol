@@ -127,19 +127,21 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         require(!_exists(currentTokenId), Errors.INV_PROJECT);
 
         IParameterControl _p = IParameterControl(_paramsAddress);
-        uint256 operationFee = _p.getUInt256(GenerativeBoilerplateNFTConfiguration.CREATE_PROJECT_FEE);
-        if (operationFee > 0) {
-            address operationFeeToken = _p.getAddress(GenerativeBoilerplateNFTConfiguration.FEE_TOKEN);
-            if (!(operationFeeToken == address(0))) {
-                IERC20Upgradeable tokenERC20 = IERC20Upgradeable(operationFeeToken);
-                // transfer erc-20 token to this contract
-                require(tokenERC20.transferFrom(
-                        msg.sender,
-                        address(this),
-                        operationFee
-                    ));
-            } else {
-                require(msg.value >= operationFee);
+        if (msg.sender != _admin) {
+            uint256 operationFee = _p.getUInt256(GenerativeBoilerplateNFTConfiguration.CREATE_PROJECT_FEE);
+            if (operationFee > 0) {
+                address operationFeeToken = _p.getAddress(GenerativeBoilerplateNFTConfiguration.FEE_TOKEN);
+                if (!(operationFeeToken == address(0))) {
+                    IERC20Upgradeable tokenERC20 = IERC20Upgradeable(operationFeeToken);
+                    // transfer erc-20 token to this contract
+                    require(tokenERC20.transferFrom(
+                            msg.sender,
+                            address(this),
+                            operationFee
+                        ));
+                } else {
+                    require(msg.value >= operationFee);
+                }
             }
         }
 
