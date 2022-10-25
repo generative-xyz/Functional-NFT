@@ -22,11 +22,11 @@ import {createAlchemyWeb3} from "@alch/alchemy-web3";
             image: "https://live.staticflickr.com/6076/6055860219_b5be1b6b19_z.jpg"
         }
         const encodedString = "data:application/json;base64," + btoa(JSON.stringify(uri)) // Base64 encode the String
-        const fromProjectId = 1;
+        const fromProjectId = 4;
         let uris = [];
         let paramValues = [];
         const seeds: any[] = [
-            '0xb01ef1c2b5820c0ad92819696229e9b61f60db23db7cba258dd31bec7651588e',
+            '0xb01ef1c2b5820c0ad92819696229e9b61f60db23db7cba258dd31bec7651588c',
         ];
 
         for (let i = 0; i < 1; i++) {
