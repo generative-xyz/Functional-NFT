@@ -1,23 +1,16 @@
-# Read environment params
-from dotenv import load_dotenv
-from pathlib import Path
-import os
-
-dotenv_path = Path('.env')
-load_dotenv(dotenv_path=dotenv_path)
-
-# Params variable
-color_list = int(os.getenv('PARAM_0'))
-shape = int(os.getenv('PARAM_1'))  # 1, 2, 3, 4, 5, 6, 7
-height = int(os.getenv('PARAM_2'))  # 1, 2, 3
-surface = int(os.getenv('PARAM_3'))  # 0, 0.5, 1
-
-import random
-import time
 import math
-
 import bpy
 import bmesh
+import json
+
+# Params variable
+with open("env.json", 'r') as file:
+    json_object = json.load(file)
+    color_list = json_object['params'][0].split(',')
+    shape = int(json_object['params'][1])
+    height = int(json_object['params'][2])
+    surface = float(json_object['params'][3])
+    rendering_path = json_object['rendering_path']
 
 
 def purge_orphans():
@@ -182,7 +175,7 @@ def apply_modifiers(obj):
 
 clean_scene()
 
-filepath = 'G:\\My Drive\\Autonomous\\2022_Rove\\2022_10_18_Halloween\\Export\\Candy_GLB\\'
+filepath = rendering_path
 filename = 'model' + '_shape' + str(shape) + '_height' + str(height) + '_surface' + str(surface)
 render = 1
 """
@@ -489,7 +482,7 @@ ground.data.materials.append(material)
 
 # export to GLB
 
-bpy.ops.export_scene.gltf(filepath=filepath + filename, check_existing=True, export_format='GLB')
+bpy.ops.export_scene.gltf(filepath=filepath + '/' + filename, check_existing=True, export_format='GLB')
 
 # add light
 bpy.ops.object.light_add(type='SUN', radius=1, align='WORLD', location=(0, 0, 0),
@@ -564,6 +557,6 @@ backdrop.data.materials.append(material)
 
 # render
 bpy.context.scene.render.image_settings.file_format = 'JPEG'
-bpy.context.scene.render.filepath = filepath + filename
+bpy.context.scene.render.filepath = filepath + '/' + filename
 if render == 1:
     bpy.ops.render.render(animation=False, write_still=True, use_viewport=False, layer='', scene='')
