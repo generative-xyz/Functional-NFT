@@ -16,33 +16,26 @@ import {keccak256} from "ethers/lib/utils";
 
 
         const contract = '0xb1F4fb76648D77D4c3F69253e1fAE812178747b2';
-
-        const projectName = "Candy Algo 1";
+        const candy = candyProject;
         const uri = "data:application/json;base64," + btoa(JSON.stringify({
-            name: projectName,
-            description: "",
-            image: "ipfs://QmRanwBkgwgmbfHfwAmkEhbZyQui8FdkYpBrJ9BWcwt7Pf"
+            name: candy.name,
+            description: candy.description,
+            image: candy.image,
         })) // Base64 encode the String
-        const fee = "0.0";
-        const feeTokenAddr = '0x0000000000000000000000000000000000000000';
-        const maxMint = 0;
-        let scriptContent = fs.readFileSync("/Users/autonomous/Documents/generative-objs/Functional-NFT/test_script/candy.py")
-        // 1: python, 2: js, 3: ts;
-        const scriptType = 1;
-        const clientSeed = true;
+        let scriptContent = fs.readFileSync(candyProject.script)
         const tx = await nft.mintProject(
                 contract, process.env.PUBLIC_KEY,
-                projectName,
-                maxMint,
+                candy.name,
+                candy.maxMint,
                 scriptContent.toString(),
-                scriptType,
-                clientSeed,
+                candy.scriptType,
+                candy.clientSeed,
                 uri,
-                ethers.utils.parseEther(fee),
-                feeTokenAddr,
+                ethers.utils.parseEther(candy.fee),
+                candy.feeTokenAddr,
                 JSON.parse(JSON.stringify({
                     _seed: '0x0000000000000000000000000000000000000000',
-                    _params: candyParamTemplates,
+                    _params: candy.params,
                 })),
                 0
             )
