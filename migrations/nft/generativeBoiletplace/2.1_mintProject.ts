@@ -11,50 +11,39 @@ import {keccak256} from "ethers/lib/utils";
             console.log("wrong network");
             return;
         }
-        const contract = '0xb1F4fb76648D77D4c3F69253e1fAE812178747b2';
+
         const nft = new GenerativeBoilerplateNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
-        const uri = {
-            name: "Test Algo",
-            description: "Test Algo",
-            image: "https://live.staticflickr.com/6076/6055860219_b5be1b6b19_z.jpg"
-        }
-        const encodedString = "data:application/json;base64," + btoa(JSON.stringify(uri)) // Base64 encode the String
 
+        const contract = '0xb1F4fb76648D77D4c3F69253e1fAE812178747b2';
+
+        const projectName = "Candy Algo 1";
+        const uri = "data:application/json;base64," + btoa(JSON.stringify({
+            name: projectName,
+            description: "",
+            image: "ipfs://QmRanwBkgwgmbfHfwAmkEhbZyQui8FdkYpBrJ9BWcwt7Pf"
+        })) // Base64 encode the String
+        const fee = "0.0";
+        const feeTokenAddr = '0x0000000000000000000000000000000000000000';
+        const maxMint = 0;
         let scriptContent = fs.readFileSync("/Users/autonomous/Documents/generative-objs/Functional-NFT/test_script/voronoi.py")
         // 1: python, 2: js, 3: ts;
         const scriptType = 1;
         const clientSeed = true;
         const tx = await nft.mintProject(
                 contract, process.env.PUBLIC_KEY,
-                "Test Algo",
-                100,
+                projectName,
+                maxMint,
                 scriptContent.toString(),
                 scriptType,
                 clientSeed,
-                encodedString,
-                ethers.utils.parseEther("0.0"),
-                "0x0000000000000000000000000000000000000000",
+                uri,
+                ethers.utils.parseEther(fee),
+                feeTokenAddr,
                 JSON.parse(JSON.stringify({
                     _seedIndex: 0,
-                    _seed: keccak256([0]),
-                    _params: [{
-                        _typeValue: 0,
-                        _max: 5,
-                        _min: 1,
-                        _decimal: 0,
-                        _availableValues: [],
-                        _value: 0,
-                        _editable: 0
-                    }, {
-                        _typeValue: 1,
-                        _max: 65535,
-                        _min: 100,
-                        _decimal: 0,
-                        _availableValues: [],
-                        _value: 0,
-                        _editable: 0
-                    }],
+                    _seed: '0x0000000000000000000000000000000000000000',
+                    _params: voronoi,
                 })),
                 0
             )

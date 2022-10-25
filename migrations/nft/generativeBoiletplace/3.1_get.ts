@@ -11,7 +11,7 @@ import {GenerativeBoilerplateNFT} from "./GenerativeBoilerplateNFT";
         }
         const contract = '0xb1F4fb76648D77D4c3F69253e1fAE812178747b2';
         const nft = new GenerativeBoilerplateNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
-        const projectId = 4;
+        const projectId = 5;
         let a: any = {};
         // a.getTokenURI = await nft.getTokenURI(contract, projectId);
         a.project = await nft.getProject(contract, projectId);
