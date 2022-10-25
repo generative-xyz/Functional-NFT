@@ -4,6 +4,7 @@ import {ethers} from "ethers";
 import {GenerativeBoilerplateNFT} from "./GenerativeBoilerplateNFT";
 import * as fs from "fs";
 import {keccak256} from "ethers/lib/utils";
+import {candyProject} from "./projectTemplates";
 
 (async () => {
     try {
@@ -34,7 +35,7 @@ import {keccak256} from "ethers/lib/utils";
                 ethers.utils.parseEther(projectTemplate.fee),
                 projectTemplate.feeTokenAddr,
                 JSON.parse(JSON.stringify({
-                    _seed: '0x0000000000000000000000000000000000000000',
+                    _seed: keccak256('0x00000000000000000000000000000000'),
                     _params: projectTemplate.params,
                 })),
                 0
