@@ -147,6 +147,7 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
         _paramsValues[currentTokenId] = _paramsTemplateValue;
         _safeMint(mintTo, currentTokenId);
 
+        emit MintGenerativeNFT(mintTo, creator, uri, currentTokenId);
     }
 
     function _setCreator(address _to, uint256 _id) internal creatorOnly(_id)

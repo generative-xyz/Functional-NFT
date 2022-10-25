@@ -13,9 +13,8 @@ dotenv_path = Path('.env')
 load_dotenv(dotenv_path=dotenv_path)
 
 RENDER_FOLDER = os.getenv('RENDER_FOLDER')
-N = int(os.getenv('PARAM_0'))
-R = int(os.getenv('PARAM_1'))
-
+R = int(os.getenv('PARAM_0'))
+N = int(os.getenv('PARAM_1'))
 
 
 def remove_object(obj):
@@ -304,4 +303,3 @@ bpy.ops.export_scene.gltf(
     filepath=outpath, export_format="GLB", export_tangents=False, export_image_format="JPEG", export_cameras=True,
     export_lights=True
 )
-
