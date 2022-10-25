@@ -26,7 +26,7 @@ import {keccak256} from "ethers/lib/utils";
         const fee = "0.0";
         const feeTokenAddr = '0x0000000000000000000000000000000000000000';
         const maxMint = 0;
-        let scriptContent = fs.readFileSync("/Users/autonomous/Documents/generative-objs/Functional-NFT/test_script/voronoi.py")
+        let scriptContent = fs.readFileSync("/Users/autonomous/Documents/generative-objs/Functional-NFT/test_script/candy.py")
         // 1: python, 2: js, 3: ts;
         const scriptType = 1;
         const clientSeed = true;
@@ -41,9 +41,8 @@ import {keccak256} from "ethers/lib/utils";
                 ethers.utils.parseEther(fee),
                 feeTokenAddr,
                 JSON.parse(JSON.stringify({
-                    _seedIndex: 0,
                     _seed: '0x0000000000000000000000000000000000000000',
-                    _params: voronoi,
+                    _params: candyParamTemplates,
                 })),
                 0
             )
