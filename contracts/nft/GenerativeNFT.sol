@@ -119,24 +119,24 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
         require(_boilerplateAddr != address(0) && _boilerplateId > 0, Errors.INV_PROJECT);
 
         // verify seed
-        if (!clientSeed) {
-            bytes32 seed = _paramsTemplateValue._seed;
-            for (uint256 i = 0; i < _paramsTemplateValue._params.length; i++) {
-                BoilerplateParam.ParamTemplate memory param = _paramsTemplateValue._params[i];
-                if (!param._editable) {
-                    if (param._availableValues.length == 0) {
-                        require(Random.randomValueRange(uint256(seed), param._min, param._max) == param._value, Errors.SEED_INV_1);
-                    } else {
-                        require(Random.randomValueIndexArray(uint256(seed), param._availableValues.length) == param._value, Errors.SEED_INV_2);
-                    }
+        //        if (!clientSeed) {
+        bytes32 seed = _paramsTemplateValue._seed;
+        for (uint256 i = 0; i < _paramsTemplateValue._params.length; i++) {
+            BoilerplateParam.ParamTemplate memory param = _paramsTemplateValue._params[i];
+            if (!param._editable) {
+                if (param._availableValues.length == 0) {
+                    require(Random.randomValueRange(uint256(seed), param._min, param._max) == param._value, Errors.SEED_INV_1);
+                } else {
+                    require(Random.randomValueIndexArray(uint256(seed), param._availableValues.length) == param._value, Errors.SEED_INV_2);
                 }
-                seed = keccak256(abi.encodePacked(seed, param._value));
             }
+            seed = keccak256(abi.encodePacked(seed, param._value));
         }
+        //        }
 
         GenerativeBoilerplateNFT boilerplateNFT = GenerativeBoilerplateNFT(_boilerplateAddr);
         require(boilerplateNFT.exists(_boilerplateId), Errors.INV_PROJECT);
-        require(boilerplateNFT.mintMaxSupply(_boilerplateId) == 0 || boilerplateNFT.mintTotalSupply(_boilerplateId) < boilerplateNFT.mintMaxSupply(_boilerplateId), Errors.REACH_MAX);
+        //        require(boilerplateNFT.mintMaxSupply(_boilerplateId) == 0 || boilerplateNFT.mintTotalSupply(_boilerplateId) < boilerplateNFT.mintMaxSupply(_boilerplateId), Errors.REACH_MAX);
 
         _nextTokenId.increment();
         uint256 currentTokenId = _nextTokenId.current();
