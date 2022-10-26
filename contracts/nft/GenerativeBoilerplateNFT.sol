@@ -123,7 +123,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         uint256 fee,
         address feeAdd,
         BoilerplateParam.ParamsOfProject calldata paramsTemplate
-    ) public nonReentrant payable returns (uint256) {
+    ) external nonReentrant payable returns (uint256) {
         require(bytes(projectName).length > 3, Errors.MISSING_NAME);
         _nextProjectId.increment();
         uint256 currentTokenId = _nextProjectId.current();
@@ -176,6 +176,14 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         _projects[currentTokenId]._minterNFTInfo = generativeNFTAdd;
 
         return currentTokenId;
+    }
+
+    function updateProject(uint256 projectId, uint256 newFee, address newFeeAddr, string memory newURI, string memory script) external {
+        require(msg.sender == _projects[projectId]._creator, Errors.ONLY_CREATOR);
+        _projects[projectId]._fee = newFee;
+        _projects[projectId]._feeToken = newFeeAddr;
+        _projects[projectId]._customUri = newURI;
+        _projects[projectId]._script = script;
     }
 
     // generateSeeds - random seed from chain in case project require
@@ -321,50 +329,22 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         return explicitOwner;
     }
 
-    // _setCreator
-    // internal func for set new creator on projectId
+    // setCreator
+    // func for set new creator on projectId
     // only creator on projectId can make this func
-    function _setCreator(address _to, uint256 _id) internal {
+    function setCreator(address _to, uint256 _id) external {
         require(_projects[_id]._creator == msg.sender, Errors.ONLY_CREATOR);
         _projects[_id]._creator = _to;
-    }
-
-    // setCreator
-    // set creator for list projectId 
-    function setCreator(
-        address _to,
-        uint256[] memory _ids
-    ) external {
-        require(_to != address(0), Errors.INV_ADD);
-        for (uint256 i = 0; i < _ids.length; i++) {
-            _setCreator(_to, _ids[i]);
-        }
     }
 
     function totalSupply() public view override returns (uint256) {
         return _nextProjectId.current();
     }
 
-    // creator update URI data on projectId
-    function setCustomURI(
-        uint256 _id,
-        string memory _newURI
-    ) public {
-        require(_projects[_id]._creator == msg.sender, Errors.ONLY_CREATOR);
-        _projects[_id]._customUri = _newURI;
-    }
 
     function baseTokenURI() virtual public view returns (string memory) {
         return _baseURI();
     }
-
-    //    function mintMaxSupply(uint256 _tokenID) external view returns (uint256) {
-    //        return _projects[_tokenID]._mintMaxSupply;
-    //    }
-    //
-    //    function mintTotalSupply(uint256 _tokenID) external view returns (uint256) {
-    //        return _projects[_tokenID]._mintTotalSupply;
-    //    }
 
     // tokenURI
     // return URI data of project
