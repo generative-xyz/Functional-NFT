@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import "../lib/helpers/Random.sol";
 import "../lib/helpers/Errors.sol";
 import "../lib/helpers/BoilerplateParam.sol";
+import "../lib/helpers/TraitInfo.sol";
 import "../interfaces/IGenerativeNFT.sol";
 import "../interfaces/IGenerativeBoilerplateNFT.sol";
 
@@ -25,6 +26,8 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
     uint256 public _boilerplateId;
     // params value for rendering -> mapping with tokenId of NFT
     mapping(uint256 => BoilerplateParam.ParamsOfProject) public _paramsValues;
+
+    TraitInfo.Traits private _traits;
 
     // 
     mapping(uint256 => string) _customUri;
@@ -78,6 +81,33 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
         _boilerplateId = boilerplateId;
         initAdmin(admin);
         transferOwnership(admin);
+    }
+
+    function updateTraits(TraitInfo.Traits calldata traits) external {
+        require(msg.sender == _admin || msg.sender == _boilerplateAddr, Errors.ONLY_ADMIN_ALLOWED);
+        _traits = traits;
+    }
+
+    function getTraits() public view returns (TraitInfo.Trait[] memory){
+        return _traits._traits;
+    }
+
+
+    function getTokenTraits(uint256 tokenId) public view returns (TraitInfo.Trait[] memory){
+        BoilerplateParam.ParamsOfProject memory p = _paramsValues[tokenId];
+        TraitInfo.Trait[] memory result = _traits._traits;
+        if (result.length != p._params.length) {
+            return result;
+        }
+        for (uint8 i = 0; i < p._params.length; i++) {
+            uint256 val = p._params[i]._value;
+            if (result[i]._availableValues.length > 0) {
+                result[i]._valueStr = result[i]._availableValues[val];
+            } else {
+                result[i]._value = val;
+            }
+        }
+        return result;
     }
 
     function name() public view override returns (string memory) {
