@@ -1,16 +1,3 @@
-# # Read environment params
-# from dotenv import load_dotenv
-# from pathlib import Path
-# import os
-# dotenv_path = Path('.env')
-# load_dotenv(dotenv_path=dotenv_path)
-
-# # Params variable
-# color_list = int(os.getenv('PARAM_0'))
-# shape = int(os.getenv('PARAM_1'))   # 1, 2, 3, 4, 5, 6, 7
-# height = int(os.getenv('PARAM_2')) # 1, 2, 3
-# surface = int(os.getenv('PARAM_3')) # 0, 0.5, 1
-
 import json
 import random
 import time
@@ -29,12 +16,6 @@ with open("env.json", 'r') as file:
 
 
 def purge_orphans():
-    """
-    Remove all orphan data blocks
-
-    see this from more info:
-    https://youtu.be/3rNqVPtbhzc?t=149
-    """
     if bpy.app.version >= (3, 0, 0):
         # run this only for Blender versions 3.0 and higher
         bpy.ops.outliner.orphans_purge(do_local_ids=True, do_linked_ids=True, do_recursive=True)
@@ -47,15 +28,6 @@ def purge_orphans():
 
 
 def clean_scene():
-    """
-    Removing all of the objects, collection, materials, particles,
-    textures, images, curves, meshes, actions, nodes, and worlds from the scene
-
-    Checkout this video explanation with example
-
-    "How to clean the scene with Python in Blender (with examples)"
-    https://youtu.be/3rNqVPtbhzc
-    """
     # make sure the active object is not in Edit Mode
     if bpy.context.active_object and bpy.context.active_object.mode == "EDIT":
         bpy.ops.object.editmode_toggle()
@@ -88,12 +60,6 @@ def clean_scene():
 
 
 def convert_srgb_to_linear_rgb(srgb_color_component):
-    """
-    Converting from sRGB to Linear RGB
-    based on https://en.wikipedia.org/wiki/SRGB#From_sRGB_to_CIE_XYZ
-
-    Video Tutorial: https://www.youtube.com/watch?v=knc1CGBhJeU
-    """
     if srgb_color_component <= 0.04045:
         linear_color_component = srgb_color_component / 12.92
     else:
@@ -103,17 +69,6 @@ def convert_srgb_to_linear_rgb(srgb_color_component):
 
 
 def hex_color_to_rgb(hex_color):
-    """
-    Converting from a color in the form of a hex triplet string (en.wikipedia.org/wiki/Web_colors#Hex_triplet)
-    to a Linear RGB
-
-    Supports: "#RRGGBB" or "RRGGBB"
-
-    Note: We are converting into Linear RGB since Blender uses a Linear Color Space internally
-    https://docs.blender.org/manual/en/latest/render/color_management.html
-
-    Video Tutorial: https://www.youtube.com/watch?v=knc1CGBhJeU
-    """
     # remove the leading '#' symbol if present
     if hex_color.startswith("#"):
         hex_color = hex_color[1:]
@@ -189,24 +144,6 @@ def apply_modifiers(obj):
 # --------------------------------------
 
 clean_scene()
-
-# color_list = ['#7030A0','#E59B15','#4F493D','#6E9077','#F8CD7D']
-# color_name = 'vintage-halloween'
-# color_list = ['#4D5B77','#87ABBC','#B6E4EF','#F9F9E5','#E3EDEF']
-# color_name = 'blizzard-blue'
-# color_list = ['#D5B4CE','#EDDF9F','#FEBFB4','#B8D5D6','#D9ADB9']
-# color_name = 'dreaming-cloud'
-# color_list = ['#DFD770','#6FE8C9','#3B9CAA','#155868','#F2EFC9']
-# color_name = 'Nekem'
-# color_list = ['#5D4436','#874F2F','#A6633B','#C27C53','#2E405D']
-# color_name = 'hot-coffee'
-# color_list = ["390099","9e0059","ff0054","ff5400","ffbd00"]
-# color_list = ["ff6700","ebebeb","c0c0c0","3a6ea5","004e98"]
-# color_name = ''
-
-# shape = 7   # 1, 2, 3, 4, 5, 6, 7
-# height = 2 # 1, 2, 3
-# surface = 1 # 0, 0.5, 1
 
 filepath = rendering_path
 filename = 'model' + '_shape' + str(shape) + '_height' + str(height) + '_surface' + str(surface)
@@ -462,81 +399,6 @@ apply_modifiers(candy)
 # Scale object to small size
 bpy.ops.transform.resize(value=(0.01, 0.01, 0.01))
 bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-
-## Delete underneath verts
-# if shape == 1 or shape == 2 or shape == 3 or shape == 4:
-#    bpy.ops.object.editmode_toggle() #enter edit mode
-#    bpy.ops.mesh.select_all(action='DESELECT')
-#    candy_bmesh = bmesh.from_edit_mesh(candy.data)
-#   
-#    for vert in candy_bmesh.verts:
-#        if vert.co[2] < -0.1: #if Z position < -0.1
-#            candy_bmesh.verts.ensure_lookup_table() 
-#            candy_bmesh.verts[vert.index].select = True
-#            bmesh.update_edit_mesh(candy.data)
-#            
-#    bpy.ops.mesh.delete(type='VERT')
-#    
-
-#    
-#            
-#    bpy.ops.object.editmode_toggle() #exit edit mode
-#    
-# bpy.ops.object.modifier_add(type='SOLIDIFY')
-# bpy.context.object.modifiers["Solidify"].thickness = 0.1
-# bpy.context.object.data.use_auto_smooth = True
-
-
-###create door
-# if shape == 1 or shape == 2:
-#    bpy.ops.mesh.primitive_cube_add(size=1,enter_editmode=False, align='WORLD', location=(0, -9, 0), scale=(2, 6, 4))
-# if shape == 3 or shape == 4:
-#    bpy.ops.mesh.primitive_cube_add(size=1,enter_editmode=False, align='WORLD', location=(5, -9, 0), scale=(2, 6, 4))
-# if shape == 5 or shape == 6 or shape == 7:
-#    bpy.ops.mesh.primitive_cube_add(size=1,enter_editmode=False, align='WORLD', location=(0, -7, 0), scale=(2, 8, 6))
-# door = bpy.context.active_object
-
-# bpy.context.view_layer.objects.active = candy
-# bpy.ops.object.modifier_add(type='BOOLEAN')
-# bpy.context.object.modifiers["Boolean"].solver = 'FAST'
-
-# bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["Cube"]
-
-# apply_modifiers(candy)
-
-# bpy.context.view_layer.objects.active = door
-# bpy.ops.object.delete(use_global=False)
-
-###create room door
-# if CUTS == 1:
-#    bpy.ops.mesh.primitive_plane_add(size=8,enter_editmode=False, align='WORLD', location=(0, 0, 0.1), scale=(1, 1, 1))
-#    door_room = bpy.context.active_object
-
-#    bpy.ops.object.editmode_toggle() #enter edit mode
-#    bpy.ops.mesh.inset(thickness=1.5, depth=0)
-#    bpy.ops.mesh.delete(type='FACE')
-#    bpy.ops.mesh.select_all(action='SELECT')
-#    bpy.ops.mesh.extrude_region_move(MESH_OT_extrude_region={"use_normal_flip":False, "use_dissolve_ortho_edges":False, "mirror":False}, TRANSFORM_OT_translate={"value":(0, 0, 2)})
-#    bpy.ops.object.editmode_toggle() #exit edit mode
-
-#    bpy.context.view_layer.objects.active = candy
-#    bpy.ops.object.modifier_add(type='BOOLEAN')
-#    #bpy.context.object.modifiers["Boolean.001"].solver = 'FAST'
-
-#    bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["Plane.001"]
-
-#    apply_modifiers(candy)
-
-#    bpy.context.view_layer.objects.active = door_room
-#    bpy.ops.object.delete(use_global=False)
-
-### add ground
-# bpy.ops.mesh.primitive_circle_add(radius=15,enter_editmode=True, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
-# bpy.ops.mesh.edge_face_add()
-# bpy.ops.object.editmode_toggle() #exit
-# ground = bpy.context.active_object
-# material = create_reflective_material(hex_color_to_rgba('#C3C3C3', alpha=1.0), roughness=0.5, specular=0.5, return_nodes=False)
-# ground.data.materials.append(material)
 
 # export to GLB
 if export == 1:
