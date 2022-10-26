@@ -7,6 +7,7 @@ const candyProject = {
     fee: "0.0",
     feeTokenAddr: "0x0000000000000000000000000000000000000000",
     maxMint: 0,
+    notOwnerLimit: 0,
     clientSeed: true,
     params: [
         { // color
@@ -61,7 +62,8 @@ const candyProject2 = {
     image: "ipfs://QmRanwBkgwgmbfHfwAmkEhbZyQui8FdkYpBrJ9BWcwt7Pf",
     fee: "0.0",
     feeTokenAddr: "0x0000000000000000000000000000000000000000",
-    maxMint: 0,
+    maxMint: 5000,
+    notOwnerLimit: 4500,
     clientSeed: true,
     params: [
         { // color
@@ -117,6 +119,7 @@ const voronoiProject = {
     fee: "0.0",
     feeTokenAddr: "0x0000000000000000000000000000000000000000",
     maxMint: 0,
+    notOwnerLimit: 0,
     clientSeed: true,
     params: [{
         _typeValue: 1,

@@ -28,6 +28,7 @@ import {candyProject, candyProject2} from "./projectTemplates";
                 contract, process.env.PUBLIC_KEY,
                 projectTemplate.name,
                 projectTemplate.maxMint,
+                projectTemplate.notOwnerLimit,
                 scriptContent.toString(),
                 projectTemplate.scriptType,
                 projectTemplate.clientSeed,

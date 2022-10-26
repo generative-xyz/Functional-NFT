@@ -115,6 +115,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         address to,
         string memory projectName,
         uint256 maxSupply,
+        uint256 maxNotOwner,
         string memory script,
         uint32 scriptType,
         bool clientSeed,
@@ -154,6 +155,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         _projects[currentTokenId]._projectName = projectName;
         _projects[currentTokenId]._creator = _admin;
         _projects[currentTokenId]._mintMaxSupply = maxSupply;
+        _projects[currentTokenId]._mintNotOwnerProjectMaxSupply = maxNotOwner;
         _projects[currentTokenId]._fee = fee;
         _projects[currentTokenId]._feeToken = feeAdd;
         _projects[currentTokenId]._paramsTemplate = paramsTemplate;

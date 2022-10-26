@@ -176,7 +176,7 @@ class GenerativeBoilerplateNFT {
     }
 
     async mintProject(contractAddress: any, to: any,
-                      projectName: string, maxSupply: number, script: string,
+                      projectName: string, maxSupply: number, maxNotOwner: number, script: string,
                       scriptType: number, clientSeed: boolean, uri: string, fee: any, feeAdd: any, paramsTemplate: any,
                       gas: number) {
         let temp = this.getContract(contractAddress);
@@ -187,7 +187,7 @@ class GenerativeBoilerplateNFT {
         // console.log({accountOneGasPrice});
         // return;
 
-        const fun = temp?.nftContract.methods.mintProject(to, projectName, maxSupply, script, scriptType, clientSeed, uri, fee, feeAdd, paramsTemplate);
+        const fun = temp?.nftContract.methods.mintProject(to, projectName, maxSupply, maxNotOwner, script, scriptType, clientSeed, uri, fee, feeAdd, paramsTemplate);
         //the transaction
         const tx = {
             from: this.senderPublicKey,
