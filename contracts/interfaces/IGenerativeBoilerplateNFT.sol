@@ -20,4 +20,8 @@ interface IGenerativeBoilerplateNFT {
         address to,
         bytes32 seed, uint256 projectId
     ) external;
+
+    function exists(
+        uint256 _id
+    ) external view returns (bool);
 }

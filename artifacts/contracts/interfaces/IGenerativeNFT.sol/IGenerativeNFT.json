@@ -137,11 +137,6 @@
           "internalType": "struct BoilerplateParam.ParamsOfProject",
           "name": "_paramsTemplateValue",
           "type": "tuple"
-        },
-        {
-          "internalType": "bool",
-          "name": "clientSeed",
-          "type": "bool"
         }
       ],
       "name": "mint",
