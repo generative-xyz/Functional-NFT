@@ -4,6 +4,7 @@ const candyProject = {
     script: "/Users/autonomous/Documents/generative-objs/Functional-NFT/test_script/candy.py",
     scriptType: 1,
     image: "ipfs://QmRanwBkgwgmbfHfwAmkEhbZyQui8FdkYpBrJ9BWcwt7Pf",
+    animation_url: "",
     fee: "0.0",
     feeTokenAddr: "0x0000000000000000000000000000000000000000",
     maxMint: 0,
@@ -55,11 +56,12 @@ const candyProject = {
 };
 
 const candyProject2 = {
-    name: "Candy algo 3",
+    name: "SWEET - On-chain Candies",
     description: "",
     script: "/Users/autonomous/Documents/generative-objs/Functional-NFT/test_script/candy_2.py",
     scriptType: 1,
-    image: "ipfs://QmRanwBkgwgmbfHfwAmkEhbZyQui8FdkYpBrJ9BWcwt7Pf",
+    image: "ipfs://QmZha95v86iME98rpxrJWbHerK3JjEHKkiGpdS4NgZKjdb",
+    animation_url: "ipfs://QmWF66ri417i2fZ8xzDRKyVzB2bpnUzZXL4ks9dhjphdJk",
     fee: "0.0",
     feeTokenAddr: "0x0000000000000000000000000000000000000000",
     maxMint: 5000,
@@ -212,6 +214,7 @@ const voronoiProject = {
     script: "/Users/autonomous/Documents/generative-objs/Functional-NFT/test_script/voronoi.py",
     scriptType: 1,
     image: "ipfs://QmRanwBkgwgmbfHfwAmkEhbZyQui8FdkYpBrJ9BWcwt7Pf",
+    animation_url: "",
     fee: "0.0",
     feeTokenAddr: "0x0000000000000000000000000000000000000000",
     maxMint: 0,

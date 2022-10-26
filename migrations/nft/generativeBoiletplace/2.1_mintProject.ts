@@ -22,6 +22,7 @@ import {candyProject, candyProject2} from "./projectTemplates";
             name: projectTemplate.name,
             description: projectTemplate.description,
             image: projectTemplate.image,
+            animation_url: projectTemplate.animation_url,
         })) // Base64 encode the String
         let scriptContent = fs.readFileSync(projectTemplate.script)
         const tx = await nft.mintProject(
