@@ -1,58 +1,47 @@
 import json
-import random
-import time
-import math
-
-import bpy
-import bmesh
 
 with open("env.json", 'r') as file:
     json_object = json.load(file)
-    color_list = json_object['params'][0].split(',')
+    color_palette_id = int(json_object['params'][0])
     shape = int(json_object['params'][1])
     height = int(json_object['params'][2])
     surface = float(json_object['params'][3])
     rendering_path = json_object['rendering_path']
 
+import math
+
+import bpy
+import bmesh
+
 
 def purge_orphans():
     if bpy.app.version >= (3, 0, 0):
-        # run this only for Blender versions 3.0 and higher
         bpy.ops.outliner.orphans_purge(do_local_ids=True, do_linked_ids=True, do_recursive=True)
     else:
-        # run this only for Blender versions lower than 3.0
-        # call purge_orphans() recursively until there are no more orphan data blocks to purge
         result = bpy.ops.outliner.orphans_purge()
         if result.pop() != "CANCELLED":
             purge_orphans()
 
 
 def clean_scene():
-    # make sure the active object is not in Edit Mode
     if bpy.context.active_object and bpy.context.active_object.mode == "EDIT":
         bpy.ops.object.editmode_toggle()
 
-    # make sure non of the objects are hidden from the viewport, selection, or disabled
     for obj in bpy.data.objects:
         obj.hide_set(False)
         obj.hide_select = False
         obj.hide_viewport = False
 
-    # select all the object and delete them (just like pressing A + X + D in the viewport)
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete()
 
-    # find all the collections and remove them
     collection_names = [col.name for col in bpy.data.collections]
     for name in collection_names:
         bpy.data.collections.remove(bpy.data.collections[name])
 
-    # in the case when you modify the world shader
-    # delete and recreate the world object
     world_names = [world.name for world in bpy.data.worlds]
     for name in world_names:
         bpy.data.worlds.remove(bpy.data.worlds[name])
-    # create a new world data block
     bpy.ops.world.new()
     bpy.context.scene.world = bpy.data.worlds["World"]
 
@@ -69,27 +58,20 @@ def convert_srgb_to_linear_rgb(srgb_color_component):
 
 
 def hex_color_to_rgb(hex_color):
-    # remove the leading '#' symbol if present
     if hex_color.startswith("#"):
         hex_color = hex_color[1:]
 
     assert len(hex_color) == 6, f"RRGGBB is the supported hex color format: {hex_color}"
 
-    # extracting the Red color component - RRxxxx
     red = int(hex_color[:2], 16)
-    # dividing by 255 to get a number between 0.0 and 1.0
     srgb_red = red / 255
     linear_red = convert_srgb_to_linear_rgb(srgb_red)
 
-    # extracting the Green color component - xxGGxx
     green = int(hex_color[2:4], 16)
-    # dividing by 255 to get a number between 0.0 and 1.0
     srgb_green = green / 255
     linear_green = convert_srgb_to_linear_rgb(srgb_green)
 
-    # extracting the Blue color component - xxxxBB
     blue = int(hex_color[4:6], 16)
-    # dividing by 255 to get a number between 0.0 and 1.0
     srgb_blue = blue / 255
     linear_blue = convert_srgb_to_linear_rgb(srgb_blue)
 
@@ -97,14 +79,6 @@ def hex_color_to_rgb(hex_color):
 
 
 def hex_color_to_rgba(hex_color, alpha=1.0):
-    """
-    Converting from a color in the form of a hex triplet string (en.wikipedia.org/wiki/Web_colors#Hex_triplet)
-    to a Linear RGB with an Alpha passed as a parameter
-
-    Supports: "#RRGGBB" or "RRGGBB"
-
-    Video Tutorial: https://www.youtube.com/watch?v=knc1CGBhJeU
-    """
     linear_red, linear_green, linear_blue = hex_color_to_rgb(hex_color)
     return tuple([linear_red, linear_green, linear_blue, alpha])
 
@@ -141,20 +115,30 @@ def apply_modifiers(obj):
         obj.modifiers.remove(m)
 
 
-# --------------------------------------
-
 clean_scene()
 
-filepath = rendering_path
-filename = 'model' + '_shape' + str(shape) + '_height' + str(height) + '_surface' + str(surface)
-renderimage = 1
-rendervideo = 0
-export = 1
-"""
-Set scene properties
-"""
-fps = 15
-loop_seconds = 2
+color_list = ["#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7", "#5D21E7", "#E777E4", "#E7E7E7", "#312624"]
+color_name = ''
+color_palette_length = 4
+color_palette = None
+count = 0
+for mask in range(2 ** len(color_list)):
+    if bin(mask).count("1") == color_palette_length:
+        if count == color_palette_id:
+            color_palette = []
+            for i in range(len(color_list)):
+                if (mask >> i) & 1 > 0:
+                    color_palette.append(color_list[i])
+            break
+        else:
+            count += 1
+if color_palette == None:
+    raise Exception("error when find color palette")
+
+file_path = rendering_path + '/result'
+
+fps = 1
+loop_seconds = 1
 frame_count = fps * loop_seconds
 scene = bpy.context.scene
 scene.frame_end = frame_count
@@ -171,26 +155,18 @@ scene.frame_start = 1
 
 scene.render.engine = "CYCLES"
 
-# Use the GPU to render
 scene.cycles.device = 'GPU'
 
-# Use the CPU to render
-# scene.cycles.device = "CPU"
-
-scene.cycles.samples = 16
-bpy.context.scene.cycles.time_limit = 1
-# bpy.context.scene.cycles.denoiser = 'OPTIX'
-
+scene.cycles.samples = 50
+bpy.context.scene.cycles.time_limit = 5
 
 bpy.context.scene.view_settings.view_transform = 'Standard'
 
-# bpy.context.scene.view_settings.look = 'Medium High Contrast'
 bpy.context.scene.view_settings.look = 'None'
 
-bpy.context.scene.render.resolution_x = 1000
-bpy.context.scene.render.resolution_y = 1000
+bpy.context.scene.render.resolution_x = 2000
+bpy.context.scene.render.resolution_y = 2000
 
-# create camera
 if shape < 4:
     cam_y = -0.8
     cam_z = 0.1
@@ -201,11 +177,7 @@ if shape > 4:
     cam_y = -0.8
     cam_z = 0.2
 
-# --------------------------------------
-
-# create shape 1
 if shape == 1:
-    # create cone without bottom
     bpy.ops.mesh.primitive_plane_add(size=30, enter_editmode=True, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
     CUTS = 0
     bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
@@ -216,13 +188,9 @@ if shape == 1:
         TRANSFORM_OT_translate={"value": (0, 0, 15 * height)})
     bpy.ops.mesh.merge(type='CENTER')
 
-# create shape 2 - part 1
 if shape == 2:
-    # create cube without top and bottom
     bpy.ops.mesh.primitive_plane_add(size=20, enter_editmode=True, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
     CUTS = 0
-    #    if CUTS >>0:
-    #        bpy.ops.mesh.subdivide(number_cuts=CUTS)
     bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
     bpy.ops.mesh.delete(type='ONLY_FACE')
     bpy.ops.mesh.select_all(action='SELECT')
@@ -231,7 +199,6 @@ if shape == 2:
         TRANSFORM_OT_translate={"value": (0, 0, 10 + height * 3)})
 
 if shape == 3:
-    # create cone without bottom
     bpy.ops.mesh.primitive_plane_add(size=30, enter_editmode=True, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
     CUTS = 1
     bpy.ops.mesh.subdivide(number_cuts=CUTS)
@@ -244,7 +211,6 @@ if shape == 3:
     bpy.ops.mesh.merge(type='CENTER')
 
 if shape == 4:
-    # create cube without top and bottom
     bpy.ops.mesh.primitive_plane_add(size=20, enter_editmode=True, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
     CUTS = 1
     bpy.ops.mesh.subdivide(number_cuts=CUTS)
@@ -257,7 +223,6 @@ if shape == 4:
 
 if shape == 5:
     CUTS = 0
-    # create plane with 4 square
     bpy.ops.mesh.primitive_plane_add(size=20, enter_editmode=True, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
     # bpy.ops.mesh.subdivide()
     bpy.ops.mesh.subdivide(number_cuts=CUTS)
@@ -284,10 +249,9 @@ FACES = len(bmesh.from_edit_mesh(bpy.context.active_object.data).faces)
 
 candy = bpy.context.active_object
 
-# Assign Materials for each face
 for i in range(FACES):
     print(i)
-    material = create_reflective_material(hex_color_to_rgba(color_list[i % len(color_list)], alpha=1),
+    material = create_reflective_material(hex_color_to_rgba(color_palette[i % len(color_palette)], alpha=1),
                                           roughness=surface, specular=0.5, return_nodes=False)
     candy.data.materials.append(material)
     candy.active_material_index = i
@@ -302,7 +266,6 @@ for i in range(FACES):
 
 bpy.ops.object.editmode_toggle()  # exit edit mode
 
-# create shape 2 - part 2
 if shape == 2 or shape == 4:
     # Select top vertex
 
@@ -342,14 +305,11 @@ if shape == 2:
     bpy.context.object.modifiers["Subdivision.001"].levels = 2
 
 if shape == 1 or shape == 3 or shape == 4:
-
-    # mirror shape
     bpy.ops.object.modifier_add(type='MIRROR')
     bpy.context.object.modifiers["Mirror"].use_axis[0] = False
     bpy.context.object.modifiers["Mirror"].use_axis[1] = False
     bpy.context.object.modifiers["Mirror"].use_axis[2] = True
 
-    # candy shape making
     bpy.ops.object.modifier_add(type='SUBSURF')
     bpy.context.object.modifiers["Subdivision"].levels = 2
 
@@ -393,28 +353,16 @@ if shape == 7:
     bpy.context.object.modifiers["Bevel"].width = 1.5
     bpy.context.object.modifiers["Bevel"].segments = 8
 
-# Apply modifier
 apply_modifiers(candy)
 
-# Scale object to small size
 bpy.ops.transform.resize(value=(0.01, 0.01, 0.01))
 bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
 
-# export to GLB
-if export == 1:
-    bpy.ops.export_scene.gltf(filepath=filepath + '/' + filename, check_existing=True, export_format='GLB')
+bpy.ops.export_scene.gltf(filepath=file_path, check_existing=True, export_format='GLB')
 
-# Animation object
-
-candy.keyframe_insert("rotation_euler", index=2, frame=1)
-candy.rotation_euler[2] = math.radians(360) + candy.rotation_euler[2]
-candy.keyframe_insert("rotation_euler", index=2, frame=frame_count)
-
-# add light
 bpy.ops.object.light_add(type='SUN', radius=1, align='WORLD', location=(0, 0, 0),
                          rotation=(0, 40 * 3.14 / 180, -40 * 3.14 / 180), scale=(1, 1, 1))
 bpy.context.object.data.angle = 0.523599
-# bpy.context.object.visible_glossy = False
 bpy.context.object.data.energy = 3
 
 bpy.ops.object.light_add(type="AREA", radius=50, location=(0, 0, 50))
@@ -425,7 +373,6 @@ bpy.ops.object.camera_add(enter_editmode=False, align='VIEW', location=(0, cam_y
 bpy.context.object.data.lens = 40
 bpy.context.scene.camera = bpy.context.scene.objects.get('Camera')
 
-# create backdrop
 bpy.ops.mesh.primitive_plane_add(size=3, enter_editmode=False, align='WORLD', location=(0, 0, -0.5), scale=(1, 1, 1))
 backdrop = bpy.context.active_object
 
@@ -452,17 +399,12 @@ bpy.context.object.modifiers["Bevel"].width = 1
 bpy.context.object.modifiers["Bevel"].segments = 10
 bpy.ops.object.shade_smooth()
 
-material = create_reflective_material(hex_color_to_rgba(color_list[0], alpha=1.0), roughness=0.5, specular=0.5,
+material = create_reflective_material(hex_color_to_rgba(color_palette[0], alpha=1.0), roughness=0.5, specular=0.5,
                                       return_nodes=False)
 backdrop.data.materials.append(material)
 
-# render
-bpy.context.scene.render.filepath = filepath + '/' + filename
-if renderimage == 1:
-    bpy.context.scene.render.image_settings.file_format = 'JPEG'
-    bpy.ops.render.render(animation=False, write_still=True, use_viewport=False, layer='', scene='')
+bpy.context.scene.render.filepath = file_path
 
-if rendervideo == 1:
-    bpy.context.scene.render.image_settings.file_format = 'FFMPEG'
-    bpy.context.scene.render.ffmpeg.format = 'MPEG4'
-    bpy.ops.render.render(animation=True, write_still=True, use_viewport=False, layer='', scene='')
+bpy.context.scene.render.image_settings.file_format = 'JPEG'
+
+bpy.ops.render.render(animation=False, write_still=True, use_viewport=False, layer='', scene='')
