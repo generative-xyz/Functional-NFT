@@ -4,7 +4,7 @@ import {GeneretiveNFT} from "./GeneretiveNFT";
 
 (async () => {
     try {
-        if (process.env.NETWORK != "goerli") {
+        if (process.env.NETWORK != "mumbai") {
             console.log("wrong network");
             return;
         }

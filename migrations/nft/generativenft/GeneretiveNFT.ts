@@ -108,7 +108,7 @@ class GeneretiveNFT {
     async getTraits(contractAddress: any) {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
-        console.log("asfafaf");
+        // console.log("asfafaf");
         //the transaction
         const tx = {
             from: this.senderPublicKey,

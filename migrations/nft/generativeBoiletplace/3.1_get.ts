@@ -5,13 +5,13 @@ import {GenerativeBoilerplateNFT} from "./GenerativeBoilerplateNFT";
 
 (async () => {
     try {
-        if (process.env.NETWORK != "goerli") {
+        if (process.env.NETWORK != "mumbai") {
             console.log("wrong network");
             return;
         }
-        const contract = '0xb1F4fb76648D77D4c3F69253e1fAE812178747b2';
+        const contract = '0xe579276f0c0532e8fd2f43292b9eedf1ca5222c3';
         const nft = new GenerativeBoilerplateNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
-        const projectId = 5;
+        const projectId = 2;
         let a: any = {};
         // a.getTokenURI = await nft.getTokenURI(contract, projectId);
         a.project = await nft.getProject(contract, projectId);

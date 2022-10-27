@@ -5,18 +5,18 @@ import {ethers} from "ethers";
 
 (async () => {
     try {
-        if (process.env.NETWORK != "goerli") {
+        if (process.env.NETWORK != "mumbai") {
             console.log("wrong network");
             return;
         }
-        const contract = '0x9a63ff46dfa34296a2cbd5a0f0a3ab28d27ebc07';
+        const contract = '0x46C02B9113DcA70a8C2e878Df0B24Dc895836b75';
         const key = 'GENERATIVE_NFT_TEMPLATE';
         const nft = new ParamControl(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
         const val: any = await nft.getAddress(contract, key);
         console.log("val", val);
 
-        let tx = await nft.setAddress(contract, key, '0x264fFa542DC2314332D1244099A5eC08d6E53057', 0);
+        let tx = await nft.setAddress(contract, key, '0xCFc5Ec40757aa3830E5feee9d6e994095d4C60eD', 0);
         console.log("%s ParamControl admin address: %s", process.env.NETWORK, tx);
 
 

@@ -9,11 +9,11 @@ import {createAlchemyWeb3} from "@alch/alchemy-web3";
 
 (async () => {
     try {
-        if (process.env.NETWORK != "goerli") {
+        if (process.env.NETWORK != "mumbai") {
             console.log("wrong network");
             return;
         }
-        const contract = '0xb1F4fb76648D77D4c3F69253e1fAE812178747b2';
+        const contract = '0xE579276F0c0532E8fD2f43292B9EeDf1CA5222C3';
         const nft = new GenerativeBoilerplateNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
         const uri = {
@@ -22,7 +22,7 @@ import {createAlchemyWeb3} from "@alch/alchemy-web3";
             image: "https://live.staticflickr.com/6076/6055860219_b5be1b6b19_z.jpg"
         }
         const encodedString = "data:application/json;base64," + btoa(JSON.stringify(uri)) // Base64 encode the String
-        const fromProjectId = 14;
+        const fromProjectId = 1;
         let uris = [];
         let paramValues = [];
         const seeds: any[] = [
