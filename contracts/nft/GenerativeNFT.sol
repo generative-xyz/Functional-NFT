@@ -103,6 +103,7 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
             uint256 val = p._params[i]._value;
             if (result[i]._availableValues.length > 0) {
                 result[i]._valueStr = result[i]._availableValues[val];
+                result[i]._value = val;
             } else {
                 result[i]._value = val;
             }
