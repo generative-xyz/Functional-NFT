@@ -180,8 +180,8 @@ const candyProject2 = {
         },
         { // shape
             _typeValue: 1,
-            _max: 5,
-            _min: 1,
+            _max: 0,
+            _min: 0,
             _decimal: 0,
             _availableValues: ["1", "2", "3", "4", "5", "6", "7"],
             _value: 0,
@@ -189,8 +189,8 @@ const candyProject2 = {
         },
         { // height
             _typeValue: 1,
-            _max: 5,
-            _min: 1,
+            _max: 0,
+            _min: 0,
             _decimal: 0,
             _availableValues: ["1", "1", "1", "1", "1", "1", "2", "2", "2", "3"],
             _value: 0,
@@ -198,8 +198,8 @@ const candyProject2 = {
         },
         {// surface
             _typeValue: 2,
-            _max: 5,
-            _min: 1,
+            _max: 0,
+            _min: 0,
             _decimal: 0,
             _availableValues: ["0", "0", "0", "0", "0", "0", "0.5", "0.5", "0.5", "1"],
             _value: 0,
