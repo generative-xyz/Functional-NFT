@@ -192,7 +192,7 @@ const candyProject2 = {
             _max: 5,
             _min: 1,
             _decimal: 0,
-            _availableValues: ["1", "2", "3"],
+            _availableValues: ["1", "1", "1", "1", "1", "1", "2", "2", "2", "3"],
             _value: 0,
             _editable: false,
         },
@@ -201,7 +201,7 @@ const candyProject2 = {
             _max: 5,
             _min: 1,
             _decimal: 0,
-            _availableValues: ["0", "0.5", "1"],
+            _availableValues: ["0", "0", "0", "0", "0", "0", "0.5", "0.5", "0.5", "1"],
             _value: 0,
             _editable: false,
         }
