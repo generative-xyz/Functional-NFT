@@ -86,14 +86,18 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         require(msg.sender == _admin && hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) && newAdm != address(0), Errors.ONLY_ADMIN_ALLOWED);
 
         // change admin
-        address _previousAdmin = _admin;
-        _admin = newAdm;
-        grantRole(DEFAULT_ADMIN_ROLE, _admin);
-        revokeRole(DEFAULT_ADMIN_ROLE, _previousAdmin);
+        if (_admin != newAdm) {
+            address _previousAdmin = _admin;
+            _admin = newAdm;
+            grantRole(DEFAULT_ADMIN_ROLE, _admin);
+            revokeRole(DEFAULT_ADMIN_ROLE, _previousAdmin);
+        }
 
         // change param
         require(newParam != address(0));
-        _paramsAddress = newParam;
+        if (_paramsAddress != newParam) {
+            _paramsAddress = newParam;
+        }
     }
 
     // disable old mint
