@@ -18,7 +18,7 @@ const candyTraits = [
         _valueStr: "",
     },
     {
-        name: "Height",
+        name: "Size",
         _availableValues: ["Nibble", "Nibble", "Nibble", "Nibble", "Nibble", "Nibble",
             "Bite", "Bite", "Bite",
             "Devour",],
