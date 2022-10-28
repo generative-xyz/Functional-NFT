@@ -109,6 +109,22 @@ class GenerativeBoilerplateNFT {
         return await temp?.nftContract.methods._projects(tokenID).call(tx);
     }
 
+    async getAdmin(contractAddress: any) {
+        let temp = this.getContract(contractAddress);
+        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
+
+        //the transaction
+        const tx = {
+            from: this.senderPublicKey,
+            to: contractAddress,
+            nonce: nonce,
+        }
+
+        const param = await temp?.nftContract.methods._paramsAddress().call(tx);
+        const admin = await temp?.nftContract.methods._admin().call(tx);
+        return {admin, param};
+    }
+
     async setCustomURI(contractAddress: any, tokenId: number, uri: string, gas: number) {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
@@ -198,7 +214,9 @@ class GenerativeBoilerplateNFT {
         }
 
         if (tx.gas == 0) {
+            // console.log(tx.data);
             tx.gas = await fun.estimateGas(tx);
+            console.log(2222);
         }
 
         return await this.signedAndSendTx(temp?.web3, tx);
