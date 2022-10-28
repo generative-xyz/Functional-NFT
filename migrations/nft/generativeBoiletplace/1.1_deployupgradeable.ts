@@ -5,7 +5,7 @@ const {getContractAddress} = require('@ethersproject/address');
 
 (async () => {
     try {
-        if (process.env.NETWORK != "goerli") {
+        if (process.env.NETWORK != "mumbai") {
             console.log("wrong network");
             return;
         }
@@ -22,11 +22,11 @@ const {getContractAddress} = require('@ethersproject/address');
         const chainID = "5";
         const baseUrl = "";
         const address = await nft.deployUpgradeable(
-            "Boiler NFT",
-            "Boiler NFT",
+            "Generative Design",
+            "GenDe",
             baseUrl,
             process.env.PUBLIC_KEY,
-            "0x9a63ff46dfa34296a2cbd5a0f0a3ab28d27ebc07");
+            "0x46C02B9113DcA70a8C2e878Df0B24Dc895836b75");
         console.log("GeneretiveBoilerplateNFT deployed address: ", address);
     } catch (e) {
         // Deal with the fact the chain failed
