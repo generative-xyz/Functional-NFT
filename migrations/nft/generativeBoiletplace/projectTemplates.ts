@@ -70,7 +70,7 @@ const candyProject2 = {
     params: [
         { // color
             _typeValue: 1,
-            _max: 125,
+            _max: 1819,
             _min: 0,
             _decimal: 0,
             _availableValues: [],

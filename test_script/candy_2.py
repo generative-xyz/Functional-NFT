@@ -117,7 +117,8 @@ def apply_modifiers(obj):
 
 clean_scene()
 
-color_list = ["#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7", "#5D21E7", "#E777E4", "#E7E7E7", "#312624"]
+color_list = ["#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7", "#5D21E7", "#E777E4", "#E7E7E7", "#312624",
+              "#E7969F", "#E7B277", "#E7DD8F", "#8CE7C3", "#87B2E7", "#A082E7", "#E4B7E7"]
 color_name = ''
 color_palette_length = 4
 color_palette = None
