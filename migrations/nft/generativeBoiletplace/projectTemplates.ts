@@ -56,7 +56,7 @@ const candyProject = {
 };
 
 const candyProject2 = {
-    name: "SWEET - On-chain Candies",
+    name: "SWEETS: On-chain Candies",
     description: "",
     script: "/Users/autonomous/Documents/generative-objs/Functional-NFT/test_script/candy_2.py",
     scriptType: 1,
@@ -69,7 +69,7 @@ const candyProject2 = {
     clientSeed: true,
     params: [
         { // color
-            _typeValue: 3,
+            _typeValue: 1,
             _max: 125,
             _min: 0,
             _decimal: 0,
