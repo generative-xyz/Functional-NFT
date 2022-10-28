@@ -27,9 +27,7 @@ const candyTraits = [
     },
     {
         name: "Surface",
-        _availableValues: ["Hydro", "Hydro", "Hydro", "Hydro", "Hydro", "Hydro",
-            "Plated", "Plated", "Plated",
-            "Tactile",],
+        _availableValues: ["Hydro", "Hydro", "Hydro", "Hydro", "Hydro", "Hydro", "Plated", "Tactile", "Tactile", "Tactile",],
         _value: 0,
         _valueStr: "",
     }
