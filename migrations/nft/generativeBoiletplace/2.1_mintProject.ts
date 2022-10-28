@@ -3,8 +3,8 @@ import * as dotenv from 'dotenv';
 import {ethers} from "ethers";
 import {GenerativeBoilerplateNFT} from "./GenerativeBoilerplateNFT";
 import * as fs from "fs";
-import {keccak256} from "ethers/lib/utils";
-import {candyProject, candyProject2} from "./projectTemplates";
+import {candyProject2} from "./projectTemplates";
+import {createAlchemyWeb3} from "@alch/alchemy-web3";
 
 (async () => {
     try {
@@ -25,6 +25,9 @@ import {candyProject, candyProject2} from "./projectTemplates";
             animation_url: projectTemplate.animation_url,
         })) // Base64 encode the String
         let scriptContent = fs.readFileSync(projectTemplate.script)
+        const hardhatConfig = require("../../../hardhat.config");
+        const web3 = createAlchemyWeb3(hardhatConfig.networks[hardhatConfig.defaultNetwork].url);
+        const seed = web3.utils.leftPad(web3.utils.asciiToHex(""), 64);
         const tx = await nft.mintProject(
                 contract, process.env.PUBLIC_KEY,
                 projectTemplate.name,
@@ -37,7 +40,7 @@ import {candyProject, candyProject2} from "./projectTemplates";
                 ethers.utils.parseEther(projectTemplate.fee),
                 projectTemplate.feeTokenAddr,
                 JSON.parse(JSON.stringify({
-                    _seed: keccak256('0x00000000000000000000000000000000'),
+                    _seed: seed,
                     _params: projectTemplate.params,
                 })),
                 0

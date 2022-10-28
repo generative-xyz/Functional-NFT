@@ -66,7 +66,7 @@ const candyProject2 = {
     feeTokenAddr: "0x0000000000000000000000000000000000000000",
     maxMint: 5000,
     notOwnerLimit: 4500,
-    clientSeed: true,
+    clientSeed: false,
     params: [
         { // color
             _typeValue: 1,

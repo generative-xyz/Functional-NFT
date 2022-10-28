@@ -184,15 +184,35 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         return currentTokenId;
     }
 
-    function updateProject(uint256 projectId, uint256 newFee, address newFeeAddr, string memory newURI, string memory script) external {
+    function updateProject(uint256 projectId,
+        uint256 newFee, address newFeeAddr,
+        string memory newURI,
+        string memory newScript,
+        address newMinterNFTInfo,
+        uint256 maxSupply,
+        uint256 totalSupply,
+        uint256 notOwnerMaxSupply,
+        uint256 notOwnerTotalSupply
+    ) external {
         require(msg.sender == _projects[projectId]._creator, Errors.ONLY_CREATOR);
         _projects[projectId]._fee = newFee;
         _projects[projectId]._feeToken = newFeeAddr;
-        _projects[projectId]._customUri = newURI;
-        _projects[projectId]._script = script;
+        if (bytes(newURI).length > 0) {
+            _projects[projectId]._customUri = newURI;
+        }
+        if (bytes(newScript).length > 0) {
+            _projects[projectId]._script = newScript;
+        }
+        _projects[projectId]._minterNFTInfo = newMinterNFTInfo;
+        _projects[projectId]._mintMaxSupply = maxSupply;
+        _projects[projectId]._mintTotalSupply = totalSupply;
+        _projects[projectId]._mintNotOwnerProjectMaxSupply = notOwnerMaxSupply;
+        _projects[projectId]._mintNotOnwerProjectTotalSupply = notOwnerTotalSupply;
     }
 
     // generateSeeds - random seed from chain in case project require
+    // TODO
+    /*
     function generateSeeds(uint256 projectId, uint256 amount) external {
         require(!_projects[projectId]._clientSeed && _exists(projectId));
         bytes32 seed;
@@ -205,36 +225,36 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         }
         emit GenerateSeeds(msg.sender, projectId, seeds);
     }
+    */
 
     // registerSeed
     // set seed to chain from client
-    function registerSeeds(uint256 projectId, bytes32[] memory seeds) external {
+    // TODO
+    /*function registerSeed(uint256 projectId, bytes32 seed) external {
         require(_projects[projectId]._clientSeed && _exists(projectId));
-        for (uint256 i = 0; i < seeds.length; i++) {
-            require(_seedOwners[seeds[i]][projectId] == address(0x0));
-            _seedOwners[seeds[i]][projectId] = msg.sender;
-        }
-    }
+        require(_seedOwners[seed][projectId] == address(0x0));
+        _seedOwners[seed][projectId] = msg.sender;
+    }*/
 
     // mintBatchUniqueNFT
     // from projectId -> get algo and minting an batch unique nfr on GenerativeNFT contract collection
     // by default, contract should get 5% fee when minter pay for owner of project
     function mintBatchUniqueNFT(MintRequest memory mintBatch) public nonReentrant payable {
         ProjectInfo memory project = _projects[mintBatch._fromProjectId];
-        require(mintBatch._uriBatch.length > 0 && mintBatch._uriBatch.length == mintBatch._paramsBatch.length, Errors.INV_PARAMS);
-        require(project._mintMaxSupply == 0 || project._mintTotalSupply + mintBatch._uriBatch.length <= project._mintMaxSupply, Errors.REACH_MAX);
+        require(mintBatch._paramsBatch.length > 0 && mintBatch._uriBatch.length == mintBatch._paramsBatch.length, Errors.INV_PARAMS);
+        require(project._mintMaxSupply == 0 || project._mintTotalSupply + mintBatch._paramsBatch.length <= project._mintMaxSupply, Errors.REACH_MAX);
         if (project._mintNotOwnerProjectMaxSupply > 0) {// not owner of project
             if (msg.sender != ownerOf(mintBatch._fromProjectId)) {
-                project._mintNotOnwerProjectTotalSupply += mintBatch._uriBatch.length;
-                require(project._mintNotOnwerProjectTotalSupply <= project._mintNotOwnerProjectMaxSupply);
+                _projects[mintBatch._fromProjectId]._mintNotOnwerProjectTotalSupply += mintBatch._paramsBatch.length;
+                require(_projects[mintBatch._fromProjectId]._mintNotOnwerProjectTotalSupply <= project._mintNotOwnerProjectMaxSupply);
             }
         }
         // get payable
         uint256 _mintFee = project._fee;
+        IParameterControl _p = IParameterControl(_paramsAddress);
         if (_mintFee > 0) {// has fee and
             if (ownerOf(mintBatch._fromProjectId) != msg.sender) {// not owner of project -> get payment
-                IParameterControl _p = IParameterControl(_paramsAddress);
-                _mintFee *= mintBatch._uriBatch.length;
+                _mintFee *= mintBatch._paramsBatch.length;
                 uint256 operationFee = _p.getUInt256(GenerativeBoilerplateNFTConfiguration.MINT_NFT_FEE);
                 if (operationFee == 0) {
                     operationFee = 500;
@@ -266,22 +286,44 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
         // get generative nft collection template
         IGenerativeNFT nft = IGenerativeNFT(_projects[mintBatch._fromProjectId]._minterNFTInfo);
         for (uint256 i = 0; i < mintBatch._paramsBatch.length; i++) {
-            require(_projects[mintBatch._fromProjectId]._paramsTemplate._params.length == mintBatch._paramsBatch[i]._params.length, Errors.INV_PARAMS);
+            require(_projects[mintBatch._fromProjectId]._paramsTemplate._params.length == mintBatch._paramsBatch[i]._value.length, Errors.INV_PARAMS);
 
             // verify seed
-            bytes32 seed = mintBatch._paramsBatch[i]._seed;
-            // seed not already used
-            require(_seedToTokens[seed][mintBatch._fromProjectId] == 0, Errors.SEED_INV);
+            bytes32 seed;
+            // TODO
             if (!_projects[mintBatch._fromProjectId]._clientSeed) {// seed on chain
+                // TODO always gen seed
+                mintBatch._paramsBatch[i]._seed = Random.randomSeed(msg.sender, mintBatch._fromProjectId, project._mintTotalSupply + 1);
+                seed = mintBatch._paramsBatch[i]._seed;
+                _seedOwners[seed][mintBatch._fromProjectId] = msg.sender;
                 // owner of seed
-                require(ownerOfSeed(seed, mintBatch._fromProjectId) == msg.sender, Errors.SEED_INV);
+                // require(_seedOwners[seed][mintBatch._fromProjectId] == msg.sender, Errors.SEED_INV);
+
             } else {// seed off-chain
+                seed = mintBatch._paramsBatch[i]._seed;
                 // require seed still not registerSeeds
                 require(_seedOwners[seed][mintBatch._fromProjectId] == address(0));
                 _seedOwners[seed][mintBatch._fromProjectId] = msg.sender;
             }
+            // seed not already used
+            require(_seedToTokens[seed][mintBatch._fromProjectId] == 0, Errors.SEED_INV);
 
-            nft.mint(mintBatch._mintTo, _admin, mintBatch._uriBatch[i], mintBatch._paramsBatch[i]);
+            // check token uri
+            string memory uri = mintBatch._uriBatch[i];
+            if (bytes(uri).length == 0) {
+                // lazy render
+                uri = string(
+                    abi.encodePacked(
+                        _p.get(GenerativeBoilerplateNFTConfiguration.NFT_BASE_URI),
+                        StringsUpgradeable.toHexString(uint256(uint160(address(this))), 20),
+                        GenerativeBoilerplateNFTConfiguration.SEPERATE_URI,
+                        StringsUpgradeable.toString(mintBatch._fromProjectId),
+                        GenerativeBoilerplateNFTConfiguration.SEPERATE_URI,
+                        StringsUpgradeable.toString(project._mintTotalSupply + 1)
+                    )
+                );
+            }
+            nft.mint(mintBatch._mintTo, _admin, uri, mintBatch._paramsBatch[i]);
             // increase total supply minting on project
             project._mintTotalSupply += 1;
             _projects[mintBatch._fromProjectId]._mintTotalSupply = project._mintTotalSupply;
@@ -297,43 +339,39 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
     // projectId - uint256
     // sender approve for operator on a project
     // operator can make a transferring seed of sender
-    function approveForAllSeeds(address operator, uint256 projectId) external {
+    /*function approveForAllSeeds(address operator, uint256 projectId) external {
         _approvalForAllSeeds[msg.sender][operator] = projectId;
-    }
+    }*/
 
     // isApprovedOrOwnerForSeed
     // return approved or not on projectId of operator on seed
-    function isApprovedOrOwnerForSeed(address operator, bytes32 seed, uint256 projectId) public view returns (bool)
-    {
-        if (ownerOfSeed(seed, projectId) == operator) {
-            return true;
-        }
-        return _approvalForAllSeeds[ownerOfSeed(seed, projectId)][operator] == projectId;
-    }
+    /*function isApprovedOrOwnerForSeed(address operator, bytes32 seed, uint256 projectId) internal view returns (bool){
+        return _seedOwners[seed][projectId] == operator || _approvalForAllSeeds[_seedOwners[seed][projectId]][operator] == projectId;
+    }*/
 
     // transferSeed
     // sender can make a transferring seed from -> to on project as ERC-721
-    function transferSeed(
+    /*function transferSeed(
         address from,
         address to,
         bytes32 seed, uint256 projectId
     ) external {
         require(_seedToTokens[seed][projectId] != 0 &&
         isApprovedOrOwnerForSeed(msg.sender, seed, projectId) &&
-        ownerOfSeed(seed, projectId) != from &&
+        _seedOwners[seed][projectId] != from &&
             to != address(0));
         _seedOwners[seed][projectId] = to;
-    }
+    }*/
 
     // ownerOfSeed
     // get owner of seed on projectId
-    function ownerOfSeed(bytes32 seed, uint256 projectId) public view returns (address) {
+    /*function ownerOfSeed(bytes32 seed, uint256 projectId) public view returns (address) {
         address explicitOwner = _seedOwners[seed][projectId];
         if (explicitOwner == address(0)) {
             return address(bytes20(seed));
         }
         return explicitOwner;
-    }
+    }*/
 
     // setCreator
     // func for set new creator on projectId
@@ -421,5 +459,9 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
             // transfer erc-20 token
             require(tokenERC20.transfer(receiver, amount));
         }
+    }
+
+    function getParamsTemplate(uint256 id) external view returns (BoilerplateParam.ParamsOfProject memory) {
+        return _projects[id]._paramsTemplate;
     }
 }

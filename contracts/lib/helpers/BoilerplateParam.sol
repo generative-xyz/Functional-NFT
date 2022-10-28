@@ -21,4 +21,9 @@ library BoilerplateParam {
         bytes32 _seed;
         ParamTemplate[] _params;
     }
+
+    struct ParamsOfNFT {
+        bytes32 _seed;
+        uint256[] _value;// index of available array value or value of range min,max
+    }
 }

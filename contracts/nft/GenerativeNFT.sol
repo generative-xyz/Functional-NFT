@@ -25,7 +25,7 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
     // linked projectId in boilerplate
     uint256 public _boilerplateId;
     // params value for rendering -> mapping with tokenId of NFT
-    mapping(uint256 => BoilerplateParam.ParamsOfProject) public _paramsValues;
+    mapping(uint256 => BoilerplateParam.ParamsOfNFT) public _paramsValues;
 
     TraitInfo.Traits private _traits;
 
@@ -94,13 +94,14 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
 
 
     function getTokenTraits(uint256 tokenId) public view returns (TraitInfo.Trait[] memory){
-        BoilerplateParam.ParamsOfProject memory p = _paramsValues[tokenId];
+        (bytes32 seed, BoilerplateParam.ParamTemplate[] memory _params) = getParamValues(tokenId);
+
         TraitInfo.Trait[] memory result = _traits._traits;
-        if (result.length != p._params.length) {
+        if (result.length != _params.length) {
             return result;
         }
-        for (uint8 i = 0; i < p._params.length; i++) {
-            uint256 val = p._params[i]._value;
+        for (uint8 i = 0; i < _params.length; i++) {
+            uint256 val = _params[i]._value;
             if (result[i]._availableValues.length > 0) {
                 result[i]._valueStr = result[i]._availableValues[val];
                 result[i]._value = val;
@@ -146,23 +147,9 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
 
     function mint(address to) public override {}
 
-    function mint(address mintTo, address creator, string memory uri, BoilerplateParam.ParamsOfProject calldata _paramsTemplateValue) external {
+    function mint(address mintTo, address creator, string memory uri, BoilerplateParam.ParamsOfNFT memory _paramsTemplateValue) external {
         require(msg.sender == _boilerplateAddr, Errors.INV_BOILERPLATE_ADD);
         require(_boilerplateAddr != address(0) && _boilerplateId > 0, Errors.INV_PROJECT);
-
-        // verify seed
-        bytes32 seed = _paramsTemplateValue._seed;
-        for (uint256 i = 0; i < _paramsTemplateValue._params.length; i++) {
-            BoilerplateParam.ParamTemplate memory param = _paramsTemplateValue._params[i];
-            if (!param._editable) {
-                if (param._availableValues.length == 0) {
-                    require(Random.randomValueRange(uint256(seed), param._min, param._max) == param._value, Errors.SEED_INV_1);
-                } else {
-                    require(Random.randomValueIndexArray(uint256(seed), param._availableValues.length) == param._value, Errors.SEED_INV_2);
-                }
-            }
-            seed = keccak256(abi.encodePacked(seed, param._value));
-        }
 
         IGenerativeBoilerplateNFT boilerplateNFT = IGenerativeBoilerplateNFT(_boilerplateAddr);
         require(boilerplateNFT.exists(_boilerplateId), Errors.INV_PROJECT);
@@ -198,7 +185,24 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
     }
 
     function getParamValues(uint256 tokenId) public view returns (bytes32, BoilerplateParam.ParamTemplate[] memory) {
-        return (_paramsValues[tokenId]._seed, _paramsValues[tokenId]._params);
+        BoilerplateParam.ParamsOfNFT memory pNFT = _paramsValues[tokenId];
+        bytes32 seed = pNFT._seed;
+        IGenerativeBoilerplateNFT b = IGenerativeBoilerplateNFT(_boilerplateAddr);
+        BoilerplateParam.ParamsOfProject memory p = b.getParamsTemplate(_boilerplateId);
+
+        for (uint256 i = 0; i < p._params.length; i++) {
+            if (!p._params[i]._editable) {
+                if (p._params[i]._availableValues.length == 0) {
+                    p._params[i]._value = Random.randomValueRange(uint256(seed), p._params[i]._min, p._params[i]._max);
+                } else {
+                    p._params[i]._value = Random.randomValueIndexArray(uint256(seed), p._params[i]._availableValues.length);
+                }
+            } else {
+                p._params[i]._value = pNFT._value[i];
+            }
+            seed = keccak256(abi.encodePacked(seed, p._params[i]._value));
+        }
+        return (pNFT._seed, p._params);
     }
 
     function totalSupply() public view override returns (uint256) {

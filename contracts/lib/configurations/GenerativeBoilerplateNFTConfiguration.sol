@@ -6,4 +6,6 @@ library GenerativeBoilerplateNFTConfiguration {
     string public constant CREATE_PROJECT_FEE = "CREATE_PROJECT_FEE"; // fee for user mint project id
     string public constant MINT_NFT_FEE = "MINT_NFT_FEE"; // % will pay for this contract when minter use project id for mint nft
     string public constant GENERATIVE_NFT_TEMPLATE = "GENERATIVE_NFT_TEMPLATE";// address of Generative NFT erc-721 contract
+    string public constant NFT_BASE_URI = "NFT_BASE_URI";
+    string public constant SEPERATE_URI = "/";
 }

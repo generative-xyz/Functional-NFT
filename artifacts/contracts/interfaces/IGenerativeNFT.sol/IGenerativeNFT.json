@@ -92,49 +92,12 @@
               "type": "bytes32"
             },
             {
-              "components": [
-                {
-                  "internalType": "uint8",
-                  "name": "_typeValue",
-                  "type": "uint8"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "_max",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "_min",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint8",
-                  "name": "_decimal",
-                  "type": "uint8"
-                },
-                {
-                  "internalType": "string[]",
-                  "name": "_availableValues",
-                  "type": "string[]"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "_value",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "bool",
-                  "name": "_editable",
-                  "type": "bool"
-                }
-              ],
-              "internalType": "struct BoilerplateParam.ParamTemplate[]",
-              "name": "_params",
-              "type": "tuple[]"
+              "internalType": "uint256[]",
+              "name": "_value",
+              "type": "uint256[]"
             }
           ],
-          "internalType": "struct BoilerplateParam.ParamsOfProject",
+          "internalType": "struct BoilerplateParam.ParamsOfNFT",
           "name": "_paramsTemplateValue",
           "type": "tuple"
         }
