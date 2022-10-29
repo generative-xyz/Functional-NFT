@@ -106,8 +106,11 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
     function pause() public override {}
     // disable unpause
     function unpause() public override {}
-    // disable burn
-    function burn(uint256 tokenId) public override {}
+
+    function burn(uint256 tokenId) public override {
+        super.burn(tokenId);
+        _projects[tokenId]._minterNFTInfo = address(0);
+    }
 
     // mint a Project token id
     // to: owner
@@ -241,6 +244,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
     // by default, contract should get 5% fee when minter pay for owner of project
     function mintBatchUniqueNFT(MintRequest memory mintBatch) public nonReentrant payable {
         ProjectInfo memory project = _projects[mintBatch._fromProjectId];
+        require(project._minterNFTInfo != address(0), Errors.INV_ADD);
         require(mintBatch._paramsBatch.length > 0 && mintBatch._uriBatch.length == mintBatch._paramsBatch.length, Errors.INV_PARAMS);
         require(project._mintMaxSupply == 0 || project._mintTotalSupply + mintBatch._paramsBatch.length <= project._mintMaxSupply, Errors.REACH_MAX);
         if (project._mintNotOwnerProjectMaxSupply > 0) {// not owner of project
