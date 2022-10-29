@@ -145,6 +145,12 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
         revokeRole(PAUSER_ROLE, _previousAdmin);
     }
 
+    function changeBoilerplate(address newBoilerplate, uint256 newBoilerplateId) public adminOnly {
+        require(newBoilerplate != address(0), Errors.INV_ADD);
+        _boilerplateAddr = newBoilerplate;
+        _boilerplateId = newBoilerplateId;
+    }
+
     function mint(address to) public override {}
 
     function mint(address mintTo, address creator, string memory uri, BoilerplateParam.ParamsOfNFT memory _paramsTemplateValue) external {
