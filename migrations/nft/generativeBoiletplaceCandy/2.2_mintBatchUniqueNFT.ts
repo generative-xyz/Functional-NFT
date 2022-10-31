@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv';
 
 import {BigNumber, ethers} from "ethers";
-import {GenerativeBoilerplateNFT} from "./GenerativeBoilerplateNFT";
+import {GenerativeBoilerplateNFTCandy} from "./GenerativeBoilerplateNFT";
 import * as fs from "fs";
 import {keccak256} from "ethers/lib/utils";
 import Web3 from "web3";
@@ -14,7 +14,7 @@ import {createAlchemyWeb3} from "@alch/alchemy-web3";
             return;
         }
         const contract = '0xE579276F0c0532E8fD2f43292B9EeDf1CA5222C3';
-        const nft = new GenerativeBoilerplateNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
+        const nft = new GenerativeBoilerplateNFTCandy(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
         const uri = {
             name: "Test Algo NFT",
