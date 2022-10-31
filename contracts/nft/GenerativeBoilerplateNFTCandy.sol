@@ -18,7 +18,7 @@ import "../interfaces/IGenerativeNFT.sol";
 import "../interfaces/IParameterControl.sol";
 import "../lib/helpers/TraitInfo.sol";
 
-contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPauserAutoIdUpgradeable, ReentrancyGuardUpgradeable, IERC2981Upgradeable, IGenerativeBoilerplateNFT {
+contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPauserAutoIdUpgradeable, ReentrancyGuardUpgradeable, IERC2981Upgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using ClonesUpgradeable for *;
     using SafeMathUpgradeable for uint256;
@@ -278,9 +278,5 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
             // transfer erc-20 token
             require(tokenERC20.transfer(receiver, amount));
         }
-    }
-
-    function getParamsTemplate(uint256 id) external view returns (BoilerplateParam.ParamsOfProject memory) {
-        return _projects[id]._paramsTemplate;
     }
 }
