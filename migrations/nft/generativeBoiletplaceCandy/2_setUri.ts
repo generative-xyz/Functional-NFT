@@ -9,9 +9,10 @@ import {GenerativeBoilerplateNFTCandy} from "./GenerativeBoilerplateNFT";
             console.log("wrong network");
             return;
         }
-        const contract = '0x62825f15315807baccdd1a9c8416e27d3cc7aa1a';
+        const contract = '0x924df058388cca4a1eb55a21ae3c5c564e629821';
         const nft = new GenerativeBoilerplateNFTCandy(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
-        const tx = await nft.setCustomURI(contract, 2, "https://rove-rendering-dev.moshwithme.io/v1/rendered-nft/80001/0x62825f15315807bACcdD1a9c8416e27d3cC7Aa1a/1/2", 0);
+        const tokenId = 4502;
+        const tx = await nft.setCustomURI(contract, tokenId, "https://rove-rendering-dev.moshwithme.io/v1/rendered-nft/80001/0x924df058388cca4a1eb55a21ae3c5c564e629821/1/" + tokenId, 0);
         console.log(tx);
     } catch (e) {
         // Deal with the fact the chain failed

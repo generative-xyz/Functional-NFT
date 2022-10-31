@@ -20,7 +20,7 @@ import {createAlchemyWeb3} from "@alch/alchemy-web3";
                 contract,
                 process.env.PUBLIC_KEY,
                 [0, Math.floor(Math.random() * 7), 0, 0],
-                5001, 0
+                0, 0
             )
         ;
         console.log("tx:", tx);

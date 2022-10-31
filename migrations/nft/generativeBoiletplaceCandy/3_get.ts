@@ -11,7 +11,7 @@ import {GenerativeBoilerplateNFTCandy} from "./GenerativeBoilerplateNFT";
         }
         const contract = '0x924dF058388cCA4a1eb55A21ae3c5C564E629821';
         const nft = new GenerativeBoilerplateNFTCandy(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
-        const tokenId = 4501;
+        const tokenId = 3;
         let a: any = {};
         a.getTokenURI = await nft.getTokenURI(contract, tokenId);
         // a.get_paramsValues = await nft.get_paramsValues(contract, tokenId);

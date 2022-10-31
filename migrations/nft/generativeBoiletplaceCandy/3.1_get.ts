@@ -9,15 +9,15 @@ import {GenerativeBoilerplateNFTCandy} from "./GenerativeBoilerplateNFT";
             console.log("wrong network");
             return;
         }
-        const contract = '0xac61b8dcf7e6fe176d02f3c4f5e951b234c349b0';
+        const contract = '0x924dF058388cCA4a1eb55A21ae3c5C564E629821';
         const nft = new GenerativeBoilerplateNFTCandy(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
         const projectId = 1;
         let a: any = {};
         // a.getTokenURI = await nft.getTokenURI(contract, projectId);
-        // a.project = await nft.getProject(contract, projectId);
+        a.project = await nft.getProject(contract, projectId);
         // a.getBaseUri = await nft.getBaseUri(contract);
-        a.getTraits = await nft.getTraits(contract);
-        console.log(a.getTraits);
+        // a.getTraits = await nft.getTraits(contract);
+        console.log(a.project);
     } catch (e) {
         // Deal with the fact the chain failed
         console.log(e);

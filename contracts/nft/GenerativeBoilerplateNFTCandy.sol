@@ -222,7 +222,7 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
                 GenerativeBoilerplateNFTConfiguration.SEPERATE_URI,
                 StringsUpgradeable.toString(1),
                 GenerativeBoilerplateNFTConfiguration.SEPERATE_URI,
-                StringsUpgradeable.toString(project._mintTotalSupply + 1)
+                StringsUpgradeable.toString(tokenId)
             )
         );
         if (bytes(uri).length > 0) {
