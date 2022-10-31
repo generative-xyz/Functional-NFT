@@ -20,7 +20,7 @@ import {createAlchemyWeb3} from "@alch/alchemy-web3";
         const nft = new GenerativeBoilerplateNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
         const encodedString = "";
-        const fromProjectId = 8;
+        const fromProjectId = 10;
         let uris = [];
         let paramValues = [];
         const seeds: any[] = [
@@ -32,7 +32,7 @@ import {createAlchemyWeb3} from "@alch/alchemy-web3";
 
             paramValues.push({
                 _seed: seeds[i],
-                _value: [0, 1, 0, 0],
+                _value: [0, Math.floor(Math.random() * 7), 0, 0],
             });
         }
         const mintBatch = JSON.parse(JSON.stringify({
