@@ -28,8 +28,6 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
     // parameter control address
     address public _paramsAddress;
 
-    // projectId is tokenID of project nft
-    CountersUpgradeable.Counter private _nextProjectId;
     CountersUpgradeable.Counter private _nextTokenId;
 
     struct ProjectInfo {
@@ -39,20 +37,19 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
         uint256 _mintTotalSupply; // total supply minted on project
         BoilerplateParam.ParamsOfProject _paramsTemplate; // struct contains list params of project and random seed(registered) in case mint nft from project
         uint256 _mintNotOwnerProjectMaxSupply; // limit for nminter is not owner of project
-        uint256 _mintNotOnwerProjectTotalSupply;
+        string _script;
     }
 
     mapping(uint256 => ProjectInfo) public _projects;
 
     // params value for rendering -> mapping with tokenId of NFT
-    mapping(uint256 => BoilerplateParam.ParamsOfNFT) public _paramsValues;
+    mapping(uint256 => uint256[]) public _paramsValues;
 
     TraitInfo.Traits private _traits;
 
     mapping(uint256 => string) _customUri;
-    // creator of nft tokenID, set from boilerplate calling
-    mapping(uint256 => address) public _creators;
-
+    mapping(uint256 => uint256) public _tokenProjectId;
+    string private pBaseTokenURI;
 
     function initialize(
         string memory name,
@@ -69,12 +66,10 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
         // set role for admin address
         grantRole(DEFAULT_ADMIN_ROLE, _admin);
 
-        // revoke role for sender
-        revokeRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        pBaseTokenURI = baseUri;
     }
 
     function updateTraits(TraitInfo.Traits calldata traits) external {
-        //        require(msg.sender == _admin || msg.sender == _boilerplateAddr, Errors.ONLY_ADMIN_ALLOWED);
         require(msg.sender == _admin);
         _traits = traits;
     }
@@ -103,13 +98,11 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
     }
 
     function getParamValues(uint256 tokenId) public view returns (bytes32, BoilerplateParam.ParamTemplate[] memory) {
-        BoilerplateParam.ParamsOfNFT memory pNFT = _paramsValues[tokenId];
-        bytes32 seed = pNFT._seed;
+        uint256[] memory values = _paramsValues[tokenId];
+        bytes32 seed = keccak256(abi.encodePacked(tokenId));
+        bytes32 oSeed = seed;
 
-        //        IGenerativeBoilerplateNFT b = IGenerativeBoilerplateNFT(_boilerplateAddr);
-        //        BoilerplateParam.ParamsOfProject memory p = b.getParamsTemplate(_boilerplateId);
-
-        BoilerplateParam.ParamsOfProject memory p = _projects[1]._paramsTemplate;
+        BoilerplateParam.ParamsOfProject memory p = _projects[_tokenProjectId[tokenId]]._paramsTemplate;
         for (uint256 i = 0; i < p._params.length; i++) {
             if (!p._params[i]._editable) {
                 if (p._params[i]._availableValues.length == 0) {
@@ -118,15 +111,15 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
                     p._params[i]._value = Random.randomValueIndexArray(uint256(seed), p._params[i]._availableValues.length);
                 }
             } else {
-                p._params[i]._value = pNFT._value[i];
+                p._params[i]._value = values[i];
             }
             seed = keccak256(abi.encodePacked(seed, p._params[i]._value));
         }
-        return (pNFT._seed, p._params);
+        return (oSeed, p._params);
     }
 
     function changeAdmin(address newAdm, address newParam) external {
-        require(msg.sender == _admin && hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) && newAdm != address(0), Errors.ONLY_ADMIN_ALLOWED);
+        require(msg.sender == _admin && newAdm != address(0), Errors.ONLY_ADMIN_ALLOWED);
 
         // change admin
         if (_admin != newAdm) {
@@ -143,164 +136,103 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
         }
     }
 
+    function changeBaseTokenUri(string memory newUri) external {
+        require(msg.sender == _admin && hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), Errors.ONLY_ADMIN_ALLOWED);
+        pBaseTokenURI = newUri;
+    }
+
     // disable old mint
     function mint(address to) public override {}
     // disable pause
     function pause() public override {}
     // disable unpause
     function unpause() public override {}
-
     // disable burn
     function burn(uint256 tokenId) public override {}
 
-    // mint a Project token id
-    // to: owner
-    // name: name of project
-    // maxSupply: max available nft supply which minted from this project
-    // uri: metadata of project info
-    // fee: fee mint nft from this project
-    // feeAdd: currency for mint nft fee
-    // paramsTemplate: json format string for render view template
     function mintProject(
         address to,
         uint256 maxSupply,
         uint256 maxNotOwner,
+        string memory script,
         uint256 fee,
         address feeAdd,
         BoilerplateParam.ParamsOfProject calldata paramsTemplate
     ) external nonReentrant payable returns (uint256) {
         require(msg.sender == _admin);
 
-        _nextProjectId.increment();
-        uint256 currentTokenId = _nextProjectId.current();
-        require(_projects[currentTokenId]._paramsTemplate._params.length == 0, Errors.INV_PROJECT);
+        uint256 currentProjectId = 1;
+        require(_projects[currentProjectId]._paramsTemplate._params.length == 0, Errors.INV_PROJECT);
 
-        _projects[currentTokenId]._mintMaxSupply = maxSupply;
-        _projects[currentTokenId]._mintNotOwnerProjectMaxSupply = maxNotOwner;
-        _projects[currentTokenId]._fee = fee;
-        _projects[currentTokenId]._feeToken = feeAdd;
-        _projects[currentTokenId]._paramsTemplate = paramsTemplate;
+        _projects[currentProjectId]._mintMaxSupply = maxSupply;
+        _projects[currentProjectId]._mintNotOwnerProjectMaxSupply = maxNotOwner;
+        _projects[currentProjectId]._fee = fee;
+        _projects[currentProjectId]._feeToken = feeAdd;
+        _projects[currentProjectId]._script = script;
+        _projects[currentProjectId]._paramsTemplate = paramsTemplate;
 
-        return currentTokenId;
+        return currentProjectId;
     }
 
     function updateProject(uint256 projectId,
         uint256 newFee, address newFeeAddr,
-        string memory newScript,
         address newMinterNFTInfo,
         uint256 maxSupply,
         uint256 totalSupply,
-        uint256 notOwnerMaxSupply,
-        uint256 notOwnerTotalSupply
+        uint256 notOwnerMaxSupply
     ) external {
-        require(msg.sender == _admin, Errors.ONLY_CREATOR);
+        require(msg.sender == _admin && hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), Errors.ONLY_ADMIN_ALLOWED);
         _projects[projectId]._fee = newFee;
         _projects[projectId]._feeToken = newFeeAddr;
         _projects[projectId]._mintMaxSupply = maxSupply;
         _projects[projectId]._mintTotalSupply = totalSupply;
         _projects[projectId]._mintNotOwnerProjectMaxSupply = notOwnerMaxSupply;
-        _projects[projectId]._mintNotOnwerProjectTotalSupply = notOwnerTotalSupply;
     }
 
-    // mintBatchUniqueNFT
-    // from projectId -> get algo and minting an batch unique nfr on GenerativeNFT contract collection
-    // by default, contract should get 5% fee when minter pay for owner of project
-    function mintBatchUniqueNFT(MintRequest memory mintBatch) public nonReentrant payable {
-        ProjectInfo memory project = _projects[mintBatch._fromProjectId];
-        require(mintBatch._paramsBatch.length > 0 && mintBatch._uriBatch.length == mintBatch._paramsBatch.length, Errors.INV_PARAMS);
-        require(project._mintMaxSupply == 0 || project._mintTotalSupply + mintBatch._paramsBatch.length <= project._mintMaxSupply, Errors.REACH_MAX);
-        if (project._mintNotOwnerProjectMaxSupply > 0) {// not owner of project
-            if (msg.sender != _admin) {
-                _projects[mintBatch._fromProjectId]._mintNotOnwerProjectTotalSupply += mintBatch._paramsBatch.length;
-                require(_projects[mintBatch._fromProjectId]._mintNotOnwerProjectTotalSupply <= project._mintNotOwnerProjectMaxSupply);
-            }
-        }
-        // get payable
-        uint256 _mintFee = project._fee;
-        IParameterControl _p = IParameterControl(_paramsAddress);
-        if (_mintFee > 0) {// has fee and
-            if (msg.sender != _admin) {// not owner of project -> get payment
-                _mintFee *= mintBatch._paramsBatch.length;
-                uint256 operationFee = _p.getUInt256(GenerativeBoilerplateNFTConfiguration.MINT_NFT_FEE);
-                if (operationFee == 0) {
-                    operationFee = 500;
-                    // default 5% getting, 95% pay for owner of project
-                }
-                if (project._feeToken == address(0x0)) {
-                    require(msg.value >= _mintFee);
-
-                    // pay for owner project
-                    (bool success,) = ownerOf(mintBatch._fromProjectId).call{value : _mintFee - (_mintFee * operationFee / 10000)}("");
-                    require(success);
-                } else {
-                    IERC20Upgradeable tokenERC20 = IERC20Upgradeable(project._feeToken);
-                    // transfer all fee erc-20 token to this contract
-                    require(tokenERC20.transferFrom(
-                            msg.sender,
-                            address(this),
-                            _mintFee
-                        ));
-
-                    // pay for owner project
-                    require(tokenERC20.transfer(ownerOf(mintBatch._fromProjectId), _mintFee - (_mintFee * operationFee / 10000)));
-                }
-            }
-        }
-
-        // minting NFT to other collection by minter
-        // needing deploy an new one by cloning from GenerativeNFT(ERC-721) template when mint project
-        // get generative nft collection template
-        //        IGenerativeNFT nft = IGenerativeNFT(_projects[mintBatch._fromProjectId]._minterNFTInfo);
-        for (uint256 i = 0; i < mintBatch._paramsBatch.length; i++) {
-            require(_projects[mintBatch._fromProjectId]._paramsTemplate._params.length == mintBatch._paramsBatch[i]._value.length, Errors.INV_PARAMS);
-
-            // verify seed
-            bytes32 seed;
-            // TODO
-            mintBatch._paramsBatch[i]._seed = Random.randomSeed(msg.sender, mintBatch._fromProjectId, project._mintTotalSupply + 1);
-            seed = mintBatch._paramsBatch[i]._seed;
-            // check token uri
-            string memory uri = mintBatch._uriBatch[i];
-            if (bytes(uri).length == 0) {
-                // lazy render
-                uri = string(
-                    abi.encodePacked(
-                        _p.get(GenerativeBoilerplateNFTConfiguration.NFT_BASE_URI),
-                        StringsUpgradeable.toHexString(uint256(uint160(address(this))), 20),
-                        GenerativeBoilerplateNFTConfiguration.SEPERATE_URI,
-                        StringsUpgradeable.toString(mintBatch._fromProjectId),
-                        GenerativeBoilerplateNFTConfiguration.SEPERATE_URI,
-                        StringsUpgradeable.toString(project._mintTotalSupply + 1)
-                    )
-                );
-            }
-            mintNFT(mintBatch._fromProjectId, mintBatch._mintTo, _admin, uri, mintBatch._paramsBatch[i]);
-            // increase total supply minting on project
-            project._mintTotalSupply += 1;
-            _projects[mintBatch._fromProjectId]._mintTotalSupply = project._mintTotalSupply;
-            // marked this seed is already used
-        }
+    function storeScript(uint256 projectId, string memory script) external {
+        require(msg.sender == _admin && hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), Errors.ONLY_ADMIN_ALLOWED);
+        require(_projects[projectId]._paramsTemplate._params.length > 0, Errors.INV_PROJECT);
+        _projects[projectId]._script = script;
     }
 
-    function mintNFT(uint256 projectId, address mintTo, address creator, string memory uri, BoilerplateParam.ParamsOfNFT memory _paramsTemplateValue) internal {
-        require(_projects[projectId]._paramsTemplate._params.length != 0, Errors.INV_PROJECT);
+    function mintUniqueNFT(address _mintTo,
+        uint256[] memory _value,
+        uint256 tokenId
+    ) public nonReentrant payable {
+        uint256 projectId = 1;
+        ProjectInfo memory project = _projects[projectId];
+        require(project._mintMaxSupply == 0 || project._mintTotalSupply + 1 <= project._mintMaxSupply, Errors.REACH_MAX);
+        if (tokenId > 0) {
+            require(msg.sender == _admin && project._mintNotOwnerProjectMaxSupply < tokenId && tokenId <= project._mintMaxSupply);
+        } else {
+            require(msg.sender != _admin);
+            // use counter
+            _nextTokenId.increment();
+            tokenId = _nextTokenId.current();
+            if (project._mintNotOwnerProjectMaxSupply > 0) {// not owner of project
+                require(tokenId <= project._mintNotOwnerProjectMaxSupply);
+            }
+        }
 
-        _nextTokenId.increment();
-        uint256 currentTokenId = _nextTokenId.current();
+        require(_projects[projectId]._paramsTemplate._params.length == _value.length, Errors.INV_PARAMS);
+        string memory uri = string(
+            abi.encodePacked(
+                baseTokenURI(),
+                StringsUpgradeable.toHexString(uint256(uint160(address(this))), 20),
+                GenerativeBoilerplateNFTConfiguration.SEPERATE_URI,
+                StringsUpgradeable.toString(1),
+                GenerativeBoilerplateNFTConfiguration.SEPERATE_URI,
+                StringsUpgradeable.toString(project._mintTotalSupply + 1)
+            )
+        );
         if (bytes(uri).length > 0) {
-            _customUri[currentTokenId] = uri;
+            _customUri[tokenId] = uri;
         }
-        _creators[currentTokenId] = _admin;
-        _paramsValues[currentTokenId] = _paramsTemplateValue;
-        _safeMint(mintTo, currentTokenId);
-    }
+        _paramsValues[tokenId] = _value;
+        _safeMint(_mintTo, tokenId);
+        _tokenProjectId[tokenId] = projectId;
 
-    // setCreator
-    // func for set new creator on projectId
-    // only creator on projectId can make this func
-    function setCreator(address _to, uint256 _id) external {
-        require(_creators[_id] == msg.sender, Errors.ONLY_CREATOR);
-        _creators[_id] = _to;
+        _projects[projectId]._mintTotalSupply += 1;
     }
 
     function totalSupply() public view override returns (uint256) {
@@ -309,14 +241,14 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
 
 
     function baseTokenURI() virtual public view returns (string memory) {
-        return _baseURI();
+        return pBaseTokenURI;
     }
 
     function setCustomURI(
         uint256 _tokenId,
         string memory _newURI
     ) public {
-        require(msg.sender == _creators[_tokenId], Errors.ONLY_CREATOR);
+        require(msg.sender == _admin && hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), Errors.ONLY_ADMIN_ALLOWED);
         _customUri[_tokenId] = _newURI;
     }
 
@@ -328,7 +260,7 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
         if (customUriBytes.length > 0) {
             return _customUri[_tokenId];
         } else {
-            return string(abi.encodePacked(baseTokenURI(), StringsUpgradeable.toString(_tokenId)));
+            return "";
         }
     }
 
@@ -339,37 +271,11 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
     }
 
     /** @dev EIP2981 royalties implementation. */
-    struct RoyaltyInfo {
-        address recipient;
-        uint24 amount;
-        bool isValue;
-    }
-
-    mapping(uint256 => RoyaltyInfo) public royalties;
-
-    function setTokenRoyalty(
-        uint256 _tokenId,
-        address _recipient,
-        uint256 _value
-    ) external {
-        require(_msgSender() == _admin, Errors.ONLY_ADMIN_ALLOWED);
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), Errors.ONLY_ADMIN_ALLOWED);
-        require(_value <= 10000, Errors.REACH_MAX);
-        royalties[_tokenId] = RoyaltyInfo(_recipient, uint24(_value), true);
-    }
-
-    // EIP2981 standard royalties return.
     function royaltyInfo(uint256 _tokenId, uint256 _salePrice) external view override
     returns (address receiver, uint256 royaltyAmount)
     {
-        RoyaltyInfo memory royalty = royalties[_tokenId];
-        if (royalty.isValue) {
-            receiver = royalty.recipient;
-            royaltyAmount = (_salePrice * royalty.amount) / 10000;
-        } else {
-            receiver = _creators[_tokenId];
-            royaltyAmount = (_salePrice * 500) / 10000;
-        }
+        receiver = _admin;
+        royaltyAmount = (_salePrice * 500) / 10000;
     }
 
     // withdraw
@@ -378,8 +284,7 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
     // erc20Addr: currency address
     // amount: amount
     function withdraw(address receiver, address erc20Addr, uint256 amount) external nonReentrant {
-        require(_msgSender() == _admin, Errors.ONLY_ADMIN_ALLOWED);
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), Errors.ONLY_ADMIN_ALLOWED);
+        require(msg.sender == _admin && hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), Errors.ONLY_ADMIN_ALLOWED);
         bool success;
         if (erc20Addr == address(0x0)) {
             require(address(this).balance >= amount);

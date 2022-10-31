@@ -16,7 +16,7 @@ import {createAlchemyWeb3} from "@alch/alchemy-web3";
         const nft = new GenerativeBoilerplateNFTCandy(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
 
-        const contract = '0x460Eb61D1Dc4FAc8B6cAF60f28a7624Cc2c1167B';
+        const contract = '0x924dF058388cCA4a1eb55A21ae3c5C564E629821';
         const projectTemplate = candyProject2;
         const uri = "data:application/json;base64," + btoa(JSON.stringify({
             name: projectTemplate.name,
@@ -24,6 +24,7 @@ import {createAlchemyWeb3} from "@alch/alchemy-web3";
             image: projectTemplate.image,
             animation_url: projectTemplate.animation_url,
         })) // Base64 encode the String
+        let scriptContent = fs.readFileSync(projectTemplate.script)
         const hardhatConfig = require("../../../hardhat.config");
         const web3 = createAlchemyWeb3(hardhatConfig.networks[hardhatConfig.defaultNetwork].url);
         const seed = web3.utils.leftPad(web3.utils.asciiToHex(""), 64);
@@ -31,6 +32,7 @@ import {createAlchemyWeb3} from "@alch/alchemy-web3";
                 contract, process.env.PUBLIC_KEY,
                 projectTemplate.maxMint,
                 projectTemplate.notOwnerLimit,
+                scriptContent.toString(),
                 ethers.utils.parseEther(projectTemplate.fee),
                 projectTemplate.feeTokenAddr,
                 JSON.parse(JSON.stringify({

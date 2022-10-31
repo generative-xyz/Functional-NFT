@@ -20,14 +20,14 @@ const {getContractAddress} = require('@ethersproject/address');
         })
         console.log({futureAddress});
         const chainID = "5";
-        const baseUrl = "";
+        const baseUrl = "https://rove-rendering-dev.moshwithme.io/v1/rendered-nft/80001/";
         const address = await nft.deployUpgradeable(
             "SWEETS: On-chain Candies",
             "SWEETS",
             baseUrl,
             process.env.PUBLIC_KEY,
             "0x46C02B9113DcA70a8C2e878Df0B24Dc895836b75");
-        console.log("GeneretiveBoilerplateNFT deployed address: ", address);
+        console.log("GeneretiveBoilerplateNFTCandy deployed address: ", address);
     } catch (e) {
         // Deal with the fact the chain failed
         console.log(e);

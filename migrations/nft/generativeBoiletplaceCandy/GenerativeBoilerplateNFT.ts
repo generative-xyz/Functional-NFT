@@ -16,10 +16,10 @@ class GenerativeBoilerplateNFTCandy {
     }
 
     async upgradeContract(proxyAddress: any) {
-        const contractUpdated = await ethers.getContractFactory("GenerativeBoilerplateNFT");
-        console.log('Upgrading GenerativeBoilerplateNFT... by proxy ' + proxyAddress);
+        const contractUpdated = await ethers.getContractFactory("GenerativeBoilerplateNFTCandy");
+        console.log('Upgrading GenerativeBoilerplateNFTCandy... by proxy ' + proxyAddress);
         const tx = await upgrades.upgradeProxy(proxyAddress, contractUpdated);
-        console.log('GenerativeBoilerplateNFT upgraded on tx address ' + tx.address);
+        console.log('GenerativeBoilerplateNFTCandy upgraded on tx address ' + tx.address);
         return tx;
     }
 
@@ -109,6 +109,20 @@ class GenerativeBoilerplateNFTCandy {
         return await temp?.nftContract.methods._projects(tokenID).call(tx);
     }
 
+    async getBaseUri(contractAddress: any) {
+        let temp = this.getContract(contractAddress);
+        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
+
+        //the transaction
+        const tx = {
+            from: this.senderPublicKey,
+            to: contractAddress,
+            nonce: nonce,
+        }
+
+        return await temp?.nftContract.methods.baseTokenURI().call(tx);
+    }
+
     async getAdmin(contractAddress: any) {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
@@ -125,54 +139,8 @@ class GenerativeBoilerplateNFTCandy {
         return {admin, param};
     }
 
-
-    async generateSeeds(contractAddress: any, projectId: number, amount: number, gas: number) {
-        let temp = this.getContract(contractAddress);
-        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
-
-        const fun = temp?.nftContract.methods.generateSeeds(projectId, amount);
-        //the transaction
-        const tx = {
-            from: this.senderPublicKey,
-            to: contractAddress,
-            nonce: nonce,
-            gas: gas,
-            data: fun.encodeABI(),
-        }
-
-        if (tx.gas == 0) {
-            tx.gas = await fun.estimateGas(tx);
-        }
-
-        const txS = await this.signedAndSendTx(temp?.web3, tx);
-        const events = await temp?.nftContract.getPastEvents("GenerateSeeds");
-        if (events != null) {
-            console.log("seeds", events[0].returnValues.seeds);
-        }
-        return txS;
-    }
-
-    async cancelTx() {
-        let API_URL: any;
-        API_URL = hardhatConfig.networks[hardhatConfig.defaultNetwork].url;
-        // load contract
-        const web3 = createAlchemyWeb3(API_URL)
-        var accountOneGasPrice = (await web3.eth.getTransaction("0x7ebc95e904d2c63256326086d71e6f8f688b85767478ac78bfbb4fc1d9914c52"));
-
-        //the transaction
-        const tx = {
-            from: this.senderPublicKey,
-            to: "0xF61234046A18b07Bf1486823369B22eFd2C4507F",
-            nonce: accountOneGasPrice ? accountOneGasPrice["nonce"] : 0,
-            gas: accountOneGasPrice ? accountOneGasPrice["gas"] : 0,
-            value: 0,
-        }
-
-        return await this.signedAndSendTx(web3, tx);
-    }
-
     async mintProject(contractAddress: any, to: any,
-                      maxSupply: number, maxNotOwner: number, fee: any, feeAdd: any, paramsTemplate: any,
+                      maxSupply: number, maxNotOwner: number, script: string, fee: any, feeAdd: any, paramsTemplate: any,
                       gas: number) {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
@@ -182,7 +150,7 @@ class GenerativeBoilerplateNFTCandy {
         // console.log({accountOneGasPrice});
         // return;
 
-        const fun = temp?.nftContract.methods.mintProject(to, maxSupply, maxNotOwner, fee, feeAdd, paramsTemplate);
+        const fun = temp?.nftContract.methods.mintProject(to, maxSupply, maxNotOwner, script, fee, feeAdd, paramsTemplate);
         //the transaction
         const tx = {
             from: this.senderPublicKey,
@@ -201,12 +169,12 @@ class GenerativeBoilerplateNFTCandy {
         return await this.signedAndSendTx(temp?.web3, tx);
     }
 
-    async mintBatchUniqueNFT(contractAddress: any, mintBatch: any,
-                             gas: any) {
+    async mintUniqueNFT(contractAddress: any, mintTo: any, value: any, tokenId: number,
+                        gas: any) {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
 
-        const fun = temp?.nftContract.methods.mintBatchUniqueNFT(mintBatch);
+        const fun = temp?.nftContract.methods.mintUniqueNFT(mintTo, value, tokenId);
         //the transaction
         const tx = {
             from: this.senderPublicKey,
@@ -298,6 +266,28 @@ class GenerativeBoilerplateNFTCandy {
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
 
         const fun = temp?.nftContract.methods.updateTraits(traits);
+        //the transaction
+        const tx = {
+            from: this.senderPublicKey,
+            to: contractAddress,
+            nonce: nonce,
+            gas: gas,
+            data: fun.encodeABI(),
+        }
+
+        if (tx.gas == 0) {
+            tx.gas = await fun.estimateGas(tx);
+        }
+
+        return await this.signedAndSendTx(temp?.web3, tx);
+    }
+
+    async storeScript(contractAddress: any, projectId: number, script: string,
+                      gas: any) {
+        let temp = this.getContract(contractAddress);
+        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
+
+        const fun = temp?.nftContract.methods.storeScript(projectId, script);
         //the transaction
         const tx = {
             from: this.senderPublicKey,

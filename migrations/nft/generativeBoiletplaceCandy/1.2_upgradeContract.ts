@@ -8,7 +8,7 @@ import {GenerativeBoilerplateNFTCandy} from "./GenerativeBoilerplateNFT";
         }
 
         const nft = new GenerativeBoilerplateNFTCandy(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
-        const address = await nft.upgradeContract("0x397881EB7e0948D2320C378273708484E459E413");
+        const address = await nft.upgradeContract("0x924dF058388cCA4a1eb55A21ae3c5C564E629821");
         console.log({address});
     } catch (e) {
         // Deal with the fact the chain failed
