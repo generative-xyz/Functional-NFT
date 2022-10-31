@@ -163,19 +163,17 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
     // paramsTemplate: json format string for render view template
     function mintProject(
         address to,
-        string memory projectName,
         uint256 maxSupply,
         uint256 maxNotOwner,
         uint256 fee,
         address feeAdd,
         BoilerplateParam.ParamsOfProject calldata paramsTemplate
     ) external nonReentrant payable returns (uint256) {
-        require(bytes(projectName).length > 3, Errors.MISSING_NAME);
         require(msg.sender == _admin);
 
         _nextProjectId.increment();
         uint256 currentTokenId = _nextProjectId.current();
-        require(!_exists(currentTokenId), Errors.INV_PROJECT);
+        require(_projects[currentTokenId]._paramsTemplate._params.length == 0, Errors.INV_PROJECT);
 
         _projects[currentTokenId]._mintMaxSupply = maxSupply;
         _projects[currentTokenId]._mintNotOwnerProjectMaxSupply = maxNotOwner;
@@ -212,7 +210,7 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
         require(mintBatch._paramsBatch.length > 0 && mintBatch._uriBatch.length == mintBatch._paramsBatch.length, Errors.INV_PARAMS);
         require(project._mintMaxSupply == 0 || project._mintTotalSupply + mintBatch._paramsBatch.length <= project._mintMaxSupply, Errors.REACH_MAX);
         if (project._mintNotOwnerProjectMaxSupply > 0) {// not owner of project
-            if (msg.sender != ownerOf(mintBatch._fromProjectId)) {
+            if (msg.sender != _admin) {
                 _projects[mintBatch._fromProjectId]._mintNotOnwerProjectTotalSupply += mintBatch._paramsBatch.length;
                 require(_projects[mintBatch._fromProjectId]._mintNotOnwerProjectTotalSupply <= project._mintNotOwnerProjectMaxSupply);
             }
@@ -221,7 +219,7 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
         uint256 _mintFee = project._fee;
         IParameterControl _p = IParameterControl(_paramsAddress);
         if (_mintFee > 0) {// has fee and
-            if (ownerOf(mintBatch._fromProjectId) != msg.sender) {// not owner of project -> get payment
+            if (msg.sender != _admin) {// not owner of project -> get payment
                 _mintFee *= mintBatch._paramsBatch.length;
                 uint256 operationFee = _p.getUInt256(GenerativeBoilerplateNFTConfiguration.MINT_NFT_FEE);
                 if (operationFee == 0) {
@@ -276,7 +274,7 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
                     )
                 );
             }
-            mintNFT(mintBatch._mintTo, _admin, uri, mintBatch._paramsBatch[i]);
+            mintNFT(mintBatch._fromProjectId, mintBatch._mintTo, _admin, uri, mintBatch._paramsBatch[i]);
             // increase total supply minting on project
             project._mintTotalSupply += 1;
             _projects[mintBatch._fromProjectId]._mintTotalSupply = project._mintTotalSupply;
@@ -284,8 +282,8 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
         }
     }
 
-    function mintNFT(address mintTo, address creator, string memory uri, BoilerplateParam.ParamsOfNFT memory _paramsTemplateValue) internal {
-        require(_projects[1]._paramsTemplate._params.length != 0, Errors.INV_PROJECT);
+    function mintNFT(uint256 projectId, address mintTo, address creator, string memory uri, BoilerplateParam.ParamsOfNFT memory _paramsTemplateValue) internal {
+        require(_projects[projectId]._paramsTemplate._params.length != 0, Errors.INV_PROJECT);
 
         _nextTokenId.increment();
         uint256 currentTokenId = _nextTokenId.current();
@@ -312,6 +310,14 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
 
     function baseTokenURI() virtual public view returns (string memory) {
         return _baseURI();
+    }
+
+    function setCustomURI(
+        uint256 _tokenId,
+        string memory _newURI
+    ) public {
+        require(msg.sender == _creators[_tokenId], Errors.ONLY_CREATOR);
+        _customUri[_tokenId] = _newURI;
     }
 
     // tokenURI
