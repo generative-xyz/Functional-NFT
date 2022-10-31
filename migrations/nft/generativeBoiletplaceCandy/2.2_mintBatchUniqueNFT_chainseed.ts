@@ -16,7 +16,7 @@ import {createAlchemyWeb3} from "@alch/alchemy-web3";
         const hardhatConfig = require("../../../hardhat.config");
         const web3 = createAlchemyWeb3(hardhatConfig.networks[hardhatConfig.defaultNetwork].url);
 
-        const contract = '0x62825f15315807bACcdD1a9c8416e27d3cC7Aa1a';
+        const contract = '0x460Eb61D1Dc4FAc8B6cAF60f28a7624Cc2c1167B';
         const nft = new GenerativeBoilerplateNFTCandy(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
         const encodedString = "";

@@ -22,8 +22,8 @@ const {getContractAddress} = require('@ethersproject/address');
         const chainID = "5";
         const baseUrl = "";
         const address = await nft.deployUpgradeable(
-            "Generative Design",
-            "GenDe",
+            "SWEETS: On-chain Candies",
+            "SWEETS",
             baseUrl,
             process.env.PUBLIC_KEY,
             "0x46C02B9113DcA70a8C2e878Df0B24Dc895836b75");
