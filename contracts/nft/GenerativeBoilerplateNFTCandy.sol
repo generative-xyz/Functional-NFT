@@ -47,7 +47,6 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
 
     TraitInfo.Traits private _traits;
 
-    mapping(uint256 => string) _customUri;
     mapping(uint256 => uint256) public _tokenProjectId;
     string private pBaseTokenURI;
 
@@ -215,19 +214,6 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
         }
 
         require(_projects[projectId]._paramsTemplate._params.length == _value.length, Errors.INV_PARAMS);
-        string memory uri = string(
-            abi.encodePacked(
-                baseTokenURI(),
-                StringsUpgradeable.toHexString(uint256(uint160(address(this))), 20),
-                GenerativeBoilerplateNFTConfiguration.SEPERATE_URI,
-                StringsUpgradeable.toString(1),
-                GenerativeBoilerplateNFTConfiguration.SEPERATE_URI,
-                StringsUpgradeable.toString(tokenId)
-            )
-        );
-        if (bytes(uri).length > 0) {
-            _customUri[tokenId] = uri;
-        }
         _paramsValues[tokenId] = _value;
         _safeMint(_mintTo, tokenId);
         _tokenProjectId[tokenId] = projectId;
@@ -244,24 +230,21 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
         return pBaseTokenURI;
     }
 
-    function setCustomURI(
-        uint256 _tokenId,
-        string memory _newURI
-    ) public {
-        require(msg.sender == _admin && hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), Errors.ONLY_ADMIN_ALLOWED);
-        _customUri[_tokenId] = _newURI;
-    }
-
     // tokenURI
     // return URI data of project
     // base on customUri of project of baseUri of erc-721
     function tokenURI(uint256 _tokenId) override public view returns (string memory) {
-        bytes memory customUriBytes = bytes(_customUri[_tokenId]);
-        if (customUriBytes.length > 0) {
-            return _customUri[_tokenId];
-        } else {
-            return "";
-        }
+        string memory uri = string(
+            abi.encodePacked(
+                baseTokenURI(),
+                StringsUpgradeable.toHexString(uint256(uint160(address(this))), 20),
+                GenerativeBoilerplateNFTConfiguration.SEPERATE_URI,
+                StringsUpgradeable.toString(_tokenProjectId[_tokenId]),
+                GenerativeBoilerplateNFTConfiguration.SEPERATE_URI,
+                StringsUpgradeable.toString(_tokenId)
+            )
+        );
+        return uri;
     }
 
     function exists(

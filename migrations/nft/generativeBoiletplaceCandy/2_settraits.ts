@@ -10,7 +10,7 @@ import {candyTraits} from "../generativenft/projectTraits";
             console.log("wrong network");
             return;
         }
-        const contract = '0x924dF058388cCA4a1eb55A21ae3c5C564E629821';
+        const contract = '0x215F48d23554F8D99A2232cb87942865b5842a92';
         const nft = new GenerativeBoilerplateNFTCandy(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
         const traits = candyTraits;
         const tx = await nft.updateTraits(contract, JSON.parse(JSON.stringify({
