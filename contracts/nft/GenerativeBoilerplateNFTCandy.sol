@@ -203,9 +203,9 @@ contract GenerativeBoilerplateNFTCandy is Initializable, ERC721PresetMinterPause
         ProjectInfo memory project = _projects[projectId];
         require(project._mintMaxSupply == 0 || project._mintTotalSupply + 1 <= project._mintMaxSupply, Errors.REACH_MAX);
         if (tokenId > 0) {
-            require(msg.sender == _admin && project._mintNotOwnerProjectMaxSupply < tokenId && tokenId <= project._mintMaxSupply);
+            require(msg.sender == _admin && project._mintNotOwnerProjectMaxSupply < tokenId && tokenId <= project._mintMaxSupply, Errors.INV_PARAMS);
         } else {
-            require(msg.sender != _admin);
+            require(msg.sender != _admin, Errors.INV_PARAMS);
             // use counter
             _nextTokenId.increment();
             tokenId = _nextTokenId.current();

@@ -13,14 +13,14 @@ import {createAlchemyWeb3} from "@alch/alchemy-web3";
             console.log("wrong network");
             return;
         }
-        const contract = '0xac61b8dcf7e6fe176d02f3c4f5e951b234c349b0';
+        const contract = '0x924dF058388cCA4a1eb55A21ae3c5C564E629821';
         const nft = new GenerativeBoilerplateNFTCandy(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
         const tx = await nft.mintUniqueNFT(
                 contract,
                 process.env.PUBLIC_KEY,
                 [0, Math.floor(Math.random() * 7), 0, 0],
-                4502, 0
+                5001, 0
             )
         ;
         console.log("tx:", tx);
