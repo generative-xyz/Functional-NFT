@@ -6,7 +6,7 @@ import "../lib/helpers/BoilerplateParam.sol";
 
 interface IGenerativeBoilerplateNFT {
     //    event GenerateSeeds(address sender, uint256 projectId, bytes32[] seeds);
-    event MintBatchNFT(address sender, MintRequest request);
+    //  event MintBatchNFT(address sender, MintRequest request);
 
     struct MintRequest {
         uint256 _fromProjectId;

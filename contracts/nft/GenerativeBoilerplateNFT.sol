@@ -299,15 +299,15 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
                 // TODO always gen seed
                 mintBatch._paramsBatch[i]._seed = Random.randomSeed(msg.sender, mintBatch._fromProjectId, project._mintTotalSupply + 1);
                 seed = mintBatch._paramsBatch[i]._seed;
-                _seedOwners[seed][mintBatch._fromProjectId] = msg.sender;
+                // _seedOwners[seed][mintBatch._fromProjectId] = msg.sender;
                 // owner of seed
                 // require(_seedOwners[seed][mintBatch._fromProjectId] == msg.sender, Errors.SEED_INV);
 
             } else {// seed off-chain
                 seed = mintBatch._paramsBatch[i]._seed;
                 // require seed still not registerSeeds
-                require(_seedOwners[seed][mintBatch._fromProjectId] == address(0));
-                _seedOwners[seed][mintBatch._fromProjectId] = msg.sender;
+                // require(_seedOwners[seed][mintBatch._fromProjectId] == address(0));
+                // _seedOwners[seed][mintBatch._fromProjectId] = msg.sender;
             }
             // seed not already used
             require(_seedToTokens[seed][mintBatch._fromProjectId] == 0, Errors.SEED_INV);
@@ -332,10 +332,10 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PresetMinterPauserAuto
             project._mintTotalSupply += 1;
             _projects[mintBatch._fromProjectId]._mintTotalSupply = project._mintTotalSupply;
             // marked this seed is already used
-            _seedToTokens[seed][mintBatch._fromProjectId] = project._mintTotalSupply;
+            // _seedToTokens[seed][mintBatch._fromProjectId] = project._mintTotalSupply;
         }
 
-        emit MintBatchNFT(msg.sender, mintBatch);
+        //        emit MintBatchNFT(msg.sender, mintBatch);
     }
 
     // approveForAllSeeds
