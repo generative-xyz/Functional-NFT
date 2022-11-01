@@ -139,8 +139,7 @@ class GenerativeBoilerplateNFTCandy {
         return {admin, param};
     }
 
-    async mintProject(contractAddress: any, to: any,
-                      maxSupply: number, maxNotOwner: number, script: string, fee: any, feeAdd: any, paramsTemplate: any,
+    async mintProject(contractAddress: any, fee: any, feeAdd: any, paramsTemplate: any,
                       gas: number) {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
@@ -150,7 +149,7 @@ class GenerativeBoilerplateNFTCandy {
         // console.log({accountOneGasPrice});
         // return;
 
-        const fun = temp?.nftContract.methods.mintProject(to, maxSupply, maxNotOwner, script, fee, feeAdd, paramsTemplate);
+        const fun = temp?.nftContract.methods.mintProject(fee, feeAdd, paramsTemplate);
         //the transaction
         const tx = {
             from: this.senderPublicKey,

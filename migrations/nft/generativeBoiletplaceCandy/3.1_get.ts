@@ -9,7 +9,7 @@ import {GenerativeBoilerplateNFTCandy} from "./GenerativeBoilerplateNFT";
             console.log("wrong network");
             return;
         }
-        const contract = '0x924dF058388cCA4a1eb55A21ae3c5C564E629821';
+        const contract = '0xA1988821bb9C1B83cb6B16F2E4D4Ee7F77D99aC0';
         const nft = new GenerativeBoilerplateNFTCandy(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
         const projectId = 1;
         let a: any = {};
