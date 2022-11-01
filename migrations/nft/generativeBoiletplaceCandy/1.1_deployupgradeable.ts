@@ -5,7 +5,7 @@ const {getContractAddress} = require('@ethersproject/address');
 
 (async () => {
     try {
-        if (process.env.NETWORK != "mumbai") {
+        if (process.env.NETWORK != "mainnet") {
             console.log("wrong network");
             return;
         }
@@ -20,13 +20,13 @@ const {getContractAddress} = require('@ethersproject/address');
         })
         console.log({futureAddress});
         const chainID = "5";
-        const baseUrl = "https://rove-rendering-dev.moshwithme.io/v1/rendered-nft/80001/";
+        const baseUrl = "https://rendering.rove.to/v1/rendered-nft/1/";
         const address = await nft.deployUpgradeable(
             "SWEETS: On-chain Candies",
             "SWEETS",
             baseUrl,
             process.env.PUBLIC_KEY,
-            "0x46C02B9113DcA70a8C2e878Df0B24Dc895836b75");
+            "0xEc9e6E328Acf73cd2b1775070275A75Efc078383");
         console.log("GeneretiveBoilerplateNFTCandy deployed address: ", address);
     } catch (e) {
         // Deal with the fact the chain failed
