@@ -126,7 +126,7 @@ contract GenerativeNFT is ERC721Pausable, ReentrancyGuard, IERC2981, IGenerative
 
     function mint(address mintTo, BoilerplateParam.ParamsOfNFT memory _paramsTemplateValue) external {
         require(msg.sender == _boilerplateAddr, Errors.INV_BOILERPLATE_ADD);
-        require(_boilerplateAddr != address(0) && _boilerplateId > 0, Errors.INV_PROJECT);
+        require(_boilerplateId > 0, Errors.INV_PROJECT);
         n++;
         require(n <= _limit, Errors.REACH_MAX);
         _paramsValues[n] = _paramsTemplateValue;
@@ -135,7 +135,7 @@ contract GenerativeNFT is ERC721Pausable, ReentrancyGuard, IERC2981, IGenerative
 
     function ownerMint(address mintTo, uint256 tokenId, BoilerplateParam.ParamsOfNFT memory _paramsTemplateValue) external {
         require(msg.sender == _boilerplateAddr, Errors.INV_BOILERPLATE_ADD);
-        require(_boilerplateAddr != address(0) && _boilerplateId > 0, Errors.INV_PROJECT);
+        require(_boilerplateId > 0, Errors.INV_PROJECT);
         require(tokenId > _limit && tokenId <= _max, Errors.REACH_MAX);
 
         _paramsValues[tokenId] = _paramsTemplateValue;
