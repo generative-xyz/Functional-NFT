@@ -41,6 +41,26 @@
               "internalType": "uint256",
               "name": "_projectId",
               "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_fee",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "_feeToken",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "_creator",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "_paramsAddress",
+              "type": "address"
             }
           ],
           "internalType": "struct BoilerplateParam.InitMinterNFTInfo",

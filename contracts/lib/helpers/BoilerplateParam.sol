@@ -44,5 +44,9 @@ library BoilerplateParam {
         uint256 _max;
         uint256 _limit;
         uint256 _projectId;
+        uint256 _fee;
+        address _feeToken;
+        address _creator;
+        address _paramsAddress;
     }
 }

@@ -14,6 +14,7 @@ import "../lib/helpers/BoilerplateParam.sol";
 import "../lib/helpers/StringUtils.sol";
 import "../interfaces/IGenerativeBoilerplateNFT.sol";
 import "../interfaces/IGenerativeNFT.sol";
+import "../interfaces/IGenerativeNFT2.sol";
 import "../interfaces/IParameterControl.sol";
 
 contract GenerativeBoilerplateNFT is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgradeable, IERC2981Upgradeable, IGenerativeBoilerplateNFT {
@@ -65,23 +66,9 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PausableUpgradeable, R
         }
     }
 
-    function mintProject(
-        address to,
-        string memory projectName,
-        uint256 maxSupply,
-        uint256 limit,
-        uint32 scriptType,
-        bool clientSeed,
-        string memory uri,
-        uint256 fee,
-        address feeAdd,
-        BoilerplateParam.ParamTemplate[] memory paramsTemplate
-    ) external nonReentrant payable returns (uint256) {
-        require(bytes(projectName).length > 3, Errors.MISSING_NAME);
-
-        _currentProjectId++;
-        IParameterControl _p = IParameterControl(_paramsAddress);
+    function paymentMintProject() internal {
         if (msg.sender != _admin) {
+            IParameterControl _p = IParameterControl(_paramsAddress);
             // at least require value 1ETH
             uint256 operationFee = _p.getUInt256(GenerativeBoilerplateNFTConfiguration.CREATE_PROJECT_FEE);
             if (operationFee > 0) {
@@ -99,6 +86,26 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PausableUpgradeable, R
                 }
             }
         }
+    }
+
+    // use case on project which can only be minted through this contract
+    function mintProject(
+        address to,
+        string memory projectName,
+        uint256 maxSupply,
+        uint256 limit,
+        uint32 scriptType,
+        bool clientSeed,
+        string memory uri,
+        uint256 fee,
+        address feeAdd,
+        BoilerplateParam.ParamTemplate[] memory paramsTemplate
+    ) external nonReentrant payable returns (uint256) {
+        require(bytes(projectName).length > 3, Errors.MISSING_NAME);
+
+        _currentProjectId++;
+        IParameterControl _p = IParameterControl(_paramsAddress);
+        paymentMintProject();
         _projects[_currentProjectId]._customUri = uri;
         _projects[_currentProjectId]._projectName = projectName;
         _projects[_currentProjectId]._creator = msg.sender;
@@ -126,9 +133,69 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PausableUpgradeable, R
             _admin,
             maxSupply,
             limit,
-            _currentProjectId)
+            _currentProjectId,
+            fee,
+            feeAdd,
+            _projects[_currentProjectId]._creator,
+            _paramsAddress)
         );
         _projects[_currentProjectId]._minterNFTInfo = generativeNFTAdd;
+
+        return _currentProjectId;
+    }
+
+    // use case on project which can be minted by its directly
+    function mintProject2(
+        address to,
+        string memory projectName,
+        uint256 maxSupply,
+        uint256 limit,
+        uint32 scriptType,
+        bool clientSeed,
+        string memory uri,
+        uint256 fee,
+        address feeAdd,
+        BoilerplateParam.ParamTemplate[] memory paramsTemplate
+    ) external nonReentrant payable returns (uint256) {
+        require(bytes(projectName).length > 3, Errors.MISSING_NAME);
+
+        _currentProjectId++;
+        IParameterControl _p = IParameterControl(_paramsAddress);
+        paymentMintProject();
+        _projects[_currentProjectId]._customUri = uri;
+        _projects[_currentProjectId]._projectName = projectName;
+        _projects[_currentProjectId]._creator = msg.sender;
+        _projects[_currentProjectId]._fee = fee;
+        _projects[_currentProjectId]._feeToken = feeAdd;
+        for (uint8 i = 0; i < paramsTemplate.length; i++) {
+            _projects[_currentProjectId]._paramsTemplate.push(paramsTemplate[i]);
+            // require project can not be editable
+            require(!paramsTemplate[i]._editable);
+        }
+
+        _projects[_currentProjectId]._scriptType = scriptType;
+        // always false for this kind of project
+        _projects[_currentProjectId]._clientSeed = false;
+
+        _safeMint(to, _currentProjectId);
+
+        // deploy new by clone from template address
+        address generativeNFTAdd2 = ClonesUpgradeable.clone(_p.getAddress(GenerativeBoilerplateNFTConfiguration.GENERATIVE_NFT_TEMPLATE2));
+        IGenerativeNFT2 nft = IGenerativeNFT2(generativeNFTAdd2);
+        nft.init(
+            BoilerplateParam.InitMinterNFTInfo(_projects[_currentProjectId]._projectName,
+            StringUtils.getSlice(1, 3, _projects[_currentProjectId]._projectName),
+            _p.get(GenerativeBoilerplateNFTConfiguration.NFT_BASE_URI),
+            _admin,
+            maxSupply,
+            limit,
+            _currentProjectId,
+            fee,
+            feeAdd,
+            _projects[_currentProjectId]._creator,
+            _paramsAddress)
+        );
+        _projects[_currentProjectId]._minterNFTInfo = generativeNFTAdd2;
 
         return _currentProjectId;
     }
@@ -146,7 +213,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PausableUpgradeable, R
         _seedOwners[seed][projectId] = msg.sender;
     }
 
-    function payment(uint256 projectId, BoilerplateParam.ProjectInfo memory project, uint256 _mintFee) internal {
+    function paymentMintNFT(uint256 projectId, BoilerplateParam.ProjectInfo memory project) internal {
         if (ownerOf(projectId) != msg.sender) {// not owner of project -> get payment
             IParameterControl _p = IParameterControl(_paramsAddress);
             uint256 operationFee = _p.getUInt256(GenerativeBoilerplateNFTConfiguration.MINT_NFT_FEE);
@@ -155,10 +222,10 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PausableUpgradeable, R
                 // default 5% getting, 95% pay for owner of project
             }
             if (project._feeToken == address(0x0)) {
-                require(msg.value >= _mintFee);
+                require(msg.value >= project._fee);
 
                 // pay for owner project
-                (bool success,) = ownerOf(projectId).call{value : _mintFee - (_mintFee * operationFee / 10000)}("");
+                (bool success,) = ownerOf(projectId).call{value : project._fee - (project._fee * operationFee / 10000)}("");
                 require(success);
             } else {
                 IERC20Upgradeable tokenERC20 = IERC20Upgradeable(project._feeToken);
@@ -166,11 +233,11 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PausableUpgradeable, R
                 require(tokenERC20.transferFrom(
                         msg.sender,
                         address(this),
-                        _mintFee
+                        project._fee
                     ));
 
                 // pay for owner project
-                require(tokenERC20.transfer(ownerOf(projectId), _mintFee - (_mintFee * operationFee / 10000)));
+                require(tokenERC20.transfer(ownerOf(projectId), project._fee - (project._fee * operationFee / 10000)));
             }
         }
     }
@@ -199,7 +266,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PausableUpgradeable, R
         // get payable
         uint256 _mintFee = project._fee;
         if (_mintFee > 0) {// has fee and
-            payment(_fromProjectId, project, _mintFee);
+            paymentMintNFT(_fromProjectId, project);
         }
 
         IGenerativeNFT nft = IGenerativeNFT(project._minterNFTInfo);
@@ -215,7 +282,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PausableUpgradeable, R
         // get payable
         uint256 _mintFee = project._fee;
         if (_mintFee > 0) {// has fee and
-            payment(_fromProjectId, project, _mintFee);
+            paymentMintNFT(_fromProjectId, project);
         }
 
         IGenerativeNFT nft = IGenerativeNFT(project._minterNFTInfo);
