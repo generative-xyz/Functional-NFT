@@ -198,18 +198,13 @@ class GenerativeBoilerplateNFT {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
 
-        var accountOneGasPrice = null;
-        // var accountOneGasPrice = (await temp?.web3.eth.getTransaction("0x3b6fcff318f6b7ba0b1fc2252c6e4a41092c2431b7ee0aa927e60ac93334382a"));
-        // console.log({accountOneGasPrice});
-        // return;
-
         const fun = temp?.nftContract.methods.mintProject(to, projectName, maxSupply, maxNotOwner, scriptType, clientSeed, uri, fee, feeAdd, paramsTemplate);
         //the transaction
         const tx = {
             from: this.senderPublicKey,
             to: contractAddress,
-            nonce: accountOneGasPrice ? accountOneGasPrice["nonce"] : nonce,
-            gas: accountOneGasPrice ? accountOneGasPrice["gas"] : gas,
+            nonce: nonce,
+            gas: gas,
             data: fun.encodeABI(),
         }
 
@@ -217,6 +212,31 @@ class GenerativeBoilerplateNFT {
             // console.log(tx.data);
             tx.gas = await fun.estimateGas(tx);
             console.log(2222);
+        }
+
+        return await this.signedAndSendTx(temp?.web3, tx);
+    }
+
+    async mintProject2(contractAddress: any, to: any,
+                       projectName: string, maxSupply: number, maxNotOwner: number,
+                       scriptType: number, clientSeed: boolean, uri: string, fee: any, feeAdd: any, paramsTemplate: any,
+                       gas: number) {
+        let temp = this.getContract(contractAddress);
+        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
+
+        const fun = temp?.nftContract.methods.mintProject2(to, projectName, maxSupply, maxNotOwner, scriptType, clientSeed, uri, fee, feeAdd, paramsTemplate);
+        //the transaction
+        const tx = {
+            from: this.senderPublicKey,
+            to: contractAddress,
+            nonce: nonce,
+            gas: gas,
+            data: fun.encodeABI(),
+        }
+
+        if (tx.gas == 0) {
+            // console.log(tx.data);
+            tx.gas = await fun.estimateGas(tx);
         }
 
         return await this.signedAndSendTx(temp?.web3, tx);
