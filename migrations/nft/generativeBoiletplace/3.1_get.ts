@@ -9,9 +9,9 @@ import {GenerativeBoilerplateNFT} from "./GenerativeBoilerplateNFT";
             console.log("wrong network");
             return;
         }
-        const contract = '0xe579276f0c0532e8fd2f43292b9eedf1ca5222c3';
+        const contract = '0x0bf438e43dc76fac0758764745c3153361ea484b';
         const nft = new GenerativeBoilerplateNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
-        const projectId = 3;
+        const projectId = 2;
         let a: any = {};
         // a.getTokenURI = await nft.getTokenURI(contract, projectId);
         a.project = await nft.getProject(contract, projectId);

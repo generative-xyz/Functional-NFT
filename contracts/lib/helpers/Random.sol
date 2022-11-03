@@ -6,8 +6,8 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 library Random {
     using SafeMathUpgradeable for uint256;
 
-    function randomSeed(address msgSender, uint256 projectId, uint256 index) internal view returns (bytes32){
-        return keccak256(abi.encodePacked(blockhash(block.number - 1), msgSender, projectId, index));
+    function randomSeed(address msgSender, uint256 projectId) internal view returns (bytes32){
+        return keccak256(abi.encodePacked(blockhash(block.number - 1), msgSender, projectId));
     }
 
     function randomValueIndexArray(uint256 seed, uint256 n) internal view returns (uint256) {

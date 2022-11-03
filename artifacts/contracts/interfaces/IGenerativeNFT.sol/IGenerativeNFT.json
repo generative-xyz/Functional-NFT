@@ -4,62 +4,48 @@
   "sourceName": "contracts/interfaces/IGenerativeNFT.sol",
   "abi": [
     {
-      "anonymous": false,
       "inputs": [
         {
-          "indexed": false,
-          "internalType": "address",
-          "name": "mintTo",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "creator",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "string",
-          "name": "uri",
-          "type": "string"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
-        }
-      ],
-      "name": "MintGenerativeNFT",
-      "type": "event"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "string",
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "symbol",
-          "type": "string"
-        },
-        {
-          "internalType": "address",
-          "name": "admin",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "boilerplateAdd",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "boilerplateId",
-          "type": "uint256"
+          "components": [
+            {
+              "internalType": "string",
+              "name": "_name",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "_symbol",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "_uri",
+              "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "_admin",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_max",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_limit",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_projectId",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct BoilerplateParam.InitMinterNFTInfo",
+          "name": "p",
+          "type": "tuple"
         }
       ],
       "name": "init",
@@ -73,16 +59,6 @@
           "internalType": "address",
           "name": "mintTo",
           "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "creator",
-          "type": "address"
-        },
-        {
-          "internalType": "string",
-          "name": "uri",
-          "type": "string"
         },
         {
           "components": [
@@ -103,6 +79,41 @@
         }
       ],
       "name": "mint",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "mintTo",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "_seed",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "_value",
+              "type": "uint256[]"
+            }
+          ],
+          "internalType": "struct BoilerplateParam.ParamsOfNFT",
+          "name": "_paramsTemplateValue",
+          "type": "tuple"
+        }
+      ],
+      "name": "ownerMint",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

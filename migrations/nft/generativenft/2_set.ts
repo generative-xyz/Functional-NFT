@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv';
 
 import {ethers} from "ethers";
-import {GeneretiveNFT} from "./GeneretiveNFT";
+import {GenerativeNFT} from "./GenerativeNFT";
 import {candyTraits} from "./projectTraits";
 
 (async () => {
@@ -10,8 +10,8 @@ import {candyTraits} from "./projectTraits";
             console.log("wrong network");
             return;
         }
-        const contract = '0x2C81F8C1210418813f8ae6d770Ba90C138a351c7';
-        const nft = new GeneretiveNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
+        const contract = '0xdec70044399547d5997ebf900c07c9d3c68467d4';
+        const nft = new GenerativeNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
         const traits = candyTraits;
         const tx = await nft.updateTraits(contract, JSON.parse(JSON.stringify({
             _traits: traits,

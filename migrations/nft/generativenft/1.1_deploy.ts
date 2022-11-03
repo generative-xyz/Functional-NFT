@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv';
 
-import {GeneretiveNFT} from "./GeneretiveNFT";
+import {GenerativeNFT} from "./GenerativeNFT";
 
 (async () => {
     try {
@@ -8,7 +8,7 @@ import {GeneretiveNFT} from "./GeneretiveNFT";
             console.log("wrong network");
             return;
         }
-        const nft = new GeneretiveNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
+        const nft = new GenerativeNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
         const address = await nft.deploy(process.env.PUBLIC_KEY);
         console.log("%s Param control deployed address: %s", process.env.NETWORK, address);
     } catch (e) {

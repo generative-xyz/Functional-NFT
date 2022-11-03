@@ -4,7 +4,6 @@ pragma solidity 0.8.12;
 import "@openzeppelin/contracts/token/ERC721/presets/ERC721PresetMinterPauserAutoId.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import "../lib/helpers/Random.sol";
@@ -14,10 +13,7 @@ import "../lib/helpers/TraitInfo.sol";
 import "../interfaces/IGenerativeNFT.sol";
 import "../interfaces/IGenerativeBoilerplateNFT.sol";
 
-contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2981, IGenerativeNFT, Ownable {
-    using Counters for Counters.Counter;
-    Counters.Counter private _nextTokenId;
-
+contract GenerativeNFT is ERC721Pausable, ReentrancyGuard, IERC2981, IGenerativeNFT, Ownable {
     // admin of collection -> owner, creator, ...
     address public _admin;
     // linked boilerplate address
@@ -29,20 +25,20 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
 
     TraitInfo.Traits private _traits;
 
-    // 
-    mapping(uint256 => string) _customUri;
-    // creator of nft tokenID, set from boilerplate calling
-    mapping(uint256 => address) public _creators;
-
     string private _nameColl;
     string private _symbolColl;
+    string private _uri;
+
+    uint256 public n;
+
+    uint256 public _max; // max supply can be minted on project
+    uint256 public _limit; // limit for nminter is not owner of project
 
     constructor(
-        string memory _name,
-        string memory _symbol,
-        string memory _baseuri,
+        string memory name,
+        string memory symbol,
         address admin
-    ) ERC721PresetMinterPauserAutoId(_name, _symbol, _baseuri) {
+    ) ERC721(name, symbol) {
         _admin = admin;
     }
 
@@ -54,33 +50,21 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
         require(owner() == msg.sender || msg.sender == _boilerplateAddr, "Ownable: caller is not the owner");
     }
 
-    function initAdmin(address _newAdmin) internal {
-        require(msg.sender == _boilerplateAddr, "INV_SENDER_INIT_ADMIN");
-        require(_newAdmin != address(0x0), "INV_ADD");
-
-        _admin = _newAdmin;
-        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
-        _grantRole(MINTER_ROLE, _admin);
-        _grantRole(PAUSER_ROLE, _admin);
-    }
-
     function init(
-        string memory name,
-        string memory symbol,
-        address admin,
-        address boilerplateAdd,
-        uint256 boilerplateId
+        BoilerplateParam.InitMinterNFTInfo memory p
     ) external {
-        require(boilerplateAdd != address(0x0), "INV_ADD");
-        require(admin != address(0x0), "INV_ADD");
+        require(p._admin != address(0x0), "INV_ADD");
         require(_boilerplateId == 0, "EXISTED");
 
-        _nameColl = name;
-        _symbolColl = symbol;
-        _boilerplateAddr = boilerplateAdd;
-        _boilerplateId = boilerplateId;
-        initAdmin(admin);
-        transferOwnership(admin);
+        _nameColl = p._name;
+        _symbolColl = p._symbol;
+        _uri = p._uri;
+        _boilerplateAddr = msg.sender;
+        _boilerplateId = p._projectId;
+        _max = p._max;
+        _limit = p._limit;
+        _admin = p._admin;
+        transferOwnership(p._admin);
     }
 
     function updateTraits(TraitInfo.Traits calldata traits) external {
@@ -91,7 +75,6 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
     function getTraits() public view returns (TraitInfo.Trait[] memory){
         return _traits._traits;
     }
-
 
     function getTokenTraits(uint256 tokenId) public view returns (TraitInfo.Trait[] memory){
         (bytes32 seed, BoilerplateParam.ParamTemplate[] memory _params) = getParamValues(tokenId);
@@ -120,14 +103,8 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
         return _symbolColl;
     }
 
-    modifier creatorOnly(uint256 _id) {
-        require(_creators[_id] == _msgSender(), "ONLY_CREATOR");
-        _;
-    }
-
     modifier adminOnly() {
         require(_msgSender() == _admin, "ONLY_ADMIN_ALLOWED");
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ONLY_ADMIN_ALLOWED");
         _;
     }
 
@@ -135,14 +112,6 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
         require(_newAdmin != address(0), Errors.INV_ADD);
         address _previousAdmin = _admin;
         _admin = _newAdmin;
-
-        grantRole(DEFAULT_ADMIN_ROLE, _admin);
-        grantRole(MINTER_ROLE, _admin);
-        grantRole(PAUSER_ROLE, _admin);
-
-        revokeRole(DEFAULT_ADMIN_ROLE, _previousAdmin);
-        revokeRole(MINTER_ROLE, _previousAdmin);
-        revokeRole(PAUSER_ROLE, _previousAdmin);
     }
 
     function changeBoilerplate(address newBoilerplate, uint256 newBoilerplateId) public adminOnly {
@@ -151,119 +120,76 @@ contract GenerativeNFT is ERC721PresetMinterPauserAutoId, ReentrancyGuard, IERC2
         _boilerplateId = newBoilerplateId;
     }
 
-    function mint(address to) public override {}
+    function changeBaseURI(string memory baseURI) public adminOnly {
+        _uri = baseURI;
+    }
 
-    function mint(address mintTo, address creator, string memory uri, BoilerplateParam.ParamsOfNFT memory _paramsTemplateValue) external {
+    function mint(address mintTo, BoilerplateParam.ParamsOfNFT memory _paramsTemplateValue) external {
         require(msg.sender == _boilerplateAddr, Errors.INV_BOILERPLATE_ADD);
         require(_boilerplateAddr != address(0) && _boilerplateId > 0, Errors.INV_PROJECT);
-
-        IGenerativeBoilerplateNFT boilerplateNFT = IGenerativeBoilerplateNFT(_boilerplateAddr);
-        require(boilerplateNFT.exists(_boilerplateId), Errors.INV_PROJECT);
-
-        _nextTokenId.increment();
-        uint256 currentTokenId = _nextTokenId.current();
-        if (bytes(uri).length > 0) {
-            _customUri[currentTokenId] = uri;
-        }
-        _creators[currentTokenId] = creator;
-        _paramsValues[currentTokenId] = _paramsTemplateValue;
-        _safeMint(mintTo, currentTokenId);
-
-        emit MintGenerativeNFT(mintTo, creator, uri, currentTokenId);
+        n++;
+        require(n <= _limit, Errors.REACH_MAX);
+        _paramsValues[n] = _paramsTemplateValue;
+        _safeMint(mintTo, n);
     }
 
-    function _setCreator(address _to, uint256 _id) internal creatorOnly(_id)
-    {
-        _creators[_id] = _to;
-    }
+    function ownerMint(address mintTo, uint256 tokenId, BoilerplateParam.ParamsOfNFT memory _paramsTemplateValue) external {
+        require(msg.sender == _boilerplateAddr, Errors.INV_BOILERPLATE_ADD);
+        require(_boilerplateAddr != address(0) && _boilerplateId > 0, Errors.INV_PROJECT);
+        require(tokenId > _limit && tokenId <= _max, Errors.REACH_MAX);
 
-    function setCreator(
-        address _to,
-        uint256[] memory _ids
-    ) public {
-        require(_to != address(0), Errors.INV_ADD);
-
-        _grantRole(MINTER_ROLE, _to);
-        for (uint256 i = 0; i < _ids.length; i++) {
-            uint256 id = _ids[i];
-            _setCreator(_to, id);
-        }
+        _paramsValues[tokenId] = _paramsTemplateValue;
+        _safeMint(mintTo, tokenId);
     }
 
     function getParamValues(uint256 tokenId) public view returns (bytes32, BoilerplateParam.ParamTemplate[] memory) {
         BoilerplateParam.ParamsOfNFT memory pNFT = _paramsValues[tokenId];
-        bytes32 seed = pNFT._seed;
         IGenerativeBoilerplateNFT b = IGenerativeBoilerplateNFT(_boilerplateAddr);
-        BoilerplateParam.ParamsOfProject memory p = b.getParamsTemplate(_boilerplateId);
+        BoilerplateParam.ParamTemplate[] memory p = b.getParamsTemplate(_boilerplateId);
 
-        for (uint256 i = 0; i < p._params.length; i++) {
-            if (!p._params[i]._editable) {
-                if (p._params[i]._availableValues.length == 0) {
-                    p._params[i]._value = Random.randomValueRange(uint256(seed), p._params[i]._min, p._params[i]._max);
+        bytes32 seed = pNFT._seed;
+        for (uint256 i = 0; i < p.length; i++) {
+            if (!p[i]._editable) {
+                if (p[i]._availableValues.length == 0) {
+                    p[i]._value = Random.randomValueRange(uint256(seed), p[i]._min, p[i]._max);
                 } else {
-                    p._params[i]._value = Random.randomValueIndexArray(uint256(seed), p._params[i]._availableValues.length);
+                    p[i]._value = Random.randomValueIndexArray(uint256(seed), p[i]._availableValues.length);
                 }
             } else {
-                p._params[i]._value = pNFT._value[i];
+                p[i]._value = pNFT._value[i];
             }
-            seed = keccak256(abi.encodePacked(seed, p._params[i]._value));
+            seed = keccak256(abi.encodePacked(seed, p[i]._value));
         }
-        return (pNFT._seed, p._params);
+        return (pNFT._seed, p);
     }
 
-    function totalSupply() public view override returns (uint256) {
-        return _nextTokenId.current() - 1;
-    }
-
-    function baseTokenURI() virtual public view returns (string memory) {
-        return _baseURI();
+    function _baseURI() internal view override returns (string memory) {
+        return _uri;
     }
 
     function tokenURI(uint256 _tokenId) override public view returns (string memory) {
-        bytes memory customUriBytes = bytes(_customUri[_tokenId]);
-        if (customUriBytes.length > 0) {
-            return _customUri[_tokenId];
-        } else {
-            return string(abi.encodePacked(baseTokenURI(), Strings.toString(_tokenId)));
-        }
-    }
-
-    function setCustomURI(
-        uint256 _tokenId,
-        string memory _newURI
-    ) public creatorOnly(_tokenId) {
-        _customUri[_tokenId] = _newURI;
+        return string(abi.encodePacked(_baseURI(),
+            Strings.toHexString(uint256(uint160(_boilerplateAddr)), 20),
+            "/", Strings.toString(_boilerplateId),
+            "/", Strings.toString(_tokenId)));
     }
 
     /** @dev EIP2981 royalties implementation. */
-    struct RoyaltyInfo {
-        address recipient;
-        uint24 amount;
-        bool isValue;
-    }
-
-    mapping(uint256 => RoyaltyInfo) public royalties;
-
-    function setTokenRoyalty(
-        uint256 _tokenId,
-        address _recipient,
-        uint256 _value
-    ) public adminOnly {
-        require(_value <= 10000, Errors.REACH_MAX);
-        royalties[_tokenId] = RoyaltyInfo(_recipient, uint24(_value), true);
-    }
-
     // EIP2981 standard royalties return.
     function royaltyInfo(uint256 _tokenId, uint256 _salePrice) external view override
     returns (address receiver, uint256 royaltyAmount)
     {
-        RoyaltyInfo memory royalty = royalties[_tokenId];
-        if (royalty.isValue) {
-            receiver = royalty.recipient;
-            royaltyAmount = (_salePrice * royalty.amount) / 10000;
-        } else {
-            receiver = _creators[_tokenId];
-            royaltyAmount = (_salePrice * 500) / 10000;
-        }
+        receiver = _admin;
+        royaltyAmount = (_salePrice * 500) / 10000;
+    }
+
+    function pause() external {
+        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
+        _pause();
+    }
+
+    function unpause() external {
+        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
+        _unpause();
     }
 }

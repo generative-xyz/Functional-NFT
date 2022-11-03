@@ -23,7 +23,7 @@ class GenerativeBoilerplateNFT {
         return tx;
     }
 
-    async deployUpgradeable(name: string, symbol: string, baseUri: string, adminAddress: any, paramAdd: any) {
+    async deployUpgradeable(name: string, symbol: string, adminAddress: any, paramAdd: any) {
         if (this.network == "local") {
             console.log("not run local");
             return;
@@ -31,8 +31,8 @@ class GenerativeBoilerplateNFT {
 
         const contract = await ethers.getContractFactory("GenerativeBoilerplateNFT");
         console.log("GenerativeBoilerplateNFT.deploying ...")
-        const proxy = await upgrades.deployProxy(contract, [name, symbol, baseUri, adminAddress, paramAdd], {
-            initializer: 'initialize(string, string, string, address, address)',
+        const proxy = await upgrades.deployProxy(contract, [name, symbol, adminAddress, paramAdd], {
+            initializer: 'initialize(string, string, address, address)',
         });
         await proxy.deployed();
         console.log("GenerativeBoilerplateNFT deployed at proxy:", proxy.address);
@@ -192,7 +192,7 @@ class GenerativeBoilerplateNFT {
     }
 
     async mintProject(contractAddress: any, to: any,
-                      projectName: string, maxSupply: number, maxNotOwner: number, script: string,
+                      projectName: string, maxSupply: number, maxNotOwner: number,
                       scriptType: number, clientSeed: boolean, uri: string, fee: any, feeAdd: any, paramsTemplate: any,
                       gas: number) {
         let temp = this.getContract(contractAddress);
@@ -203,7 +203,7 @@ class GenerativeBoilerplateNFT {
         // console.log({accountOneGasPrice});
         // return;
 
-        const fun = temp?.nftContract.methods.mintProject(to, projectName, maxSupply, maxNotOwner, script, scriptType, clientSeed, uri, fee, feeAdd, paramsTemplate);
+        const fun = temp?.nftContract.methods.mintProject(to, projectName, maxSupply, maxNotOwner, scriptType, clientSeed, uri, fee, feeAdd, paramsTemplate);
         //the transaction
         const tx = {
             from: this.senderPublicKey,
@@ -222,12 +222,55 @@ class GenerativeBoilerplateNFT {
         return await this.signedAndSendTx(temp?.web3, tx);
     }
 
-    async mintBatchUniqueNFT(contractAddress: any, mintBatch: any,
-                             gas: any) {
+    async setScript(contractAddress: any, projectId: any, script: string, gas: 0) {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
 
-        const fun = temp?.nftContract.methods.mintBatchUniqueNFT(mintBatch);
+        const fun = temp?.nftContract.methods.mintNFT(projectId, script);
+        //the transaction
+        const tx = {
+            from: this.senderPublicKey,
+            to: contractAddress,
+            nonce: nonce,
+            gas: gas,
+            data: fun.encodeABI(),
+        }
+
+        if (tx.gas == 0) {
+            tx.gas = await fun.estimateGas(tx);
+        }
+
+        return await this.signedAndSendTx(temp?.web3, tx);
+    }
+
+    async mintNFT(contractAddress: any, projectId: any, mintBatch: any,
+                  gas: any) {
+        let temp = this.getContract(contractAddress);
+        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
+
+        const fun = temp?.nftContract.methods.mintNFT(projectId, mintBatch);
+        //the transaction
+        const tx = {
+            from: this.senderPublicKey,
+            to: contractAddress,
+            nonce: nonce,
+            gas: gas,
+            data: fun.encodeABI(),
+        }
+
+        if (tx.gas == 0) {
+            tx.gas = await fun.estimateGas(tx);
+        }
+
+        return await this.signedAndSendTx(temp?.web3, tx);
+    }
+
+    async ownerMintNFT(contractAddress: any, projectId: any, tokenId: any, mintBatch: any,
+                       gas: any) {
+        let temp = this.getContract(contractAddress);
+        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
+
+        const fun = temp?.nftContract.methods.ownerMintNFT(projectId, tokenId, mintBatch);
         //the transaction
         const tx = {
             from: this.senderPublicKey,

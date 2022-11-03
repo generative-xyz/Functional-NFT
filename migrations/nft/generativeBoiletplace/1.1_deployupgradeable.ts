@@ -20,11 +20,9 @@ const {getContractAddress} = require('@ethersproject/address');
         })
         console.log({futureAddress});
         const chainID = "5";
-        const baseUrl = "";
         const address = await nft.deployUpgradeable(
             "Generative Design",
             "GenDe",
-            baseUrl,
             process.env.PUBLIC_KEY,
             "0x46C02B9113DcA70a8C2e878Df0B24Dc895836b75");
         console.log("GeneretiveBoilerplateNFT deployed address: ", address);

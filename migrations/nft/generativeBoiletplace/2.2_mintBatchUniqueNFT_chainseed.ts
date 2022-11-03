@@ -6,6 +6,7 @@ import * as fs from "fs";
 import {keccak256} from "ethers/lib/utils";
 import Web3 from "web3";
 import {createAlchemyWeb3} from "@alch/alchemy-web3";
+import {json} from "hardhat/internal/core/params/argumentTypes";
 
 (async () => {
     try {
@@ -16,35 +17,20 @@ import {createAlchemyWeb3} from "@alch/alchemy-web3";
         const hardhatConfig = require("../../../hardhat.config");
         const web3 = createAlchemyWeb3(hardhatConfig.networks[hardhatConfig.defaultNetwork].url);
 
-        const contract = '0xE579276F0c0532E8fD2f43292B9EeDf1CA5222C3';
+        const contract = '0x0bf438e43dc76fac0758764745c3153361ea484b';
         const nft = new GenerativeBoilerplateNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
-        const encodedString = "";
-        const fromProjectId = 10;
-        let uris = [];
+        const fromProjectId = 2;
         let paramValues = [];
-        const seeds: any[] = [
-            web3.utils.leftPad(web3.utils.asciiToHex(""), 64), // no seed
-        ];
-
-        for (let i = 0; i < 1; i++) {
-            uris.push(encodedString);
-
-            paramValues.push({
-                _seed: seeds[i],
-                _value: [0, Math.floor(Math.random() * 7), 0, 0],
-            });
-        }
-        const mintBatch = JSON.parse(JSON.stringify({
-            _fromProjectId: fromProjectId,
-            _mintTo: process.env.PUBLIC_KEY,
-            _uriBatch: uris,
-            _paramsBatch: paramValues,
+        const seed = web3.utils.leftPad(web3.utils.asciiToHex(""), 64) // no seed
+        paramValues = JSON.parse(JSON.stringify({
+            _seed: seed,
+            _value: [0, Math.floor(Math.random() * 7), 0, 0],
         }));
-        const tx = await nft.mintBatchUniqueNFT(
+        const tx = await nft.mintNFT(
                 contract,
-                mintBatch,
-                0
+                fromProjectId,
+                paramValues, 0
             )
         ;
         console.log("tx:", tx);
