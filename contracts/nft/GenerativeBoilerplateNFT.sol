@@ -106,6 +106,9 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PausableUpgradeable, R
         _projects[_currentProjectId]._feeToken = feeAdd;
         for (uint8 i = 0; i < paramsTemplate.length; i++) {
             _projects[_currentProjectId]._paramsTemplate.push(paramsTemplate[i]);
+            if (paramsTemplate[i]._editable && !_projects[_currentProjectId]._editable) {
+                _projects[_currentProjectId]._editable = paramsTemplate[i]._editable;
+            }
         }
 
         _projects[_currentProjectId]._scriptType = scriptType;
@@ -191,7 +194,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PausableUpgradeable, R
 
     function mintNFT(uint256 _fromProjectId, BoilerplateParam.ParamsOfNFT memory paramValue) public nonReentrant payable {
         BoilerplateParam.ProjectInfo memory project = _projects[_fromProjectId];
-        require(project._paramsTemplate.length == paramValue._value.length, Errors.INV_PARAMS);
+        require(project._paramsTemplate.length == paramValue._value.length || !project._editable, Errors.INV_PARAMS);
 
         // get payable
         uint256 _mintFee = project._fee;
@@ -206,7 +209,7 @@ contract GenerativeBoilerplateNFT is Initializable, ERC721PausableUpgradeable, R
 
     function ownerMintNFT(uint256 _fromProjectId, uint256 tokenId, BoilerplateParam.ParamsOfNFT memory paramValue) public nonReentrant payable {
         BoilerplateParam.ProjectInfo memory project = _projects[_fromProjectId];
-        require(project._paramsTemplate.length == paramValue._value.length, Errors.INV_PARAMS);
+        require(project._paramsTemplate.length == paramValue._value.length || !project._editable, Errors.INV_PARAMS);
         require(msg.sender == project._creator);
 
         // get payable

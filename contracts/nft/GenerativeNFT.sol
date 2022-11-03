@@ -156,7 +156,9 @@ contract GenerativeNFT is ERC721Pausable, ReentrancyGuard, IERC2981, IGenerative
                     p[i]._value = Random.randomValueIndexArray(uint256(seed), p[i]._availableValues.length);
                 }
             } else {
-                p[i]._value = pNFT._value[i];
+                if (pNFT._value.length > 0 && i <= pNFT._value.length - 1) {
+                    p[i]._value = pNFT._value[i];
+                }
             }
             seed = keccak256(abi.encodePacked(seed, p[i]._value));
         }

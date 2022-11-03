@@ -13,6 +13,7 @@ library BoilerplateParam {
         bool _clientSeed; // accept seed from client if true -> contract will not verify value
         ParamTemplate[] _paramsTemplate; // struct contains list params of project and random seed(registered) in case mint nft from project
         address _minterNFTInfo;// map projectId ->  NFT collection address mint from project
+        bool _editable;
     }
 
     struct ParamTemplate {
