@@ -84,7 +84,7 @@ const candyProject2 = {
             _decimal: 0,
             _availableValues: ["1", "2", "3", "4", "5", "6", "7"],
             _value: 0,
-            _editable: true,
+            _editable: false,
         },
         { // height
             _typeValue: 1,

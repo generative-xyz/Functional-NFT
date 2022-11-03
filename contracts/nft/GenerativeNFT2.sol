@@ -168,7 +168,7 @@ contract GenerativeNFT2 is ERC721Pausable, ReentrancyGuard, IERC2981, IGenerativ
     }
 
     function mint() external {
-        require(msg.sender == _boilerplateAddr, Errors.INV_BOILERPLATE_ADD);
+        require(_boilerplateAddr != address(0), Errors.INV_BOILERPLATE_ADD);
         require(_boilerplateId > 0, Errors.INV_PROJECT);
         paymentMintNFT();
         n++;
@@ -177,7 +177,7 @@ contract GenerativeNFT2 is ERC721Pausable, ReentrancyGuard, IERC2981, IGenerativ
     }
 
     function ownerMint(uint256 tokenId) external {
-        require(msg.sender == _boilerplateAddr, Errors.INV_BOILERPLATE_ADD);
+        require(_boilerplateAddr != address(0), Errors.INV_BOILERPLATE_ADD);
         require(_boilerplateId > 0, Errors.INV_PROJECT);
         require(tokenId > _limit && tokenId <= _max, Errors.REACH_MAX);
         paymentMintNFT();

@@ -20,7 +20,7 @@ import {json} from "hardhat/internal/core/params/argumentTypes";
         const contract = '0x0bf438e43dc76fac0758764745c3153361ea484b';
         const nft = new GenerativeBoilerplateNFT(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
-        const fromProjectId = 6;
+        const fromProjectId = 10;
         let paramValues = [];
         const seed = web3.utils.leftPad(web3.utils.asciiToHex(""), 64) // no seed
         paramValues = JSON.parse(JSON.stringify({
