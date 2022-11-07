@@ -6,7 +6,7 @@ const candyTraits = [
         _valueStr: "",
     },
     {
-        name: "Sharp",
+        name: "Shape",
         _availableValues: ["Pillhead",
             "Smiler",
             "Spektral",
