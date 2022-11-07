@@ -10,28 +10,35 @@ import "../lib/helpers/Errors.sol";
 
 contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgradeable, OwnableUpgradeable, IERC2981Upgradeable {
     using SafeMathUpgradeable for uint256;
+    // supply
+    uint256 constant _max = 5000;
+    uint256 constant _maxUser = 4500;
 
-    // super admin
     address public _admin;
-    // parameter control address
     address public _paramsAddress;
 
     string public _algorithm;
     uint256 public _counter;
-
     string public _uri;
 
-    // token-gated 721 
+    // mint condition
+    // Sweet nft
     address public _tokenAddrErc721;
+    // check trait shape
+    string[] private _shapes = [
+    "Pillhead",
+    "Smiler",
+    "Spektral",
+    "Helix",
+    "Tesseract",
+    "Torus",
+    "Obelisk"
+    ];
+    mapping(string => uint) private _availableShapes;
+    uint private _numAvailableShapes;
 
-    // fee
     uint256 public _fee;
-
     mapping(address => uint) _whiteList;
-
-    // supply
-    uint256 constant _max = 5000;
-    uint256 constant _maxUser = 4500;
 
     function initialize(
         string memory name,
@@ -44,6 +51,9 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         __ERC721_init(name, symbol);
         _paramsAddress = paramsAddress;
         _admin = admin;
+
+        _availableShapes["Pillhead"] = 1;
+        _numAvailableShapes = 1;
     }
 
     function changeAdmin(address newAdm, address newParam) external {
@@ -136,7 +146,12 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }
 
     function mintByToken(uint256 tokenIdGated) public nonReentrant {
-        require(_tokenAddrErc721 != address(0));
+        require(_tokenAddrErc721 != address(0), Errors.INV_ADD);
+        // check shapes
+        if (_numAvailableShapes > 0) {
+            require(_availableShapes[rand(tokenIdGated, "shape", _shapes)] == 1, Errors.INV_PARAMS);
+        }
+        // erc-721
         IERC721Upgradeable token = IERC721Upgradeable(_tokenAddrErc721);
         // burn
         token.safeTransferFrom(msg.sender, address(0), tokenIdGated);
