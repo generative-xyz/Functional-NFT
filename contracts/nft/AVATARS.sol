@@ -101,11 +101,11 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         }
     }
 
-    function addWhitelist(address[] memory addrs) external {
+    function addWhitelist(address[] memory addrs, uint256 count) external {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
 
         for (uint i = 0; i < addrs.length; i++) {
-            _whiteList[addrs[i]] = 1;
+            _whiteList[addrs[i]] = count;
         }
     }
 
@@ -169,11 +169,11 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }
 
     function mintWhitelist() public nonReentrant payable {
-        require(_whiteList[msg.sender] == 1, Errors.INV_ADD);
+        require(_whiteList[msg.sender] > 0, Errors.INV_ADD);
         require(_counter < _maxUser);
         _counter++;
         _safeMint(msg.sender, _counter);
-        _whiteList[msg.sender] = 2;
+        _whiteList[msg.sender] -= 1;
     }
 
     function ownerMint(uint256 id) public nonReentrant {
