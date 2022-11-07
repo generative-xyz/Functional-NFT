@@ -17,7 +17,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     address public _paramsAddress;
 
     string public _algorithm;
-    uint256 public n;
+    uint256 public _counter;
 
     string public _uri;
 
@@ -27,11 +27,11 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     // fee
     uint256 public _fee;
 
-    function setAlgo(string memory algo) public {
-        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
-        _algorithm = algo;
-    }
+    mapping(address => uint) _whiteList;
 
+    // supply
+    uint256 constant _max = 5000;
+    uint256 constant _maxUser = 4500;
 
     function initialize(
         string memory name,
@@ -62,13 +62,9 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         }
     }
 
-    /** @dev EIP2981 royalties implementation. */
-    // EIP2981 standard royalties return.
-    function royaltyInfo(uint256 _tokenId, uint256 _salePrice) external view override
-    returns (address receiver, uint256 royaltyAmount)
-    {
-        receiver = _admin;
-        royaltyAmount = (_salePrice * 500) / 10000;
+    function setAlgo(string memory algo) public {
+        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
+        _algorithm = algo;
     }
 
     function pause() external {
@@ -95,9 +91,21 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         }
     }
 
+    function addWhitelist(address[] memory addrs) external {
+        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
+
+        for (uint i = 0; i < addrs.length; i++) {
+            _whiteList[addrs[i]] = 1;
+        }
+    }
+
     function rand(uint256 id, string memory trait, string[] memory values) internal pure returns (string memory) {
         uint256 k = uint256(keccak256(abi.encodePacked(trait, toString(id))));
         return values[k % values.length];
+    }
+
+    function getParamValues(uint256 tokenId) public view returns (string memory color, string memory shape, string memory size, string memory surface) {
+        return ("", "", "", "");
     }
 
     function toString(uint256 value) internal pure returns (string memory) {
@@ -133,21 +141,38 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         // burn
         token.safeTransferFrom(msg.sender, address(0), tokenIdGated);
 
-        require(n < 4500);
-        n++;
-        _safeMint(msg.sender, n);
+        require(_counter < _maxUser);
+        _counter++;
+        _safeMint(msg.sender, _counter);
     }
 
     function mint() public nonReentrant payable {
         require(_fee > 0 && msg.value >= _fee, Errors.INV_FEE_PROJECT);
-        require(n < 4500);
-        n++;
-        _safeMint(msg.sender, n);
+        require(_counter < _maxUser);
+        _counter++;
+        _safeMint(msg.sender, _counter);
+    }
+
+    function mintWhitelist() public nonReentrant payable {
+        require(_whiteList[msg.sender] == 1, Errors.INV_ADD);
+        require(_counter < _maxUser);
+        _counter++;
+        _safeMint(msg.sender, _counter);
+        _whiteList[msg.sender] = 2;
     }
 
     function ownerMint(uint256 id) public nonReentrant {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
-        require(id > 4500 && id <= 5000);
+        require(id > _maxUser && id <= _max);
         _safeMint(msg.sender, id);
+    }
+
+    /** @dev EIP2981 royalties implementation. */
+    // EIP2981 standard royalties return.
+    function royaltyInfo(uint256 _tokenId, uint256 _salePrice) external view override
+    returns (address receiver, uint256 royaltyAmount)
+    {
+        receiver = _admin;
+        royaltyAmount = (_salePrice * 500) / 10000;
     }
 }
