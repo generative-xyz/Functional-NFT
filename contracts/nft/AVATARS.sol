@@ -6,9 +6,10 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import '@chainlink/contracts/src/v0.8/ChainlinkClient.sol';
 import "../lib/helpers/Errors.sol";
 
-contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgradeable, OwnableUpgradeable, IERC2981Upgradeable {
+contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgradeable, OwnableUpgradeable, ChainlinkClient, IERC2981Upgradeable {
     using SafeMathUpgradeable for uint256;
     // supply
     uint256 constant _max = 5000;
@@ -39,6 +40,25 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
 
     uint256 public _fee;
     mapping(address => uint) _whiteList;
+
+    // Oracle
+    bytes32 public _oracleJobId;
+    uint256 public _oracleFee;
+    string public _oracleUrl;
+
+    //
+    // Avatars traits
+    //
+    // TODO
+    string[] private _nations = [
+    "England",
+    "Italia"
+    ];
+
+    enum EMOTION {NORMAL, CRY, HAPPY}
+    mapping(string => EMOTION) _nationsEmo;
+    enum Result {UNKNOWN, HOMETEAMWIN, AWAYTEAMWIN, DRAW, PENDING}
+
 
     function initialize(
         string memory name,
@@ -114,8 +134,13 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         return values[k % values.length];
     }
 
-    function getParamValues(uint256 tokenId) public view returns (string memory color, string memory shape, string memory size, string memory surface) {
-        return ("", "", "", "");
+    function getNation(uint256 id) public view returns (string memory) {
+        return rand(id, "nation", _nations);
+    }
+
+    function getParamValues(uint256 tokenId) public view returns (EMOTION emo, string memory nation) {
+        nation = getNation(tokenId);
+        return (_nationsEmo[nation], nation);
     }
 
     function toString(uint256 value) internal pure returns (string memory) {
@@ -189,5 +214,62 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     {
         receiver = _admin;
         royaltyAmount = (_salePrice * 500) / 10000;
+    }
+
+    ///
+    // Oracle
+    ///
+    using Chainlink for Chainlink.Request;
+    function changeOracle(bytes32 jobId, uint256 fee, string memory url) external {
+        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
+        _oracleJobId = jobId;
+        // 0,1 * 10**18 (Varies by network and job)
+        //        _fee = (1 * LINK_DIVISIBILITY) / 10;
+        _oracleFee = fee;
+        _oracleUrl = url;
+    }
+
+    function fulfill(bytes32 requestId, bytes memory gameData) public recordChainlinkFulfillment(requestId) {
+        // TODO
+        (bytes32 gameId, string memory home, string memory away, uint homeTeamGoals, uint awayTeamGoals, uint8 status) = abi.decode(gameData, (bytes32, string, string, uint8, uint8, uint8));
+        Result result = determineResult(homeTeamGoals, awayTeamGoals);
+        if (result == Result.HOMETEAMWIN) {
+            _nationsEmo[home] = EMOTION.HAPPY;
+            _nationsEmo[away] = EMOTION.CRY;
+        } else if (result == Result.AWAYTEAMWIN) {
+            _nationsEmo[home] = EMOTION.CRY;
+            _nationsEmo[away] = EMOTION.HAPPY;
+        } else {
+            _nationsEmo[home] = EMOTION.NORMAL;
+            _nationsEmo[away] = EMOTION.NORMAL;
+        }
+    }
+
+    function determineResult(uint homeTeam, uint awayTeam) internal view returns (Result) {
+        if (homeTeam > awayTeam) {return Result.HOMETEAMWIN;}
+        if (homeTeam == awayTeam) {return Result.DRAW;}
+        return Result.AWAYTEAMWIN;
+    }
+
+    function requestData(bytes32 _gameId) public returns (bytes32 requestId) {
+        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
+        Chainlink.Request memory req = buildChainlinkRequest(_oracleJobId, address(this), this.fulfill.selector);
+
+        // Set the URL to perform the GET request on
+        req.add('get', string(abi.encodePacked(_oracleUrl, "/game/", _gameId, "/data")));
+
+        // Chainlink nodes prior to 1.0.0 support this format
+        // request.add("path", "k1.k2.k3.k4..."); 
+        req.add('path', "DATA.GAME");
+        // Chainlink nodes 1.0.0 and later support this format
+
+        // Sends the request
+        return sendChainlinkRequest(req, _oracleFee);
+    }
+
+    function withdrawLink() public {
+        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
+        LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
+        require(link.transfer(msg.sender, link.balanceOf(address(this))), 'Unable to transfer');
     }
 }
