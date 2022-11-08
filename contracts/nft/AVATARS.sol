@@ -40,6 +40,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
 
     uint256 public _fee;
     mapping(address => uint) _whiteList;
+    uint256 public _whitelistFee;
 
     // Oracle
     bytes32 public _oracleJobId;
@@ -51,8 +52,14 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     //
     // TODO
     string[] private _nations = [
-    "England",
-    "Italia"
+    "Qatar", "Ecuador", "Senegal", "Netherlands", // GA
+    "England", "IR Iran", "USA", "Wales", // GB
+    "Argentina", "Saudi Arabia", "Mexico", "Poland", // GC
+    "France", "Australia", "Denmark", "Tunisia", //GD
+    "Spain", "Costa Rica", "Germany", "Japan", //GE
+    "Belgium", "Canada", "Morocco", "Croatia", //GF
+    "Brazil", "Serbia", "Switzerland", "Cameroon", //GG
+    "Portugal", "Ghana", "Uruguay", "Korea Republic" // GH
     ];
 
     enum EMOTION {NORMAL, CRY, HAPPY}
@@ -195,6 +202,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
 
     function mintWhitelist() public nonReentrant payable {
         require(_whiteList[msg.sender] > 0, Errors.INV_ADD);
+        require(_whitelistFee > 0 && msg.value >= _whitelistFee, Errors.INV_FEE_PROJECT);
         require(_counter < _maxUser);
         _counter++;
         _safeMint(msg.sender, _counter);
