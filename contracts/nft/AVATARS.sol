@@ -47,6 +47,14 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     uint256 public _oracleFee;
     string public _oracleUrl;
 
+    struct NationEmo {
+        string tempEmo;
+        uint256 tempLastTime;
+    }
+
+    mapping(string => NationEmo) _nationsEmo;
+    enum Result {UNKNOWN, HOMETEAMWIN, AWAYTEAMWIN, DRAW, PENDING}
+
     //
     // Avatars traits
     //
@@ -61,11 +69,42 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     "Brazil", "Serbia", "Switzerland", "Cameroon", //GG
     "Portugal", "Ghana", "Uruguay", "Korea Republic" // GH
     ];
+    string[] private _emotions = ["normal", "sad", "happy"];
+    string[] private _emotionTimes = ["Forever", "1 day", "7 days", "30 days"];
 
-    enum EMOTION {NORMAL, CRY, HAPPY}
-    mapping(string => EMOTION) _nationsEmo;
-    enum Result {UNKNOWN, HOMETEAMWIN, AWAYTEAMWIN, DRAW, PENDING}
+    string[] private _dnas = ["male", "female", "robot", "ape", "alien", "ball head"];
+    string[] private _skins = ["none"];
+    string[] private _skins3 = ["dark", "bright", "yellow"];
+    string[] private _beards = ["none"];
+    string[] private _beards4 = ["none", "shape 1", "shape 2", "shape 3"];
+    string[] private _hairs = ["none"];
+    string[] private _hairs4 = ["none", "short", "long", "crazy"];
+    string[] private _hairs3 = ["short", "long", "crazy"];
 
+    string[] private _tops = ["tshirt", "hoodie"];
+    string[] private _bottoms = ["shorts", "jogger"];
+    uint private _numbers = 99;
+    string[] private _shoes = ["reg 1", "reg 2", "reg 3", "spe 1", "spe 2", "spe 3"];
+    string[] private _tatoos = ["none", "shape 1", "shape 2", "shape 3", "shape 4", "shape 5"];
+    string[] private _glasses = ["none", "shape 1", "shape 2", "shape 3"];
+    string[] private _gloves = ["none", "have"];
+
+    struct Player {
+        string _emotion;
+        string _emotionTime;
+        string _nation;
+        string _dna;
+        string _skin;
+        string _beard;
+        string _hair;
+        string _shoes;
+        string _top;
+        string _bottom;
+        uint256 _number;
+        string _tatoo;
+        string _glasses;
+        string _gloves;
+    }
 
     function initialize(
         string memory name,
@@ -141,14 +180,121 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         return values[k % values.length];
     }
 
-    function getNation(uint256 id) public view returns (string memory) {
+    function randUint256(uint256 id, string memory trait, uint256 min, uint256 max) internal pure returns (uint256) {
+        uint256 k = uint256(keccak256(abi.encodePacked(trait, toString(id))));
+        return (min + k % (max - min + 1));
+    }
+
+    function getNation(uint256 id) internal view returns (string memory) {
         return rand(id, "nation", _nations);
     }
 
-    function getParamValues(uint256 tokenId) public view returns (EMOTION emo, string memory nation) {
-        nation = getNation(tokenId);
-        return (_nationsEmo[nation], nation);
+    function getDNA(uint256 id) internal view returns (string memory) {
+        return rand(id, "dna", _dnas);
     }
+
+    function getSkin(uint256 id) internal view returns (string memory) {
+        bytes32 a = keccak256(abi.encodePacked(getDNA(id)));
+        bytes32 b2 = keccak256(abi.encodePacked(_dnas[2]));
+        bytes32 b3 = keccak256(abi.encodePacked(_dnas[3]));
+        bytes32 b4 = keccak256(abi.encodePacked(_dnas[4]));
+        bytes32 b5 = keccak256(abi.encodePacked(_dnas[5]));
+
+        if (a == b2 || a == b3 || a == b4 || a == b5) {
+            return rand(id, "skin", _skins);
+        }
+        return rand(id, "skin", _skins3);
+    }
+
+    function getBeard(uint256 id) internal view returns (string memory) {
+        bytes32 a = keccak256(abi.encodePacked(getDNA(id)));
+        bytes32 b1 = keccak256(abi.encodePacked(_dnas[1]));
+        bytes32 b2 = keccak256(abi.encodePacked(_dnas[2]));
+        bytes32 b3 = keccak256(abi.encodePacked(_dnas[3]));
+        bytes32 b4 = keccak256(abi.encodePacked(_dnas[4]));
+        bytes32 b5 = keccak256(abi.encodePacked(_dnas[5]));
+
+        if (a == b1 || a == b2 || a == b3 || a == b4 || a == b5) {
+            return rand(id, "beard", _beards);
+        }
+        return rand(id, "beard", _beards4);
+    }
+
+    function getHair(uint256 id) internal view returns (string memory) {
+        bytes32 a = keccak256(abi.encodePacked(getDNA(id)));
+        bytes32 b1 = keccak256(abi.encodePacked(_dnas[1]));
+        bytes32 b2 = keccak256(abi.encodePacked(_dnas[2]));
+        bytes32 b3 = keccak256(abi.encodePacked(_dnas[3]));
+        bytes32 b4 = keccak256(abi.encodePacked(_dnas[4]));
+        bytes32 b5 = keccak256(abi.encodePacked(_dnas[5]));
+
+        if (a == b2 || a == b3 || a == b4 || a == b5) {
+            return rand(id, "hair", _hairs);
+        } else if (a == b2) {
+            return rand(id, "hair", _hairs3);
+        }
+        return rand(id, "hair", _hairs4);
+    }
+
+    function getTop(uint256 id) internal view returns (string memory) {
+        return rand(id, "top", _tops);
+    }
+
+    function getBottom(uint256 id) internal view returns (string memory) {
+        return rand(id, "bottom", _bottoms);
+    }
+
+    function getNumber(uint256 id) internal view returns (uint256) {
+        return randUint256(id, "number", 0, _numbers);
+    }
+
+    function getShoes(uint256 id) internal view returns (string memory) {
+        return rand(id, "shoe", _shoes);
+    }
+
+    function getTatoo(uint256 id) internal view returns (string memory) {
+        return rand(id, "tatoo", _tatoos);
+    }
+
+    function getGlasses(uint256 id) internal view returns (string memory) {
+        return rand(id, "glasses", _glasses);
+    }
+
+    function getGloves(uint256 id) internal view returns (string memory) {
+        return rand(id, "glovers", _glasses);
+    }
+
+    function getEmotionTime(uint256 id) internal view returns (string memory) {
+        return rand(id, "emotionTime", _emotionTimes);
+    }
+
+    function getParamValues(uint256 tokenId) public view returns (Player memory player) {
+        string memory nation = getNation(tokenId);
+        string memory emotionTime = getEmotionTime(tokenId);
+        string memory emo = _nationsEmo[nation].tempEmo;
+        if (keccak256(abi.encodePacked(emotionTime)) != keccak256(abi.encodePacked(_emotionTimes[0]))) {
+            uint256 eT = 86400;
+            if (keccak256(abi.encodePacked(emotionTime)) == keccak256(abi.encodePacked(_emotionTimes[1]))) {
+                eT = eT * 1;
+            }
+            else if (keccak256(abi.encodePacked(emotionTime)) == keccak256(abi.encodePacked(_emotionTimes[2]))) {
+                eT = eT * 7;
+            } else {
+                eT = eT * 30;
+            }
+            if (block.timestamp - _nationsEmo[nation].tempLastTime > eT) {
+                emo = _emotions[0];
+            }
+        }
+        player = Player(emo, emotionTime, nation, getDNA(tokenId),
+            getSkin(tokenId), getBeard(tokenId), getHair(tokenId),
+            getShoes(tokenId), getTop(tokenId), getBottom(tokenId),
+            getNumber(tokenId), getTatoo(tokenId),
+            getGlasses(tokenId),
+            getGloves(tokenId));
+        return player;
+    }
+
 
     function toString(uint256 value) internal pure returns (string memory) {
         if (value == 0) {return "0";}
@@ -238,19 +384,20 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }
 
     function fulfill(bytes32 requestId, bytes memory gameData) public recordChainlinkFulfillment(requestId) {
-        // TODO
-        (bytes32 gameId, string memory home, string memory away, uint homeTeamGoals, uint awayTeamGoals, uint8 status) = abi.decode(gameData, (bytes32, string, string, uint8, uint8, uint8));
+        (string memory gameId, uint256 startTime, string memory home, string memory away, uint homeTeamGoals, uint awayTeamGoals, uint8 status) = abi.decode(gameData, (string, uint256, string, string, uint8, uint8, uint8));
         Result result = determineResult(homeTeamGoals, awayTeamGoals);
         if (result == Result.HOMETEAMWIN) {
-            _nationsEmo[home] = EMOTION.HAPPY;
-            _nationsEmo[away] = EMOTION.CRY;
+            _nationsEmo[home].tempEmo = _emotions[2];
+            _nationsEmo[away].tempEmo = _emotions[1];
         } else if (result == Result.AWAYTEAMWIN) {
-            _nationsEmo[home] = EMOTION.CRY;
-            _nationsEmo[away] = EMOTION.HAPPY;
+            _nationsEmo[home].tempEmo = _emotions[1];
+            _nationsEmo[away].tempEmo = _emotions[2];
         } else {
-            _nationsEmo[home] = EMOTION.NORMAL;
-            _nationsEmo[away] = EMOTION.NORMAL;
+            _nationsEmo[home].tempEmo = _emotions[0];
+            _nationsEmo[away].tempEmo = _emotions[0];
         }
+        _nationsEmo[home].tempLastTime = block.timestamp;
+        _nationsEmo[away].tempLastTime = block.timestamp;
     }
 
     function determineResult(uint homeTeam, uint awayTeam) internal view returns (Result) {
@@ -264,7 +411,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         Chainlink.Request memory req = buildChainlinkRequest(_oracleJobId, address(this), this.fulfill.selector);
 
         // Set the URL to perform the GET request on
-        req.add('get', string(abi.encodePacked(_oracleUrl, "/game/", _gameId, "/data")));
+        req.add('get', string(abi.encodePacked(_oracleUrl, "/game/", _gameId)));
 
         // Chainlink nodes prior to 1.0.0 support this format
         // request.add("path", "k1.k2.k3.k4..."); 
