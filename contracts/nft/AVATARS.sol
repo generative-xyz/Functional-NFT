@@ -11,10 +11,12 @@ import "../lib/helpers/Errors.sol";
 
 contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgradeable, OwnableUpgradeable, ChainlinkClient, IERC2981Upgradeable {
     using SafeMathUpgradeable for uint256;
-    // supply
+
+    // @dev: supply for collection
     uint256 constant _max = 5000;
     uint256 constant _maxUser = 4500;
 
+    // @dev: handler
     address public _admin;
     address public _paramsAddress;
 
@@ -22,8 +24,8 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     uint256 public _counter;
     string public _uri;
 
-    // mint condition
-    // Sweet nft
+    // @dev: mint condition 
+    // base on Sweet nft
     address public _tokenAddrErc721;
     // check trait shape
     string[] private _shapes = [
@@ -37,16 +39,13 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     ];
     mapping(string => uint) private _availableShapes;
     uint private _numAvailableShapes;
-
+    // base on fee
     uint256 public _fee;
+    // base on whitelist
     mapping(address => uint) _whiteList;
     uint256 public _whitelistFee;
 
-    // Oracle
-    bytes32 public _oracleJobId;
-    uint256 public _oracleFee;
-    string public _oracleUrl;
-
+    // @dev: living data for collection
     struct NationEmo {
         string tempEmo;
         uint256 tempLastTime;
@@ -55,10 +54,8 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     mapping(string => NationEmo) _nationsEmo;
     enum Result {UNKNOWN, HOMETEAMWIN, AWAYTEAMWIN, DRAW, PENDING}
 
-    //
-    // Avatars traits
-    //
-    // TODO
+    /** @dev Avatars traits
+    */
     string[] private _nations = [
     "Qatar", "Ecuador", "Senegal", "Netherlands", // GA
     "England", "IR Iran", "USA", "Wales", // GB
@@ -72,18 +69,18 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     string[] private _emotions = ["normal", "sad", "happy"];
     string[] private _emotionTimes = ["Forever", "1 day", "7 days", "30 days"];
 
-    string[] private _dnas = ["male", "female", "robot", "ape", "alien", "ball head"];
-    string[] private _skins = ["none"];
+    string[] private _dnas = ["male", "female", "robot", "ape", "alien", "ball head", "gold"];
+    string private _skins = "none";
     string[] private _skins3 = ["dark", "bright", "yellow"];
-    string[] private _beards = ["none"];
+    string private _beards = "none";
     string[] private _beards4 = ["none", "shape 1", "shape 2", "shape 3"];
-    string[] private _hairs = ["none"];
+    string private _hairs = "none";
     string[] private _hairs4 = ["none", "short", "long", "crazy"];
     string[] private _hairs3 = ["short", "long", "crazy"];
 
     string[] private _tops = ["tshirt", "hoodie"];
     string[] private _bottoms = ["shorts", "jogger"];
-    uint private _numbers = 99;
+    uint private _numbers = 26;
     string[] private _shoes = ["reg 1", "reg 2", "reg 3", "spe 1", "spe 2", "spe 3"];
     string[] private _tatoos = ["none", "shape 1", "shape 2", "shape 3", "shape 4", "shape 5"];
     string[] private _glasses = ["none", "shape 1", "shape 2", "shape 3"];
@@ -110,13 +107,19 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         string memory name,
         string memory symbol,
         address admin,
-        address paramsAddress
+        address paramsAddress,
+        address LINK_TOKEN,
+        address ORACLE
     ) initializer public {
         require(admin != address(0), Errors.INV_ADD);
         require(paramsAddress != address(0), Errors.INV_ADD);
         __ERC721_init(name, symbol);
         _paramsAddress = paramsAddress;
         _admin = admin;
+
+        // init for oracle
+        setChainlinkToken(LINK_TOKEN);
+        setChainlinkOracle(ORACLE);
 
         _availableShapes["Pillhead"] = 1;
         _numAvailableShapes = 1;
@@ -175,6 +178,8 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         }
     }
 
+    /* @TRAITS: Get data for render
+    */
     function rand(uint256 id, string memory trait, string[] memory values) internal pure returns (string memory) {
         uint256 k = uint256(keccak256(abi.encodePacked(trait, toString(id))));
         return values[k % values.length];
@@ -194,43 +199,46 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }
 
     function getSkin(uint256 id) internal view returns (string memory) {
-        bytes32 a = keccak256(abi.encodePacked(getDNA(id)));
+        bytes32 dna = keccak256(abi.encodePacked(getDNA(id)));
         bytes32 b2 = keccak256(abi.encodePacked(_dnas[2]));
         bytes32 b3 = keccak256(abi.encodePacked(_dnas[3]));
         bytes32 b4 = keccak256(abi.encodePacked(_dnas[4]));
         bytes32 b5 = keccak256(abi.encodePacked(_dnas[5]));
+        bytes32 b6 = keccak256(abi.encodePacked(_dnas[6]));
 
-        if (a == b2 || a == b3 || a == b4 || a == b5) {
-            return rand(id, "skin", _skins);
+        if (dna == b2 || dna == b3 || dna == b4 || dna == b5 || dna == b6) {
+            return _skins;
         }
         return rand(id, "skin", _skins3);
     }
 
     function getBeard(uint256 id) internal view returns (string memory) {
-        bytes32 a = keccak256(abi.encodePacked(getDNA(id)));
+        bytes32 dna = keccak256(abi.encodePacked(getDNA(id)));
         bytes32 b1 = keccak256(abi.encodePacked(_dnas[1]));
         bytes32 b2 = keccak256(abi.encodePacked(_dnas[2]));
         bytes32 b3 = keccak256(abi.encodePacked(_dnas[3]));
         bytes32 b4 = keccak256(abi.encodePacked(_dnas[4]));
         bytes32 b5 = keccak256(abi.encodePacked(_dnas[5]));
+        bytes32 b6 = keccak256(abi.encodePacked(_dnas[6]));
 
-        if (a == b1 || a == b2 || a == b3 || a == b4 || a == b5) {
-            return rand(id, "beard", _beards);
+        if (dna == b1 || dna == b2 || dna == b3 || dna == b4 || dna == b5 || dna == b6) {
+            return _beards;
         }
         return rand(id, "beard", _beards4);
     }
 
     function getHair(uint256 id) internal view returns (string memory) {
-        bytes32 a = keccak256(abi.encodePacked(getDNA(id)));
+        bytes32 dna = keccak256(abi.encodePacked(getDNA(id)));
         bytes32 b1 = keccak256(abi.encodePacked(_dnas[1]));
         bytes32 b2 = keccak256(abi.encodePacked(_dnas[2]));
         bytes32 b3 = keccak256(abi.encodePacked(_dnas[3]));
         bytes32 b4 = keccak256(abi.encodePacked(_dnas[4]));
         bytes32 b5 = keccak256(abi.encodePacked(_dnas[5]));
+        bytes32 b6 = keccak256(abi.encodePacked(_dnas[6]));
 
-        if (a == b2 || a == b3 || a == b4 || a == b5) {
-            return rand(id, "hair", _hairs);
-        } else if (a == b2) {
+        if (dna == b2 || dna == b3 || dna == b4 || dna == b5 || dna == b6) {
+            return _hairs;
+        } else if (dna == b2) {
             return rand(id, "hair", _hairs3);
         }
         return rand(id, "hair", _hairs4);
@@ -245,7 +253,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }
 
     function getNumber(uint256 id) internal view returns (uint256) {
-        return randUint256(id, "number", 0, _numbers);
+        return randUint256(id, "number", 1, _numbers);
     }
 
     function getShoes(uint256 id) internal view returns (string memory) {
@@ -295,7 +303,6 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         return player;
     }
 
-
     function toString(uint256 value) internal pure returns (string memory) {
         if (value == 0) {return "0";}
         uint256 temp = value;
@@ -314,6 +321,8 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         return string(buffer);
     }
 
+    /* @URI: control uri
+    */
     function _baseURI() internal view override returns (string memory) {
         return _uri;
     }
@@ -323,6 +332,8 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         _uri = baseURI;
     }
 
+    /* @MINT mint nft
+    */
     function mintByToken(uint256 tokenIdGated) public nonReentrant {
         require(_tokenAddrErc721 != address(0), Errors.INV_ADD);
         // check shapes
@@ -370,21 +381,36 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         royaltyAmount = (_salePrice * 500) / 10000;
     }
 
-    ///
-    // Oracle
-    ///
+    /* @notice: Oracle feature
+    */
     using Chainlink for Chainlink.Request;
-    function changeOracle(bytes32 jobId, uint256 fee, string memory url) external {
-        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
-        _oracleJobId = jobId;
-        // 0,1 * 10**18 (Varies by network and job)
-        //        _fee = (1 * LINK_DIVISIBILITY) / 10;
-        _oracleFee = fee;
-        _oracleUrl = url;
+    using CBORChainlink for BufferChainlink.buffer;
+    struct GameCreate {
+        uint32 gameId;
+        uint40 startTime;
+        string homeTeam;
+        string awayTeam;
     }
 
+    struct GameResolve {
+        uint32 gameId;
+        uint8 homeScore;
+        uint8 awayScore;
+        string status;
+    }
+
+    function changeOracle(address oracle) external {
+        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
+        setChainlinkOracle(oracle);
+    }
+
+    /**
+     * @notice Stores the scheduled games.
+     * @param requestId the request ID for fulfillment.
+     * @param gameData the games data is resolved.
+     */
     function fulfill(bytes32 requestId, bytes memory gameData) public recordChainlinkFulfillment(requestId) {
-        (string memory gameId, uint256 startTime, string memory home, string memory away, uint homeTeamGoals, uint awayTeamGoals, uint8 status) = abi.decode(gameData, (string, uint256, string, string, uint8, uint8, uint8));
+        (uint32 gameId, uint40 startTime, string memory home, string memory away, uint8 homeTeamGoals, uint8 awayTeamGoals, uint8 status) = abi.decode(gameData, (uint32, uint40, string, string, uint8, uint8, uint8));
         Result result = determineResult(homeTeamGoals, awayTeamGoals);
         if (result == Result.HOMETEAMWIN) {
             _nationsEmo[home].tempEmo = _emotions[2];
@@ -400,26 +426,46 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         _nationsEmo[away].tempLastTime = block.timestamp;
     }
 
+    /**
+     * @notice Stores the scheduled games.
+     * @param _requestId the request ID for fulfillment.
+     * @param _result the games either to be created or resolved.
+     */
+    function fulfillSchedule(bytes32 _requestId, bytes[] memory _result) external recordChainlinkFulfillment(_requestId) {
+        // TODO
+    }
+
     function determineResult(uint homeTeam, uint awayTeam) internal view returns (Result) {
         if (homeTeam > awayTeam) {return Result.HOMETEAMWIN;}
         if (homeTeam == awayTeam) {return Result.DRAW;}
         return Result.AWAYTEAMWIN;
     }
 
-    function requestData(bytes32 _gameId) public returns (bytes32 requestId) {
+    function requestData(bytes32 jobId, uint256 fee, string memory url, string memory path) public returns (bytes32 requestId) {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
-        Chainlink.Request memory req = buildChainlinkRequest(_oracleJobId, address(this), this.fulfill.selector);
-
-        // Set the URL to perform the GET request on
-        req.add('get', string(abi.encodePacked(_oracleUrl, "/game/", _gameId)));
-
-        // Chainlink nodes prior to 1.0.0 support this format
-        // request.add("path", "k1.k2.k3.k4..."); 
-        req.add('path', "DATA.GAME");
-        // Chainlink nodes 1.0.0 and later support this format
-
+        Chainlink.Request memory req = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
+        req.add('get', url);
+        req.add('path', path);
         // Sends the request
-        return sendChainlinkRequest(req, _oracleFee);
+        return sendChainlinkRequest(req, fee);
+    }
+
+    /**
+     * @notice Requests the tournament games either to be created or to be resolved on a specific date.
+     * @dev Requests the 'schedule' endpoint. Result is an array of GameCreate or GameResolve encoded (see structs).
+     * @param jobId the jobID.
+     * @param fee the LINK amount in Juels (i.e. 10^18 aka 1 LINK).
+     // 77: FIFA World Cup
+     * @param market the number associated with the type of market (see Data Conversions).
+     * @param date the starting time of the event as a UNIX timestamp in seconds.
+     */
+    function requestSchedule(bytes32 jobId, uint256 fee, uint256 market, uint256 date) external {
+        Chainlink.Request memory req = buildOperatorRequest(jobId, this.fulfillSchedule.selector);
+        req.addUint("market", market);
+        // 77: FIFA World Cup
+        req.addUint("leagueId", 77);
+        req.addUint("date", date);
+        sendOperatorRequest(req, fee);
     }
 
     function withdrawLink() public {
