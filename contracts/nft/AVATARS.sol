@@ -6,10 +6,9 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import '@chainlink/contracts/src/v0.8/ChainlinkClient.sol';
 import "../lib/helpers/Errors.sol";
 
-contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgradeable, OwnableUpgradeable, ChainlinkClient, IERC2981Upgradeable {
+contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgradeable, OwnableUpgradeable, IERC2981Upgradeable {
     using SafeMathUpgradeable for uint256;
 
     // @dev: supply for collection
@@ -20,6 +19,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     address public _admin;
     address public _be;
     address public _paramsAddress;
+    address public _oracle;
 
     string public _algorithm;
     uint256 public _counter;
@@ -79,46 +79,20 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         string _gloves;
     }
 
-    /**
-     * @notice Initialize the link token and target oracle
-     *
-     * Mumbai polygon Testnet details:
-     * Link Token: 0x326C977E6efc84E512bB9C30f76E30c160eD06FB
-     ** - Any API
-     * Oracle: 0x40193c8518BB267228Fc409a613bDbD8eC5a97b3 (Chainlink DevRel)
-     * jobId: 7da2702f37fd48e5b1b9a5715e3509b6
-     * jobId bytes32: 0x3764613237303266333766643438653562316239613537313565333530396236
-     ** - Enetpulse Sports Data Oracle
-     * Oracle: 0xd5821b900e44db9490da9b09541bbd027fBecF4E
-     * jobId: d110b5c4b83d42dca20e410ac537cd94
-     * jobId bytes32: 0x6431313062356334623833643432646361323065343130616335333763643934
-     *
-     *
-     * Ethereum Mainnet details:
-     * Link Token: 0x514910771af9ca656af840dff83e8264ecf986ca
-     * Oracle: 0x6A9e45568261c5e0CBb1831Bd35cA5c4b70375AE (Chainlink DevRel)
-     * jobId: 7da2702f37fd48e5b1b9a5715e3509b6
-     * jobId bytes32: 0x3764613237303266333766643438653562316239613537313565333530396236
-     ** - Enetpulse Sports Data Oracle
-     * Oracle: 0x6A9e45568261c5e0CBb1831Bd35cA5c4b70375AE (Chainlink DevRel)
-     */
     function initialize(
         string memory name,
         string memory symbol,
         address admin,
         address paramsAddress,
-        address LINK_TOKEN,
         address ORACLE
     ) initializer public {
-        require(admin != address(0), Errors.INV_ADD);
-        require(paramsAddress != address(0), Errors.INV_ADD);
+        require(admin != address(0) && paramsAddress != address(0) && ORACLE != address(0), Errors.INV_ADD);
         __ERC721_init(name, symbol);
         _paramsAddress = paramsAddress;
         _admin = admin;
 
         // init for oracle
-        setChainlinkToken(LINK_TOKEN);
-        setChainlinkOracle(ORACLE);
+        _oracle = ORACLE;
 
         // init traits
         initTraits();
@@ -325,7 +299,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }
 
     function getGloves(uint256 id) internal view returns (string memory) {
-        return rand(id, "glovers", _glasses);
+        return rand(id, "glovers", _gloves);
     }
 
     function getEmotionTime(uint256 id) internal view returns (string memory) {
@@ -419,25 +393,11 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
 
     /* @notice: Oracle feature
     */
-    using Chainlink for Chainlink.Request;
-    using CBORChainlink for BufferChainlink.buffer;
-    struct GameCreate {
-        uint32 gameId;
-        uint40 startTime;
-        string homeTeam;
-        string awayTeam;
-    }
-
-    struct GameResolve {
-        uint32 gameId;
-        uint8 homeScore;
-        uint8 awayScore;
-        string status;
-    }
 
     function changeOracle(address oracle) external {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
-        setChainlinkOracle(oracle);
+        require(oracle != address(0), Errors.INV_ADD);
+        _oracle = oracle;
     }
 
     /**
@@ -445,7 +405,8 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
      * @param requestId the request ID for fulfillment.
      * @param gameData the games data is resolved.
      */
-    function fulfill(bytes32 requestId, bytes memory gameData) public recordChainlinkFulfillment(requestId) {
+    function fulfill(bytes32 requestId, bytes memory gameData) public {
+        require(msg.sender == _oracle, Errors.INV_ADD);
         (uint32 gameId, uint40 startTime, string memory home, string memory away, uint8 homeTeamGoals, uint8 awayTeamGoals, uint8 status) = abi.decode(gameData, (uint32, uint40, string, string, uint8, uint8, uint8));
         Result result = determineResult(homeTeamGoals, awayTeamGoals);
         if (result == Result.H_W) {
@@ -462,49 +423,9 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         _moods[away].tempLastTime = block.timestamp;
     }
 
-    /**
-     * @notice Stores, from Enetpulse, the scheduled games.
-     */
-    /*function fulfillSchedule(bytes32 _requestId, bytes[] memory _result) external recordChainlinkFulfillment(_requestId) {
-        for (uint i = 0; i < _result.length; i++) {
-    
-        }
-    }*/
-
     function determineResult(uint homeTeam, uint awayTeam) internal view returns (Result) {
         if (homeTeam > awayTeam) {return Result.H_W;}
         if (homeTeam == awayTeam) {return Result.D;}
         return Result.A_W;
-    }
-
-    /**
-    * @notice Requests, from any API,the tournament games to be resolved.
-    */
-    function requestData(bytes32 jobId, uint256 fee, string memory url, string memory path) public returns (bytes32 requestId) {
-        require(msg.sender == _admin || msg.sender == _be, Errors.ONLY_ADMIN_ALLOWED);
-        Chainlink.Request memory req = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
-        req.add('get', url);
-        req.add('path', path);
-        // Sends the request
-        return sendChainlinkRequest(req, fee);
-    }
-
-    /**
-     * @notice Requests, from Enetpulse, the tournament games either to be created or to be resolved on a specific date.
-     */
-    /*function requestSchedule(bytes32 jobId, uint256 fee, uint256 market, uint256 date) external {
-        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
-        Chainlink.Request memory req = buildOperatorRequest(jobId, this.fulfillSchedule.selector);
-        req.addUint("market", market);
-        // 77: FIFA World Cup
-        req.addUint("leagueId", 77);
-        req.addUint("date", date);
-        sendOperatorRequest(req, fee);
-    }*/
-
-    function withdrawLink() public {
-        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
-        LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
-        require(link.transfer(msg.sender, link.balanceOf(address(this))), 'Unable to transfer');
     }
 }
