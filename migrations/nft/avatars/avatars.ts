@@ -18,7 +18,8 @@ class AVATARS {
         this.senderPublicKey = senderPublicKey;
     }
 
-    async deployUpgradeable(name: string, symbol: string, adminAddress: any, paramAdd: any, sweet: any, link: any, oracle: any) {
+    async deployUpgradeable(name: string, symbol: string, adminAddress: any, paramAdd: any,
+    ) {
         if (this.network == "local") {
             console.log("not run local");
             return;
@@ -26,8 +27,8 @@ class AVATARS {
 
         const contract = await ethers.getContractFactory("AVATARS");
         console.log("AVATARS.deploying ...")
-        const proxy = await upgrades.deployProxy(contract, [name, symbol, adminAddress, paramAdd, sweet, link, oracle], {
-            initializer: 'initialize(string, string, address, address, address, address, address)',
+        const proxy = await upgrades.deployProxy(contract, [name, symbol, adminAddress, paramAdd], {
+            initializer: 'initialize(string, string, address, address)',
         });
         await proxy.deployed();
         console.log("AVATARS deployed at proxy:", proxy.address);

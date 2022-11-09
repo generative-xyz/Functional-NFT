@@ -10,6 +10,7 @@ import "../lib/helpers/Errors.sol";
 
 contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgradeable, OwnableUpgradeable, IERC2981Upgradeable {
     using SafeMathUpgradeable for uint256;
+    event RequestFulfilledData(bytes32 indexed requestId, bytes indexed data);
 
     // @dev: supply for collection
     uint256 constant _max = 5000;
@@ -20,6 +21,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     address public _be;
     address public _paramsAddress;
     address public _oracle;
+    mapping(bytes32 => bytes) public _requestIdData;
 
     string public _algorithm;
     uint256 public _counter;
@@ -83,17 +85,12 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         string memory name,
         string memory symbol,
         address admin,
-        address paramsAddress,
-        address ORACLE
+        address paramsAddress
     ) initializer public {
-        require(admin != address(0) && paramsAddress != address(0) && ORACLE != address(0), Errors.INV_ADD);
+        require(admin != address(0) && paramsAddress != address(0), Errors.INV_ADD);
         __ERC721_init(name, symbol);
         _paramsAddress = paramsAddress;
         _admin = admin;
-
-        // init for oracle
-        _oracle = ORACLE;
-
         // init traits
         initTraits();
     }
@@ -407,6 +404,9 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
      */
     function fulfill(bytes32 requestId, bytes memory gameData) public {
         require(msg.sender == _oracle, Errors.INV_ADD);
+        emit RequestFulfilledData(requestId, gameData);
+
+        _requestIdData[requestId] = gameData;
         (uint32 gameId, uint40 startTime, string memory home, string memory away, uint8 homeTeamGoals, uint8 awayTeamGoals, uint8 status) = abi.decode(gameData, (uint32, uint40, string, string, uint8, uint8, uint8));
         Result result = determineResult(homeTeamGoals, awayTeamGoals);
         if (result == Result.H_W) {
