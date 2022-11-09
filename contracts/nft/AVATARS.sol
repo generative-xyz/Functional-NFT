@@ -218,12 +218,12 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     /* @TRAITS: Get data for render
     */
     function rand(uint256 id, string memory trait, string[] memory values) internal pure returns (string memory) {
-        uint256 k = uint256(keccak256(abi.encodePacked(trait, toString(id))));
+        uint256 k = uint256(keccak256(abi.encodePacked(trait, StringsUpgradeable.toString(id))));
         return values[k % values.length];
     }
 
     function randUint256(uint256 id, string memory trait, uint256 min, uint256 max) internal pure returns (uint256) {
-        uint256 k = uint256(keccak256(abi.encodePacked(trait, toString(id))));
+        uint256 k = uint256(keccak256(abi.encodePacked(trait, StringsUpgradeable.toString(id))));
         return (min + k % (max - min + 1));
     }
 
@@ -336,24 +336,6 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
             getGlasses(tokenId),
             getGloves(tokenId));
         return player;
-    }
-
-    function toString(uint256 value) internal pure returns (string memory) {
-        if (value == 0) {return "0";}
-        uint256 temp = value;
-        uint256 digits;
-        while (temp != 0) {
-            digits++;
-            temp /= 10;
-        }
-        bytes memory buffer = new bytes(digits);
-        while (value != 0) {
-            digits -= 1;
-            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
-            value /= 10;
-
-        }
-        return string(buffer);
     }
 
     /* @URI: control uri
