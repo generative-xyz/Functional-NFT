@@ -29,15 +29,9 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
     address public _admin;
     address public _be;
 
-    // @dev: living data for collection
-    struct Mood {
-        string tempEmo;
-        uint256 tempLastTime;
-    }
+    mapping(bytes32 => bytes[]) public requestIdGames;
+    mapping(bytes32 => bytes) public requestIdGamesData;
 
-    mapping(string => Mood) public _moods;
-    enum Result {U, H_W, A_W, D}
-    string[] public _emotions = ["0", "1", "2"];
 
     /**
      * @notice Initialize the link token and target oracle
@@ -93,22 +87,8 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
      */
     function fulfill(bytes32 requestId, bytes memory gameData) public recordChainlinkFulfillment(requestId) {
         emit RequestFulfilledData(requestId, gameData);
-        /*(uint32 gameId, uint40 startTime, string memory home, string memory away, uint8 homeTeamGoals, uint8 awayTeamGoals, uint8 status) = abi.decode(gameData, (uint32, uint40, string, string, uint8, uint8, uint8));
-        Result result = determineResult(homeTeamGoals, awayTeamGoals);
-        if (result == Result.H_W) {
-            _moods[home].tempEmo = _emotions[2];
-            _moods[away].tempEmo = _emotions[1];
-        } else if (result == Result.A_W) {
-            _moods[home].tempEmo = _emotions[1];
-            _moods[away].tempEmo = _emotions[2];
-        } else {
-            _moods[home].tempEmo = _emotions[0];
-            _moods[away].tempEmo = _emotions[0];
-        }
-        
-        0x2178c7a02856fe8f204cff3921baad3325803af86d9106ff115ab41b99eec43d00000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000160000000000000000000000000000000000000000000000000000000000000000900000000000000000000000000000000000000000000000000000000001e848000000000000000000000000000000000000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000012000000000000000000000000000000000000000000000000000000000000000070000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000055161746172000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000745637561646f7200000000000000000000000000000000000000000000000000
-        _moods[home].tempLastTime = block.timestamp;
-        _moods[away].tempLastTime = block.timestamp;*/
+
+        requestIdGamesData[requestId] = gameData;
     }
 
     /**
@@ -116,12 +96,9 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
      */
     function fulfillSchedule(bytes32 requestId, bytes[] memory result) external recordChainlinkFulfillment(requestId) {
         emit RequestFulfilled(requestId, result);
-    }
 
-    function determineResult(uint homeTeam, uint awayTeam) internal view returns (Result) {
-        if (homeTeam > awayTeam) {return Result.H_W;}
-        if (homeTeam == awayTeam) {return Result.D;}
-        return Result.A_W;
+        requestIdGames[requestId] = result;
+        
     }
 
     /**
@@ -142,6 +119,7 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
     function requestSchedule(bytes32 jobId, uint256 fee, uint256 market, uint256 leagueId, uint256 date) external {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
         Chainlink.Request memory req = buildOperatorRequest(jobId, this.fulfillSchedule.selector);
+        //0: create, 1: resolved
         req.addUint("market", market);
         // 77: FIFA World Cup
         req.addUint("leagueId", leagueId);
@@ -149,9 +127,107 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
         sendOperatorRequest(req, fee);
     }
 
+    function requestSchedule(
+        bytes32 _specId,
+        uint256 _payment,
+        uint256 _market,
+        uint256 _leagueId,
+        uint256 _date,
+        uint256[] calldata _gameIds
+    ) external {
+        Chainlink.Request memory req = buildOperatorRequest(_specId, this.fulfillSchedule.selector);
+        req.addUint("market", _market);
+        req.addUint("leagueId", _leagueId);
+        req.addUint("date", _date);
+        _addUintArray(req, "gameIds", _gameIds);
+        sendOperatorRequest(req, _payment);
+    }
+
+    function cancelRequest(
+        bytes32 _requestId,
+        uint256 _payment,
+        bytes4 _callbackFunctionId,
+        uint256 _expiration
+    ) external {
+        cancelChainlinkRequest(_requestId, _payment, _callbackFunctionId, _expiration);
+    }
+
+    function setOracle(address _oracle) external {
+        setChainlinkOracle(_oracle);
+    }
+
+    function setRequestIdGames(bytes32 _requestId, bytes[] memory _games) external {
+        requestIdGames[_requestId] = _games;
+    }
+
     function withdrawLink() public {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
         LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
         require(link.transfer(msg.sender, link.balanceOf(address(this))), 'Unable to transfer');
+    }
+
+    /* ========== EXTERNAL VIEW FUNCTIONS ========== */
+    function getGameCreate(bytes32 _requestId, uint256 _idx) external view returns (GameCreate memory) {
+        return _getGameCreateStruct(requestIdGames[_requestId][_idx]);
+    }
+
+    function getGameResolve(bytes32 _requestId, uint256 _idx) external view returns (GameResolve memory) {
+        return _getGameResolveStruct(requestIdGames[_requestId][_idx]);
+    }
+
+    function _getOracleAddress() external view returns (address) {
+        return chainlinkOracleAddress();
+    }
+
+    /* ========== PRIVATE PURE FUNCTIONS ========== */
+    function _addUintArray(
+        Chainlink.Request memory _req,
+        string memory _key,
+        uint256[] memory _values
+    ) private pure {
+        Chainlink.Request memory r2 = _req;
+        r2.buf.encodeString(_key);
+        r2.buf.startArray();
+        uint256 valuesLength = _values.length;
+        for (uint256 i = 0; i < valuesLength;) {
+            r2.buf.encodeUInt(_values[i]);
+        unchecked {
+            ++i;
+        }
+        }
+        r2.buf.endSequence();
+        _req = r2;
+    }
+
+    function _getGameCreateStruct(bytes memory _data) private pure returns (GameCreate memory) {
+        uint32 gameId = uint32(bytes4(_sliceDynamicArray(0, 4, _data)));
+        uint40 startTime = uint40(bytes5(_sliceDynamicArray(4, 9, _data)));
+        uint8 homeTeamLength = uint8(bytes1(_data[9]));
+        uint256 endHomeTeam = 10 + homeTeamLength;
+        string memory homeTeam = string(_sliceDynamicArray(10, endHomeTeam, _data));
+        string memory awayTeam = string(_sliceDynamicArray(endHomeTeam, _data.length, _data));
+        GameCreate memory gameCreate = GameCreate(gameId, startTime, homeTeam, awayTeam);
+        return gameCreate;
+    }
+
+    function _getGameResolveStruct(bytes memory _data) private pure returns (GameResolve memory) {
+        uint32 gameId = uint32(bytes4(_sliceDynamicArray(0, 4, _data)));
+        uint8 homeScore = uint8(bytes1(_data[4]));
+        uint8 awayScore = uint8(bytes1(_data[5]));
+        string memory status = string(_sliceDynamicArray(6, _data.length, _data));
+        GameResolve memory gameResolve = GameResolve(gameId, homeScore, awayScore, status);
+        return gameResolve;
+    }
+
+    function _sliceDynamicArray(
+        uint256 _start,
+        uint256 _end,
+        bytes memory _data
+    ) private pure returns (bytes memory) {
+        bytes memory result = new bytes(_end - _start);
+        for (uint256 i = 0; i < _end - _start; ++i) {
+            result[i] = _data[_start + i];
+        }
+        return result;
     }
 }
