@@ -105,7 +105,6 @@ class AVATARS {
     async setBE(contractAddress: any, be: any, gas: number) {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
-        console.log(keccak256(temp?.web3.eth.abi.en))
         const fun = temp?.nftContract.methods.setBE(be);
         //the transaction
         const tx = {

@@ -138,29 +138,42 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         "Portugal", "Ghana", "Uruguay", "Korea Republic" // GH
         ];
 
-        _emotions = ["normal", "sad", "happy"];
+        _emotions = ["0", "1", "2"];
+        //["normal", "sad", "happy"];
 
-        _emotionTimes = ["Forever", "1 day", "7 days", "30 days"];
+        _emotionTimes = ["0", "1", "2", "3"];
+        //["Forever", "1 day", "7 days", "30 days"];
 
-        _dnas = ["male", "female", "robot", "ape", "alien", "ball head"];
+        _dnas = ["0", "1", "2", "3", "4", "5"];
+        //["male", "female", "robot", "ape", "alien", "ball head"];
 
-        _skins3 = ["dark", "bright", "yellow"];
+        _skins3 = ["0", "1", "2"];
+        //["dark", "bright", "yellow"];
 
-        _beards4 = ["none", "shape 1", "shape 2", "shape 3"];
+        _beards4 = ["0", "1", "2", "3"];
+        //["none", "shape 1", "shape 2", "shape 3"];
 
-        _hairs4 = ["none", "short", "long", "crazy"];
-        _hairs3 = ["short", "long", "crazy"];
+        _hairs4 = ["0", "1", "2", "3"];
+        //["none", "short", "long", "crazy"];
+        _hairs3 = ["1", "2", "3"];
+        //["short", "long", "crazy"];
 
         _tops = ["tshirt", "hoodie"];
+        //["0", "1"];
 
-        _bottoms = ["shorts", "jogger"];
+        _bottoms = ["0", "1"];
+        //["shorts", "jogger"];
 
-        _shoes = ["reg 1", "reg 2", "reg 3", "spe 1", "spe 2", "spe 3"];
+        _shoes = ["0", "1", "2", "3", "4", "5"];
+        //["reg 1", "reg 2", "reg 3", "spe 1", "spe 2", "spe 3"];
 
-        _tatoos = ["none", "shape 1", "shape 2", "shape 3", "shape 4", "shape 5"];
+        _tatoos = ["0", "1", "2", "3", "4", "5"];
+        //["none", "shape 1", "shape 2", "shape 3", "shape 4", "shape 5"];
 
-        _glasses = ["none", "shape 1", "shape 2", "shape 3"];
-        _gloves = ["none", "have"];
+        _glasses = ["0", "1", "2", "3"];
+        //["none", "shape 1", "shape 2", "shape 3"];
+        _gloves = ["0", "1"];
+        //["none", "have"];
 
     }
 
@@ -217,16 +230,18 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         }
     }
 
+    function seeding(uint256 id, string memory trait) internal pure returns (uint256) {
+        return uint256(keccak256(abi.encodePacked(trait, StringsUpgradeable.toString(id))));
+    }
+
     /* @TRAITS: Get data for render
     */
     function rand(uint256 id, string memory trait, string[] memory values) internal pure returns (string memory) {
-        uint256 k = uint256(keccak256(abi.encodePacked(trait, StringsUpgradeable.toString(id))));
-        return values[k % values.length];
+        return values[seeding(id, trait) % values.length];
     }
 
     function randUint256(uint256 id, string memory trait, uint256 min, uint256 max) internal pure returns (uint256) {
-        uint256 k = uint256(keccak256(abi.encodePacked(trait, StringsUpgradeable.toString(id))));
-        return (min + k % (max - min + 1));
+        return (min + seeding(id, trait) % (max - min + 1));
     }
 
     function compareStrings(string memory a, string memory b) internal view returns (bool) {
