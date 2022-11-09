@@ -18,6 +18,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
 
     // @dev: handler
     address public _admin;
+    address public _be;
     address public _paramsAddress;
 
     string public _algorithm;
@@ -140,7 +141,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
 
         _emotionTimes = ["Forever", "1 day", "7 days", "30 days"];
 
-        _dnas = ["male", "female", "robot", "ape", "alien", "ball head", "gold"];
+        _dnas = ["male", "female", "robot", "ape", "alien", "ball head"];
 
         _skins3 = ["dark", "bright", "yellow"];
 
@@ -162,21 +163,19 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
 
     }
 
-    /*function changeAdmin(address newAdm, address newParam) external {
+    function changeAdmin(address newAdm) external {
         require(msg.sender == _admin && newAdm != address(0), Errors.ONLY_ADMIN_ALLOWED);
-
         // change admin
         if (_admin != newAdm) {
             address _previousAdmin = _admin;
             _admin = newAdm;
         }
+    }
 
-        // change param
-        require(newParam != address(0));
-        if (_paramsAddress != newParam) {
-            _paramsAddress = newParam;
-        }
-    }*/
+    function changeBE(address be) external {
+        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
+        _be = be;
+    }
 
     function setAlgo(string memory algo) public {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
@@ -219,6 +218,10 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         return (min + k % (max - min + 1));
     }
 
+    function compareStrings(string memory a, string memory b) internal view returns (bool) {
+        return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
+    }
+
     function getNation(uint256 id) internal view returns (string memory) {
         return rand(id, "nation", _nations);
     }
@@ -228,46 +231,41 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }
 
     function getSkin(uint256 id) internal view returns (string memory) {
-        bytes32 dna = keccak256(abi.encodePacked(getDNA(id)));
-        bytes32 b2 = keccak256(abi.encodePacked(_dnas[2]));
-        bytes32 b3 = keccak256(abi.encodePacked(_dnas[3]));
-        bytes32 b4 = keccak256(abi.encodePacked(_dnas[4]));
-        bytes32 b5 = keccak256(abi.encodePacked(_dnas[5]));
-        bytes32 b6 = keccak256(abi.encodePacked(_dnas[6]));
+        string memory dna = getDNA(id);
 
-        if (dna == b2 || dna == b3 || dna == b4 || dna == b5 || dna == b6) {
+        if (compareStrings(dna, _dnas[2])
+        || compareStrings(dna, _dnas[3])
+        || compareStrings(dna, _dnas[4])
+            || compareStrings(dna, _dnas[5])) {
             return "none";
         }
         return rand(id, "skin", _skins3);
     }
 
     function getBeard(uint256 id) internal view returns (string memory) {
-        bytes32 dna = keccak256(abi.encodePacked(getDNA(id)));
-        bytes32 b1 = keccak256(abi.encodePacked(_dnas[1]));
-        bytes32 b2 = keccak256(abi.encodePacked(_dnas[2]));
-        bytes32 b3 = keccak256(abi.encodePacked(_dnas[3]));
-        bytes32 b4 = keccak256(abi.encodePacked(_dnas[4]));
-        bytes32 b5 = keccak256(abi.encodePacked(_dnas[5]));
-        bytes32 b6 = keccak256(abi.encodePacked(_dnas[6]));
+        string memory dna = getDNA(id);
 
-        if (dna == b1 || dna == b2 || dna == b3 || dna == b4 || dna == b5 || dna == b6) {
+        if (
+            compareStrings(dna, _dnas[1])
+            || compareStrings(dna, _dnas[2])
+            || compareStrings(dna, _dnas[3])
+            || compareStrings(dna, _dnas[4])
+            || compareStrings(dna, _dnas[5])) {
             return "none";
         }
         return rand(id, "beard", _beards4);
     }
 
     function getHair(uint256 id) internal view returns (string memory) {
-        bytes32 dna = keccak256(abi.encodePacked(getDNA(id)));
-        bytes32 b1 = keccak256(abi.encodePacked(_dnas[1]));
-        bytes32 b2 = keccak256(abi.encodePacked(_dnas[2]));
-        bytes32 b3 = keccak256(abi.encodePacked(_dnas[3]));
-        bytes32 b4 = keccak256(abi.encodePacked(_dnas[4]));
-        bytes32 b5 = keccak256(abi.encodePacked(_dnas[5]));
-        bytes32 b6 = keccak256(abi.encodePacked(_dnas[6]));
+        string memory dna = getDNA(id);
 
-        if (dna == b2 || dna == b3 || dna == b4 || dna == b5 || dna == b6) {
+        if (
+            compareStrings(dna, _dnas[2])
+            || compareStrings(dna, _dnas[3])
+            || compareStrings(dna, _dnas[4])
+            || compareStrings(dna, _dnas[5])) {
             return "none";
-        } else if (dna == b2) {
+        } else if (compareStrings(dna, _dnas[1])) {
             return rand(id, "hair", _hairs3);
         }
         return rand(id, "hair", _hairs4);
@@ -309,12 +307,12 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         string memory nation = getNation(tokenId);
         string memory emotionTime = getEmotionTime(tokenId);
         string memory emo = _nationsEmo[nation].tempEmo;
-        if (keccak256(abi.encodePacked(emotionTime)) != keccak256(abi.encodePacked(_emotionTimes[0]))) {
+        if (!compareStrings(emotionTime, _emotionTimes[0])) {
             uint256 eT = 86400;
-            if (keccak256(abi.encodePacked(emotionTime)) == keccak256(abi.encodePacked(_emotionTimes[3]))) {
+            if (compareStrings(emotionTime, _emotionTimes[3])) {
                 eT = eT * 30;
             }
-            else if (keccak256(abi.encodePacked(emotionTime)) == keccak256(abi.encodePacked(_emotionTimes[2]))) {
+            else if (compareStrings(emotionTime, _emotionTimes[2])) {
                 eT = eT * 7;
             }
             if (block.timestamp - _nationsEmo[nation].tempLastTime > eT) {
@@ -454,7 +452,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     * @notice Requests, from any API,the tournament games to be resolved.
     */
     function requestData(bytes32 jobId, uint256 fee, string memory url, string memory path) public returns (bytes32 requestId) {
-        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
+        require(msg.sender == _admin || msg.sender == _be, Errors.ONLY_ADMIN_ALLOWED);
         Chainlink.Request memory req = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
         req.add('get', url);
         req.add('path', path);
