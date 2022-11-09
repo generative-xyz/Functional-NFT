@@ -35,13 +35,13 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     uint256 public _whitelistFee;
 
     // @dev: living data for collection
-    struct NationEmo {
+    struct Mood {
         string tempEmo;
         uint256 tempLastTime;
     }
 
-    mapping(string => NationEmo) _nationsEmo;
-    enum Result {UNKNOWN, HOMETEAMWIN, AWAYTEAMWIN, DRAW, PENDING}
+    mapping(string => Mood) _moods;
+    enum Result {U, H_W, A_W, D}
 
     /** @dev Avatars traits
     */
@@ -332,7 +332,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     function getParamValues(uint256 tokenId) public view returns (Player memory player) {
         string memory nation = getNation(tokenId);
         string memory emotionTime = getEmotionTime(tokenId);
-        string memory emo = _nationsEmo[nation].tempEmo;
+        string memory emo = _moods[nation].tempEmo;
         if (!compareStrings(emotionTime, _emotionTimes[0])) {
             uint256 eT = 86400;
             if (compareStrings(emotionTime, _emotionTimes[3])) {
@@ -341,7 +341,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
             else if (compareStrings(emotionTime, _emotionTimes[2])) {
                 eT = eT * 7;
             }
-            if (block.timestamp - _nationsEmo[nation].tempLastTime > eT) {
+            if (block.timestamp - _moods[nation].tempLastTime > eT) {
                 emo = _emotions[0];
             }
         }
@@ -445,18 +445,18 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     function fulfill(bytes32 requestId, bytes memory gameData) public recordChainlinkFulfillment(requestId) {
         (uint32 gameId, uint40 startTime, string memory home, string memory away, uint8 homeTeamGoals, uint8 awayTeamGoals, uint8 status) = abi.decode(gameData, (uint32, uint40, string, string, uint8, uint8, uint8));
         Result result = determineResult(homeTeamGoals, awayTeamGoals);
-        if (result == Result.HOMETEAMWIN) {
-            _nationsEmo[home].tempEmo = _emotions[2];
-            _nationsEmo[away].tempEmo = _emotions[1];
-        } else if (result == Result.AWAYTEAMWIN) {
-            _nationsEmo[home].tempEmo = _emotions[1];
-            _nationsEmo[away].tempEmo = _emotions[2];
+        if (result == Result.H_W) {
+            _moods[home].tempEmo = _emotions[2];
+            _moods[away].tempEmo = _emotions[1];
+        } else if (result == Result.A_W) {
+            _moods[home].tempEmo = _emotions[1];
+            _moods[away].tempEmo = _emotions[2];
         } else {
-            _nationsEmo[home].tempEmo = _emotions[0];
-            _nationsEmo[away].tempEmo = _emotions[0];
+            _moods[home].tempEmo = _emotions[0];
+            _moods[away].tempEmo = _emotions[0];
         }
-        _nationsEmo[home].tempLastTime = block.timestamp;
-        _nationsEmo[away].tempLastTime = block.timestamp;
+        _moods[home].tempLastTime = block.timestamp;
+        _moods[away].tempLastTime = block.timestamp;
     }
 
     /**
@@ -469,9 +469,9 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }*/
 
     function determineResult(uint homeTeam, uint awayTeam) internal view returns (Result) {
-        if (homeTeam > awayTeam) {return Result.HOMETEAMWIN;}
-        if (homeTeam == awayTeam) {return Result.DRAW;}
-        return Result.AWAYTEAMWIN;
+        if (homeTeam > awayTeam) {return Result.H_W;}
+        if (homeTeam == awayTeam) {return Result.D;}
+        return Result.A_W;
     }
 
     /**
