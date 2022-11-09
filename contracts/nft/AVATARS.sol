@@ -107,7 +107,6 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         string memory symbol,
         address admin,
         address paramsAddress,
-        address sweet,
         address LINK_TOKEN,
         address ORACLE
     ) initializer public {
@@ -116,7 +115,6 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         __ERC721_init(name, symbol);
         _paramsAddress = paramsAddress;
         _admin = admin;
-        _tokenAddrErc721 = sweet;
 
         // init for oracle
         setChainlinkToken(LINK_TOKEN);
@@ -178,12 +176,13 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }
 
     function changeAdmin(address newAdm) external {
-        require(msg.sender == _admin && newAdm != address(0), Errors.ONLY_ADMIN_ALLOWED);
-        // change admin
-        if (_admin != newAdm) {
-            address _previousAdmin = _admin;
-            _admin = newAdm;
-        }
+        require(msg.sender == _admin && newAdm != address(0) && _admin != newAdm, Errors.ONLY_ADMIN_ALLOWED);
+        _admin = newAdm;
+    }
+
+    function changeToken(address sweet) external {
+        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
+        _tokenAddrErc721 = sweet;
     }
 
     function setBE(address be) external {
@@ -233,6 +232,10 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     function seeding(uint256 id, string memory trait) internal pure returns (uint256) {
         return uint256(keccak256(abi.encodePacked(trait, StringsUpgradeable.toString(id))));
     }
+
+    /*function testShape(uint256 tokenIdGated) public view returns (uint256) {
+        return seeding(tokenIdGated, "shape") % 7;
+    }*/
 
     /* @TRAITS: Get data for render
     */
@@ -372,11 +375,11 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         // check shapes
         // string[] private shapes = ["Pillhead", "Smiler", "Spektral", "Helix", "Tesseract", "Torus", "Obelisk"];
         // accept Pillhead
-        require(uint256(keccak256(abi.encodePacked("shape", StringsUpgradeable.toString(tokenIdGated)))) % 7 == 0, Errors.INV_PARAMS);
+        require(seeding(tokenIdGated, "shape") % 7 == 0, Errors.INV_PARAMS);
         // erc-721
         IERC721Upgradeable token = IERC721Upgradeable(_tokenAddrErc721);
         // burn
-        token.safeTransferFrom(msg.sender, address(0), tokenIdGated);
+        token.safeTransferFrom(msg.sender, address(this), tokenIdGated);
 
         require(_counter < _maxUser);
         _counter++;
@@ -464,7 +467,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
      */
     /*function fulfillSchedule(bytes32 _requestId, bytes[] memory _result) external recordChainlinkFulfillment(_requestId) {
         for (uint i = 0; i < _result.length; i++) {
-
+    
         }
     }*/
 
