@@ -1,4 +1,4 @@
-import {AVATARS} from "./avatats";
+import {AVATARS} from "./avatars";
 
 (async () => {
     try {
@@ -8,7 +8,7 @@ import {AVATARS} from "./avatats";
         }
 
         const nft = new AVATARS(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
-        const address = await nft.upgradeContract("0xff5E73B5E01BDC0b8E9C5f5bAC1EB01C4e170170");
+        const address = await nft.upgradeContract("0x54a8d190d360a6AD5F806034284A1b9FcF2950b6");
         console.log({address});
     } catch (e) {
         // Deal with the fact the chain failed

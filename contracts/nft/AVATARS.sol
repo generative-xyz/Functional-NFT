@@ -28,7 +28,6 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     // @dev: mint condition 
     // base on Sweet nft
     address public _tokenAddrErc721;
-
     // base on fee
     uint256 public _fee;
     // base on whitelist
@@ -174,7 +173,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         }
     }
 
-    function changeBE(address be) external {
+    function setBE(address be) external {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
         _be = be;
     }
@@ -182,6 +181,16 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     function setAlgo(string memory algo) public {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
         _algorithm = algo;
+    }
+
+    function setFee(uint256 fee) public {
+        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
+        _fee = fee;
+    }
+
+    function setWhitelistFee(uint256 whitelistFee) public {
+        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
+        _whitelistFee = whitelistFee;
     }
 
     function pause() external {
