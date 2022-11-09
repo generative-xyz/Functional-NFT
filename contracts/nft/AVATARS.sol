@@ -28,15 +28,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     // base on Sweet nft
     address public _tokenAddrErc721;
     // check trait shape
-    string[] private _shapes = [
-    "Pillhead",
-    "Smiler",
-    "Spektral",
-    "Helix",
-    "Tesseract",
-    "Torus",
-    "Obelisk"
-    ];
+    string[] private _shapes;
     mapping(string => uint) private _availableShapes;
     uint private _numAvailableShapes;
     // base on fee
@@ -56,35 +48,22 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
 
     /** @dev Avatars traits
     */
-    string[] private _nations = [
-    "Qatar", "Ecuador", "Senegal", "Netherlands", // GA
-    "England", "IR Iran", "USA", "Wales", // GB
-    "Argentina", "Saudi Arabia", "Mexico", "Poland", // GC
-    "France", "Australia", "Denmark", "Tunisia", //GD
-    "Spain", "Costa Rica", "Germany", "Japan", //GE
-    "Belgium", "Canada", "Morocco", "Croatia", //GF
-    "Brazil", "Serbia", "Switzerland", "Cameroon", //GG
-    "Portugal", "Ghana", "Uruguay", "Korea Republic" // GH
-    ];
-    string[] private _emotions = ["normal", "sad", "happy"];
-    string[] private _emotionTimes = ["Forever", "1 day", "7 days", "30 days"];
+    string[] private _nations;
+    string[] private _emotions;
+    string[] private _emotionTimes;
 
-    string[] private _dnas = ["male", "female", "robot", "ape", "alien", "ball head", "gold"];
-    string private _skins = "none";
-    string[] private _skins3 = ["dark", "bright", "yellow"];
-    string private _beards = "none";
-    string[] private _beards4 = ["none", "shape 1", "shape 2", "shape 3"];
-    string private _hairs = "none";
-    string[] private _hairs4 = ["none", "short", "long", "crazy"];
-    string[] private _hairs3 = ["short", "long", "crazy"];
+    string[] private _dnas;
+    string[] private _skins3;
+    string[] private _beards4;
+    string[] private _hairs4;
+    string[] private _hairs3;
 
-    string[] private _tops = ["tshirt", "hoodie"];
-    string[] private _bottoms = ["shorts", "jogger"];
-    uint private _numbers = 26;
-    string[] private _shoes = ["reg 1", "reg 2", "reg 3", "spe 1", "spe 2", "spe 3"];
-    string[] private _tatoos = ["none", "shape 1", "shape 2", "shape 3", "shape 4", "shape 5"];
-    string[] private _glasses = ["none", "shape 1", "shape 2", "shape 3"];
-    string[] private _gloves = ["none", "have"];
+    string[] private _tops;
+    string[] private _bottoms;
+    string[] private _shoes;
+    string[] private _tatoos;
+    string[] private _glasses;
+    string[] private _gloves;
 
     struct Player {
         string _emotion;
@@ -103,6 +82,29 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         string _gloves;
     }
 
+    /**
+     * @notice Initialize the link token and target oracle
+     *
+     * Mumbai polygon Testnet details:
+     * Link Token: 0x326C977E6efc84E512bB9C30f76E30c160eD06FB
+     ** - Any API
+     * Oracle: 0x40193c8518BB267228Fc409a613bDbD8eC5a97b3 (Chainlink DevRel)
+     * jobId: 7da2702f37fd48e5b1b9a5715e3509b6
+     * jobId bytes32: 0x3764613237303266333766643438653562316239613537313565333530396236
+     ** - Enetpulse Sports Data Oracle
+     * Oracle: 0xd5821b900e44db9490da9b09541bbd027fBecF4E
+     * jobId: d110b5c4b83d42dca20e410ac537cd94
+     * jobId bytes32: 0x6431313062356334623833643432646361323065343130616335333763643934
+     *
+     *
+     * Ethereum Mainnet details:
+     * Link Token: 0x514910771af9ca656af840dff83e8264ecf986ca
+     * Oracle: 0x6A9e45568261c5e0CBb1831Bd35cA5c4b70375AE (Chainlink DevRel)
+     * jobId: 7da2702f37fd48e5b1b9a5715e3509b6
+     * jobId bytes32: 0x3764613237303266333766643438653562316239613537313565333530396236
+     ** - Enetpulse Sports Data Oracle
+     * Oracle: 0x6A9e45568261c5e0CBb1831Bd35cA5c4b70375AE (Chainlink DevRel)
+     */
     function initialize(
         string memory name,
         string memory symbol,
@@ -121,11 +123,54 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         setChainlinkToken(LINK_TOKEN);
         setChainlinkOracle(ORACLE);
 
+        // _shapes
+        _shapes = ["Pillhead", "Smiler", "Spektral", "Helix", "Tesseract", "Torus", "Obelisk"];
         _availableShapes["Pillhead"] = 1;
         _numAvailableShapes = 1;
+
+        // init traits
+        initTraits();
     }
 
-    function changeAdmin(address newAdm, address newParam) external {
+    function initTraits() internal {
+        _nations = [
+        "Qatar", "Ecuador", "Senegal", "Netherlands", // GA
+        "England", "IR Iran", "USA", "Wales", // GB
+        "Argentina", "Saudi Arabia", "Mexico", "Poland", // GC
+        "France", "Australia", "Denmark", "Tunisia", //GD
+        "Spain", "Costa Rica", "Germany", "Japan", //GE
+        "Belgium", "Canada", "Morocco", "Croatia", //GF
+        "Brazil", "Serbia", "Switzerland", "Cameroon", //GG
+        "Portugal", "Ghana", "Uruguay", "Korea Republic" // GH
+        ];
+
+        _emotions = ["normal", "sad", "happy"];
+
+        _emotionTimes = ["Forever", "1 day", "7 days", "30 days"];
+
+        _dnas = ["male", "female", "robot", "ape", "alien", "ball head", "gold"];
+
+        _skins3 = ["dark", "bright", "yellow"];
+
+        _beards4 = ["none", "shape 1", "shape 2", "shape 3"];
+
+        _hairs4 = ["none", "short", "long", "crazy"];
+        _hairs3 = ["short", "long", "crazy"];
+
+        _tops = ["tshirt", "hoodie"];
+
+        _bottoms = ["shorts", "jogger"];
+
+        _shoes = ["reg 1", "reg 2", "reg 3", "spe 1", "spe 2", "spe 3"];
+
+        _tatoos = ["none", "shape 1", "shape 2", "shape 3", "shape 4", "shape 5"];
+
+        _glasses = ["none", "shape 1", "shape 2", "shape 3"];
+        _gloves = ["none", "have"];
+
+    }
+
+    /*function changeAdmin(address newAdm, address newParam) external {
         require(msg.sender == _admin && newAdm != address(0), Errors.ONLY_ADMIN_ALLOWED);
 
         // change admin
@@ -139,7 +184,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         if (_paramsAddress != newParam) {
             _paramsAddress = newParam;
         }
-    }
+    }*/
 
     function setAlgo(string memory algo) public {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
@@ -156,18 +201,10 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         _unpause();
     }
 
-    function withdraw(address erc20Addr, uint256 amount) external nonReentrant {
+    function withdraw(uint256 amount) external nonReentrant {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
-        bool success;
-        if (erc20Addr == address(0x0)) {
-            require(address(this).balance >= amount);
-            (success,) = msg.sender.call{value : amount}("");
-            require(success);
-        } else {
-            IERC20Upgradeable tokenERC20 = IERC20Upgradeable(erc20Addr);
-            // transfer erc-20 token
-            require(tokenERC20.transfer(msg.sender, amount));
-        }
+        (bool success,) = msg.sender.call{value : address(this).balance}("");
+        require(success);
     }
 
     function addWhitelist(address[] memory addrs, uint256 count) external {
@@ -207,7 +244,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         bytes32 b6 = keccak256(abi.encodePacked(_dnas[6]));
 
         if (dna == b2 || dna == b3 || dna == b4 || dna == b5 || dna == b6) {
-            return _skins;
+            return "none";
         }
         return rand(id, "skin", _skins3);
     }
@@ -222,7 +259,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         bytes32 b6 = keccak256(abi.encodePacked(_dnas[6]));
 
         if (dna == b1 || dna == b2 || dna == b3 || dna == b4 || dna == b5 || dna == b6) {
-            return _beards;
+            return "none";
         }
         return rand(id, "beard", _beards4);
     }
@@ -237,7 +274,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         bytes32 b6 = keccak256(abi.encodePacked(_dnas[6]));
 
         if (dna == b2 || dna == b3 || dna == b4 || dna == b5 || dna == b6) {
-            return _hairs;
+            return "none";
         } else if (dna == b2) {
             return rand(id, "hair", _hairs3);
         }
@@ -253,7 +290,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }
 
     function getNumber(uint256 id) internal view returns (uint256) {
-        return randUint256(id, "number", 1, _numbers);
+        return randUint256(id, "number", 1, 26);
     }
 
     function getShoes(uint256 id) internal view returns (string memory) {
@@ -282,13 +319,11 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         string memory emo = _nationsEmo[nation].tempEmo;
         if (keccak256(abi.encodePacked(emotionTime)) != keccak256(abi.encodePacked(_emotionTimes[0]))) {
             uint256 eT = 86400;
-            if (keccak256(abi.encodePacked(emotionTime)) == keccak256(abi.encodePacked(_emotionTimes[1]))) {
-                eT = eT * 1;
+            if (keccak256(abi.encodePacked(emotionTime)) == keccak256(abi.encodePacked(_emotionTimes[3]))) {
+                eT = eT * 30;
             }
             else if (keccak256(abi.encodePacked(emotionTime)) == keccak256(abi.encodePacked(_emotionTimes[2]))) {
                 eT = eT * 7;
-            } else {
-                eT = eT * 30;
             }
             if (block.timestamp - _nationsEmo[nation].tempLastTime > eT) {
                 emo = _emotions[0];
@@ -405,7 +440,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }
 
     /**
-     * @notice Stores the scheduled games.
+     * @notice Stores, from any API, the scheduled games.
      * @param requestId the request ID for fulfillment.
      * @param gameData the games data is resolved.
      */
@@ -427,13 +462,13 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }
 
     /**
-     * @notice Stores the scheduled games.
-     * @param _requestId the request ID for fulfillment.
-     * @param _result the games either to be created or resolved.
+     * @notice Stores, from Enetpulse, the scheduled games.
      */
-    function fulfillSchedule(bytes32 _requestId, bytes[] memory _result) external recordChainlinkFulfillment(_requestId) {
-        // TODO
-    }
+    /*function fulfillSchedule(bytes32 _requestId, bytes[] memory _result) external recordChainlinkFulfillment(_requestId) {
+        for (uint i = 0; i < _result.length; i++) {
+
+        }
+    }*/
 
     function determineResult(uint homeTeam, uint awayTeam) internal view returns (Result) {
         if (homeTeam > awayTeam) {return Result.HOMETEAMWIN;}
@@ -441,6 +476,9 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         return Result.AWAYTEAMWIN;
     }
 
+    /**
+    * @notice Requests, from any API,the tournament games to be resolved.
+    */
     function requestData(bytes32 jobId, uint256 fee, string memory url, string memory path) public returns (bytes32 requestId) {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
         Chainlink.Request memory req = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
@@ -451,22 +489,17 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }
 
     /**
-     * @notice Requests the tournament games either to be created or to be resolved on a specific date.
-     * @dev Requests the 'schedule' endpoint. Result is an array of GameCreate or GameResolve encoded (see structs).
-     * @param jobId the jobID.
-     * @param fee the LINK amount in Juels (i.e. 10^18 aka 1 LINK).
-     // 77: FIFA World Cup
-     * @param market the number associated with the type of market (see Data Conversions).
-     * @param date the starting time of the event as a UNIX timestamp in seconds.
+     * @notice Requests, from Enetpulse, the tournament games either to be created or to be resolved on a specific date.
      */
-    function requestSchedule(bytes32 jobId, uint256 fee, uint256 market, uint256 date) external {
+    /*function requestSchedule(bytes32 jobId, uint256 fee, uint256 market, uint256 date) external {
+        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
         Chainlink.Request memory req = buildOperatorRequest(jobId, this.fulfillSchedule.selector);
         req.addUint("market", market);
         // 77: FIFA World Cup
         req.addUint("leagueId", 77);
         req.addUint("date", date);
         sendOperatorRequest(req, fee);
-    }
+    }*/
 
     function withdrawLink() public {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
