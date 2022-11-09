@@ -27,12 +27,23 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
         string status;
     }
 
+    struct Game {
+        uint32 gameId;
+        uint40 startTime;
+        string homeTeam;
+        string awayTeam;
+        uint8 homeScore;
+        uint8 awayScore;
+        string status;
+    }
+
     address public _admin;
     address public _be;
     address public _callbackAddress;
 
     mapping(bytes32 => bytes[]) public requestIdGames;
     mapping(bytes32 => bytes) public requestIdGamesData;
+    mapping(uint32 => Game) public games;
 
 
     /**
@@ -110,6 +121,18 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
         emit RequestFulfilled(requestId, result);
 
         requestIdGames[requestId] = result;
+        uint32 gameId = uint32(bytes4(_sliceDynamicArray(0, 4, result[0])));
+        if (games[gameId].startTime == 0) {
+            // create
+            GameCreate memory g = _getGameCreateStruct(requestIdGames[requestId][0]);
+            games[gameId] = Game(g.gameId, g.startTime, g.homeTeam, g.awayTeam, 0, 0, "");
+        } else {
+            // resolved
+            GameResolve memory g = _getGameResolveStruct(requestIdGames[requestId][0]);
+            games[gameId].homeScore = g.homeScore;
+            games[gameId].awayScore = g.awayScore;
+            games[gameId].status = g.status;
+        }
         if (_callbackAddress != address(0)) {
             // TODO
             //        ICallback callBack = ICallback(_callbackAddress);
