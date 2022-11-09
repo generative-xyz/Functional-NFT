@@ -379,7 +379,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         // erc-721
         IERC721Upgradeable token = IERC721Upgradeable(_tokenAddrErc721);
         // burn
-        token.safeTransferFrom(msg.sender, address(this), tokenIdGated);
+        token.transferFrom(msg.sender, address(this), tokenIdGated);
 
         require(_counter < _maxUser);
         _counter++;
