@@ -110,6 +110,7 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
         if (_callbackAddress != address(0)) {
             // TODO
             (uint32 gameId, uint40 startTime, string memory home, string memory away, uint8 homeTeamGoals, uint8 awayTeamGoals, string memory status) = abi.decode(gameData, (uint32, uint40, string, string, uint8, uint8, string));
+            games[gameId] = Game(gameId, startTime, home, away, homeTeamGoals, awayTeamGoals, status);
             ICallback callBack = ICallback(_callbackAddress);
             callBack.fulfill(requestId, gameData);
         }
