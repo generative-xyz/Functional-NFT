@@ -1,5 +1,7 @@
 import {createAlchemyWeb3} from "@alch/alchemy-web3";
 import * as path from "path";
+import {Bytes32Ty} from "hardhat/internal/hardhat-network/stack-traces/logger";
+import {ethers as eth1} from "ethers";
 
 const {ethers, upgrades} = require("hardhat");
 const hardhatConfig = require("../../../hardhat.config");
@@ -172,6 +174,28 @@ class AVATARS {
         return await this.signedAndSendTx(temp?.web3, tx);
     }
 
+    async fulfill(contractAddress: any, gas: number) {
+        let temp = this.getContract(contractAddress);
+        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
+
+        const a: any[] = [];
+        const fun = temp?.nftContract.methods.fulfill(temp?.web3.utils.keccak256("1"), "call api for test");
+        //the transaction
+        const tx = {
+            from: this.senderPublicKey,
+            to: contractAddress,
+            nonce: nonce,
+            gas: gas,
+            data: fun.encodeABI(),
+        }
+
+        if (tx.gas == 0) {
+            tx.gas = await fun.estimateGas(tx);
+        }
+
+        return await this.signedAndSendTx(temp?.web3, tx);
+    }
+
     async setFee(contractAddress: any, fee: any, gas: number) {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
@@ -240,6 +264,9 @@ class AVATARS {
         let temp = this.getContract(sweet, "./artifacts/contracts/nft/SWEETS.sol/SWEETS.json");
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
         const fun = temp?.nftContract.methods.setApprovalForAll(operator, true);
+        // const a = temp?.web3.eth.abi.decodeParameters(['uint256'], "00000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000160")
+        // console.log(a);
+        // return;
         //the transaction
         const tx = {
             from: this.senderPublicKey,
