@@ -108,6 +108,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         string memory symbol,
         address admin,
         address paramsAddress,
+        address sweet,
         address LINK_TOKEN,
         address ORACLE
     ) initializer public {
@@ -116,6 +117,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         __ERC721_init(name, symbol);
         _paramsAddress = paramsAddress;
         _admin = admin;
+        _tokenAddrErc721 = sweet;
 
         // init for oracle
         setChainlinkToken(LINK_TOKEN);
