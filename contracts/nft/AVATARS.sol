@@ -158,8 +158,8 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         _hairs3 = ["1", "2", "3"];
         //["short", "long", "crazy"];
 
-        _tops = ["tshirt", "hoodie"];
-        //["0", "1"];
+        _tops = ["0", "1"];
+        //["tshirt", "hoodie"];
 
         _bottoms = ["0", "1"];
         //["shorts", "jogger"];
