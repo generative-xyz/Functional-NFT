@@ -27,10 +27,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     // @dev: mint condition 
     // base on Sweet nft
     address public _tokenAddrErc721;
-    // check trait shape
-    string[] private _shapes;
-    mapping(string => uint) private _availableShapes;
-    uint private _numAvailableShapes;
+
     // base on fee
     uint256 public _fee;
     // base on whitelist
@@ -122,11 +119,6 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         // init for oracle
         setChainlinkToken(LINK_TOKEN);
         setChainlinkOracle(ORACLE);
-
-        // _shapes
-        _shapes = ["Pillhead", "Smiler", "Spektral", "Helix", "Tesseract", "Torus", "Obelisk"];
-        _availableShapes["Pillhead"] = 1;
-        _numAvailableShapes = 1;
 
         // init traits
         initTraits();
@@ -354,9 +346,9 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     function mintByToken(uint256 tokenIdGated) public nonReentrant {
         require(_tokenAddrErc721 != address(0), Errors.INV_ADD);
         // check shapes
-        if (_numAvailableShapes > 0) {
-            require(_availableShapes[rand(tokenIdGated, "shape", _shapes)] == 1, Errors.INV_PARAMS);
-        }
+        // string[] private shapes = ["Pillhead", "Smiler", "Spektral", "Helix", "Tesseract", "Torus", "Obelisk"];
+        // accept Pillhead
+        require(uint256(keccak256(abi.encodePacked("shape", StringsUpgradeable.toString(tokenIdGated)))) % 7 == 0, Errors.INV_PARAMS);
         // erc-721
         IERC721Upgradeable token = IERC721Upgradeable(_tokenAddrErc721);
         // burn
