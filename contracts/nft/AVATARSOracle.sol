@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import '@chainlink/contracts/src/v0.8/ChainlinkClient.sol';
 import "../lib/helpers/Errors.sol";
+import "../interfaces/ICallback.sol";
 
 contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
     event RequestFulfilled(bytes32 indexed requestId, bytes[] indexed data);
@@ -28,6 +29,7 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
 
     address public _admin;
     address public _be;
+    address public _callbackAddress;
 
     mapping(bytes32 => bytes[]) public requestIdGames;
     mapping(bytes32 => bytes) public requestIdGamesData;
@@ -70,7 +72,7 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
         _admin = newAdm;
     }
 
-    function setBE(address be) external {
+    function changeBE(address be) external {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
         _be = be;
     }
@@ -78,6 +80,11 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
     function changeOracle(address oracle) external {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
         setChainlinkOracle(oracle);
+    }
+
+    function changeCallbackAddress(address add) external {
+        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
+        _callbackAddress = add;
     }
 
     /**
@@ -89,6 +96,11 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
         emit RequestFulfilledData(requestId, gameData);
 
         requestIdGamesData[requestId] = gameData;
+        if (_callbackAddress != address(0)) {
+            // TODO
+            //        ICallback callBack = ICallback(_callbackAddress);
+            //        callBack.fulfill(requestId, gameData);
+        }
     }
 
     /**
@@ -98,7 +110,11 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
         emit RequestFulfilled(requestId, result);
 
         requestIdGames[requestId] = result;
-        
+        if (_callbackAddress != address(0)) {
+            // TODO
+            //        ICallback callBack = ICallback(_callbackAddress);
+            //        callBack.fulfill(requestId, gameData);
+        }
     }
 
     /**
