@@ -407,7 +407,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         emit RequestFulfilledData(requestId, gameData);
 
         _requestIdData[requestId] = gameData;
-        (uint32 gameId, uint40 startTime, string memory home, string memory away, uint8 homeTeamGoals, uint8 awayTeamGoals, uint8 status) = abi.decode(gameData, (uint32, uint40, string, string, uint8, uint8, uint8));
+        (uint32 gameId, uint40 startTime, string memory home, string memory away, uint8 homeTeamGoals, uint8 awayTeamGoals, string memory status) = abi.decode(gameData, (uint32, uint40, string, string, uint8, uint8, string));
         Result result = determineResult(homeTeamGoals, awayTeamGoals);
         if (result == Result.H_W) {
             _moods[home].tempEmo = _emotions[2];
