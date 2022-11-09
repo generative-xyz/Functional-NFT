@@ -32,7 +32,7 @@ class AVATARS {
         return proxy.address;
     }
 
-    getContract(contractAddress: any) {
+    getContract(contractAddress: any, contractName: any = "./artifacts/contracts/nft/AVATARS.sol/AVATARS.json") {
         console.log("Network run", this.network, hardhatConfig.networks[this.network].url);
         if (this.network == "local") {
             console.log("not run local");
@@ -42,7 +42,7 @@ class AVATARS {
         API_URL = hardhatConfig.networks[hardhatConfig.defaultNetwork].url;
 
         // load contract
-        let contract = require(path.resolve("./artifacts/contracts/nft/AVATARS.sol/AVATARS.json"));
+        let contract = require(path.resolve(contractName));
         const web3 = createAlchemyWeb3(API_URL)
         const nftContract = new web3.eth.Contract(contract.abi, contractAddress)
         return {web3, nftContract};
@@ -96,6 +96,21 @@ class AVATARS {
         return val;
     }
 
+    async aaaa(contractAddress: any, tokenId: any) {
+        let temp = this.getContract(contractAddress);
+        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
+
+        //the transaction
+        const tx = {
+            from: this.senderPublicKey,
+            to: contractAddress,
+            nonce: nonce,
+        }
+
+        const val: any = await temp?.nftContract.methods.aaaa(tokenId).call(tx);
+        return val;
+    }
+
     async withdrawLink(contractAddress: any, gas: number) {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
@@ -121,6 +136,26 @@ class AVATARS {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
         const fun = temp?.nftContract.methods.setBE(be);
+        //the transaction
+        const tx = {
+            from: this.senderPublicKey,
+            to: contractAddress,
+            nonce: nonce,
+            gas: gas,
+            data: fun.encodeABI(),
+        }
+
+        if (tx.gas == 0) {
+            tx.gas = await fun.estimateGas(tx);
+        }
+
+        return await this.signedAndSendTx(temp?.web3, tx);
+    }
+
+    async changeToken(contractAddress: any, sweet: any, gas: number) {
+        let temp = this.getContract(contractAddress);
+        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
+        const fun = temp?.nftContract.methods.changeToken(sweet);
         //the transaction
         const tx = {
             from: this.senderPublicKey,
@@ -201,10 +236,43 @@ class AVATARS {
         return await this.signedAndSendTx(temp?.web3, tx);
     }
 
+    async setApproveSweet(sweet: any, operator: any, tokenGateId: any, gas: number) {
+        let temp = this.getContract(sweet, "./artifacts/contracts/nft/SWEETS.sol/SWEETS.json");
+        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
+        const fun = temp?.nftContract.methods.setApprovalForAll(operator, true);
+        //the transaction
+        const tx = {
+            from: this.senderPublicKey,
+            to: sweet,
+            nonce: nonce,
+            gas: gas,
+            data: fun.encodeABI(),
+        }
+
+        if (tx.gas == 0) {
+            tx.gas = await fun.estimateGas(tx);
+        }
+
+        return await this.signedAndSendTx(temp?.web3, tx);
+    }
+
     async mintByToken(contractAddress: any, tokenGateId: any, gas: number) {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
-
+        /*const aaa = await this.aaaa(contractAddress, tokenGateId);
+        console.log(aaa);
+        return;
+        // @ts-ignore
+        const a = temp?.web3.utils.keccak256(temp?.web3.utils.encodePacked("shape", "1"));
+        // @ts-ignore
+        const at = temp?.web3.utils.toBN(a);
+        // @ts-ignore
+        console.log(at.toString());
+        // @ts-ignore
+        const m = at.mod(temp?.web3.utils.toBN(7));
+        // @ts-ignore
+        console.log(m.toString());
+        return;*/
         const fun = temp?.nftContract.methods.mintByToken(tokenGateId);
         //the transaction
         const tx = {
