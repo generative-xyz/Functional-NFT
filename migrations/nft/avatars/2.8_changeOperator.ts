@@ -14,10 +14,7 @@ import {AvatarsOracle} from "./avatarsOracle";
         }
         const contract = '0xDCbBca88D27B6A8379e76d99aa8AcB8031cB6760';
         const nft = new AvatarsOracle(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
-        // const data = await nft.requestIdGamesData(contract, "0x0fcc52054138e1cf21ade0a081a5926c25a92538ca7c3a5e93d820bfdca726fd");
-        // console.log(data);
-        // return
-        const tx = await nft.requestData(contract, 0);
+        const tx = await nft.changeOracle(contract, '0xeE3BC809fFa9BB32A88d39d40DF6425d5d712B16', 0);
         console.log("tx:", tx);
     } catch (e) {
         // Deal with the fact the chain failed
