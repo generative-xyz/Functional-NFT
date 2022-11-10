@@ -11,7 +11,7 @@ import {AVATARS} from "./avatars";
             console.log("wrong network");
             return;
         }
-        const contract = '0xFc522A802eBC021449b268f5cF0B52C73276d0CB';
+        const contract = '0xdfa0d7551c9553d52296781fc2c0b74065af2390';
         const nft = new AVATARS(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
         const a = await nft.getParamValues(contract, 4501);

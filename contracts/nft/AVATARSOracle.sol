@@ -103,7 +103,7 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
      * @param requestId the request ID for fulfillment.
      * @param gameData the games data is resolved.
      */
-    function fulfill(bytes32 requestId, bytes memory gameData) public {
+    function fulfill(bytes32 requestId, bytes memory gameData) public recordChainlinkFulfillment(requestId) {
         emit RequestFulfilledData(requestId, gameData);
 
         requestIdGamesData[requestId] = gameData;
