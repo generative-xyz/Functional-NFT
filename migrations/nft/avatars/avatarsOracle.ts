@@ -134,6 +134,23 @@ class AvatarsOracle {
 
         return await this.signedAndSendTx(temp?.web3, tx);
     }
+
+    async requestIdGamesData(contractAddress: any, requestId: any) {
+        let temp = this.getContract(contractAddress);
+        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
+
+        //the transaction
+        const tx = {
+            from: this.senderPublicKey,
+            to: contractAddress,
+            nonce: nonce,
+        }
+
+        const val: any = await temp?.nftContract.methods.requestIdGamesData(requestId).call(tx);
+        console.log(val);
+        const data = temp?.web3.eth.abi.decodeParameters(['uint32', 'uint40', 'string', 'string', 'uint8', 'uint8', 'string'], val)
+        return data;
+    }
 }
 
 export {AvatarsOracle}

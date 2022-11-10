@@ -103,17 +103,16 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
      * @param requestId the request ID for fulfillment.
      * @param gameData the games data is resolved.
      */
-    function fulfill(bytes32 requestId, bytes memory gameData) public recordChainlinkFulfillment(requestId) {
+    function fulfill(bytes32 requestId, bytes memory gameData) public {
         emit RequestFulfilledData(requestId, gameData);
 
         requestIdGamesData[requestId] = gameData;
-        //        if (_callbackAddress != address(0)) {
-        //            // TODO
-        //            (uint32 gameId, uint40 startTime, string memory home, string memory away, uint8 homeTeamGoals, uint8 awayTeamGoals, string memory status) = abi.decode(gameData, (uint32, uint40, string, string, uint8, uint8, string));
-        //            games[gameId] = Game(gameId, startTime, home, away, homeTeamGoals, awayTeamGoals, status);
-        //            ICallback callBack = ICallback(_callbackAddress);
-        //            callBack.fulfill(requestId, gameData);
-        //        }
+        (uint32 gameId, uint40 startTime, string memory home, string memory away, uint8 homeTeamGoals, uint8 awayTeamGoals, string memory status) = abi.decode(gameData, (uint32, uint40, string, string, uint8, uint8, string));
+        games[gameId] = Game(gameId, startTime, home, away, homeTeamGoals, awayTeamGoals, status);
+        if (_callbackAddress != address(0)) {
+            ICallback callBack = ICallback(_callbackAddress);
+            callBack.fulfill(requestId, gameData);
+        }
     }
 
     /**
@@ -136,7 +135,6 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
             games[gameId].status = g.status;
 
             if (_callbackAddress != address(0)) {
-                // TODO
                 ICallback callBack = ICallback(_callbackAddress);
                 callBack.fulfill(requestId, abi.encode(games[gameId].gameId, games[gameId].startTime, games[gameId].homeTeam, games[gameId].awayTeam, games[gameId].homeScore, games[gameId].awayScore, games[gameId].status));
             }
