@@ -13,9 +13,15 @@ import {AVATARS} from "./avatars";
         }
         const contract = '0xdfa0d7551c9553d52296781fc2c0b74065af2390';
         const nft = new AVATARS(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
-
-        const a = await nft.getParamValues(contract, 4501);
-        console.log(a);
+        // const args = process.argv.slice(2)
+        // const a = await nft.getParamValues(contract, args[0]);
+        for (var i = 1; i < 100; i++) {
+            const a = await nft.getParamValues(contract, i);
+            if (a._nation == "USA") {
+                console.log(a);
+                return;
+            }
+        }
     } catch (e) {
         // Deal with the fact the chain failed
         console.log(e);

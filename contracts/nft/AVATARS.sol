@@ -52,26 +52,26 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     string[] private _emotionTimes;
 
     string[] private _dnas;
-    string[] private _skins3;
-    string[] private _beards4;
-    string[] private _hairs4;
-    string[] private _hairs3;
+    string[] private _beards3;
+    string[] private _hair10;
+    string[] private _hairs7;
 
+    string[] private _undershirts;
     string[] private _tops;
     string[] private _bottoms;
     string[] private _shoes;
     string[] private _tatoos;
     string[] private _glasses;
-    string[] private _gloves;
+    string[] private _captains;
 
     struct Player {
         string _emotion;
         string _emotionTime;
         string _nation;
         string _dna;
-        string _skin;
         string _beard;
         string _hair;
+        string _undershirt;
         string _shoes;
         string _top;
         string _bottom;
@@ -98,34 +98,33 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     function initTraits() internal {
         _nations = [
         "Qatar", "Ecuador", "Senegal", "Netherlands", // GA
-        "England", "IR Iran", "USA", "Wales", // GB
+        "England", "IR_Iran", "USA", "Wales", // GB
         "Argentina", "Saudi Arabia", "Mexico", "Poland", // GC
         "France", "Australia", "Denmark", "Tunisia", //GD
-        "Spain", "Costa Rica", "Germany", "Japan", //GE
+        "Spain", "Costa_Rica", "Germany", "Japan", //GE
         "Belgium", "Canada", "Morocco", "Croatia", //GF
         "Brazil", "Serbia", "Switzerland", "Cameroon", //GG
-        "Portugal", "Ghana", "Uruguay", "Korea Republic" // GH
+        "Portugal", "Ghana", "Uruguay", "Korea_Republic" // GH
         ];
 
-        _emotions = ["0", "1", "2"];
+        _emotions = ["1", "2", "3"];
         //["normal", "sad", "happy"];
 
-        _emotionTimes = ["0", "1", "2", "3"];
+        _emotionTimes = ["1", "2", "3", "4"];
         //["Forever", "1 day", "7 days", "30 days"];
 
-        _dnas = ["0", "1", "2", "3", "4", "5"];
+        _dnas = ["1", "2", "3", "4", "5", "6", "7"];
         //["male", "female", "robot", "ape", "alien", "ball head"];
 
-        _skins3 = ["0", "1", "2"];
-        //["dark", "bright", "yellow"];
-
-        _beards4 = ["0", "1", "2", "3"];
+        _beards3 = ["0", "1", "2"];
         //["none", "shape 1", "shape 2", "shape 3"];
 
-        _hairs4 = ["0", "1", "2", "3"];
+        _hair10 = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
         //["none", "short", "long", "crazy"];
-        _hairs3 = ["1", "2", "3"];
+        _hairs7 = ["1", "2", "3", "4", "5", "6", "7"];
         //["short", "long", "crazy"];
+
+        _undershirts = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17"];
 
         _tops = ["0", "1"];
         //["tshirt", "hoodie"];
@@ -133,15 +132,15 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         _bottoms = ["0", "1"];
         //["shorts", "jogger"];
 
-        _shoes = ["0", "1", "2", "3", "4", "5"];
+        _shoes = ["1", "2", "3"];
         //["reg 1", "reg 2", "reg 3", "spe 1", "spe 2", "spe 3"];
 
-        _tatoos = ["0", "1", "2", "3", "4", "5"];
+        _tatoos = ["0", "1", "2", "3", "4"];
         //["none", "shape 1", "shape 2", "shape 3", "shape 4", "shape 5"];
 
-        _glasses = ["0", "1", "2", "3"];
+        _glasses = ["0", "1", "2", "3", "4", "5"];
         //["none", "shape 1", "shape 2", "shape 3"];
-        _gloves = ["0", "1"];
+        _captains = ["0", "1"];
         //["none", "have"];
 
     }
@@ -230,18 +229,6 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         return rand(id, "dna", _dnas);
     }
 
-    function getSkin(uint256 id) internal view returns (string memory) {
-        string memory dna = getDNA(id);
-
-        if (compareStrings(dna, _dnas[2])
-        || compareStrings(dna, _dnas[3])
-        || compareStrings(dna, _dnas[4])
-            || compareStrings(dna, _dnas[5])) {
-            return "none";
-        }
-        return rand(id, "skin", _skins3);
-    }
-
     function getBeard(uint256 id) internal view returns (string memory) {
         string memory dna = getDNA(id);
 
@@ -250,10 +237,12 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
             || compareStrings(dna, _dnas[2])
             || compareStrings(dna, _dnas[3])
             || compareStrings(dna, _dnas[4])
-            || compareStrings(dna, _dnas[5])) {
-            return "none";
+            || compareStrings(dna, _dnas[5])
+            || compareStrings(dna, _dnas[6])
+        ) {
+            return "0";
         }
-        return rand(id, "beard", _beards4);
+        return rand(id, "beard", _beards3);
     }
 
     function getHair(uint256 id) internal view returns (string memory) {
@@ -263,12 +252,28 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
             compareStrings(dna, _dnas[2])
             || compareStrings(dna, _dnas[3])
             || compareStrings(dna, _dnas[4])
-            || compareStrings(dna, _dnas[5])) {
-            return "none";
+            || compareStrings(dna, _dnas[5])
+            || compareStrings(dna, _dnas[6])) {
+            return "0";
         } else if (compareStrings(dna, _dnas[1])) {
-            return rand(id, "hair", _hairs3);
+            return rand(id, "hair", _hairs7);
         }
-        return rand(id, "hair", _hairs4);
+        return rand(id, "hair", _hair10);
+    }
+
+    function getUndershirt(uint256 id) internal view returns (string memory) {
+        string memory dna = getDNA(id);
+
+        if (compareStrings(dna, _dnas[0])) {
+            string memory top = getTop(id);
+            if (compareStrings(top, _tops[0])) {
+                uint256 number = getNumber(id);
+                if (number != 0) {
+                    return rand(id, "undershirt", _undershirts);
+                }
+            }
+        }
+        return "0";
     }
 
     function getTop(uint256 id) internal view returns (string memory) {
@@ -280,7 +285,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }
 
     function getNumber(uint256 id) internal view returns (uint256) {
-        return randUint256(id, "number", 1, 26);
+        return randUint256(id, "number", 0, 26);
     }
 
     function getShoes(uint256 id) internal view returns (string memory) {
@@ -295,8 +300,8 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         return rand(id, "glasses", _glasses);
     }
 
-    function getGloves(uint256 id) internal view returns (string memory) {
-        return rand(id, "glovers", _gloves);
+    function getCaptain(uint256 id) internal view returns (string memory) {
+        return rand(id, "glovers", _captains);
     }
 
     function getEmotionTime(uint256 id) internal view returns (string memory) {
@@ -319,12 +324,22 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
                 emo = _emotions[0];
             }
         }
-        player = Player(emo, emotionTime, nation, getDNA(tokenId),
-            getSkin(tokenId), getBeard(tokenId), getHair(tokenId),
-            getShoes(tokenId), getTop(tokenId), getBottom(tokenId),
-            getNumber(tokenId), getTatoo(tokenId),
+        player = Player(
+            emo,
+            emotionTime,
+            nation,
+            getDNA(tokenId),
+            getBeard(tokenId),
+            getHair(tokenId),
+            getShoes(tokenId),
+            getUndershirt(tokenId),
+            getTop(tokenId),
+            getBottom(tokenId),
+            getNumber(tokenId),
+            getTatoo(tokenId),
             getGlasses(tokenId),
-            getGloves(tokenId));
+            getCaptain(tokenId)
+        );
         return player;
     }
 
