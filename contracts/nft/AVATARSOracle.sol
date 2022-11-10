@@ -107,13 +107,13 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
         emit RequestFulfilledData(requestId, gameData);
 
         requestIdGamesData[requestId] = gameData;
-        if (_callbackAddress != address(0)) {
-            // TODO
-            (uint32 gameId, uint40 startTime, string memory home, string memory away, uint8 homeTeamGoals, uint8 awayTeamGoals, string memory status) = abi.decode(gameData, (uint32, uint40, string, string, uint8, uint8, string));
-            games[gameId] = Game(gameId, startTime, home, away, homeTeamGoals, awayTeamGoals, status);
-            ICallback callBack = ICallback(_callbackAddress);
-            callBack.fulfill(requestId, gameData);
-        }
+        //        if (_callbackAddress != address(0)) {
+        //            // TODO
+        //            (uint32 gameId, uint40 startTime, string memory home, string memory away, uint8 homeTeamGoals, uint8 awayTeamGoals, string memory status) = abi.decode(gameData, (uint32, uint40, string, string, uint8, uint8, string));
+        //            games[gameId] = Game(gameId, startTime, home, away, homeTeamGoals, awayTeamGoals, status);
+        //            ICallback callBack = ICallback(_callbackAddress);
+        //            callBack.fulfill(requestId, gameData);
+        //        }
     }
 
     /**
@@ -146,9 +146,9 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
     /**
     * @notice Requests, from any API,the tournament games to be resolved.
     */
-    function requestData(bytes32 jobId, uint256 fee, string memory url, string memory path) public returns (bytes32 requestId) {
+    function requestData(string memory jobId, uint256 fee, string memory url, string memory path) public returns (bytes32 requestId) {
         require(msg.sender == _admin || msg.sender == _be, Errors.ONLY_ADMIN_ALLOWED);
-        Chainlink.Request memory req = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
+        Chainlink.Request memory req = buildChainlinkRequest(stringToBytes32(jobId), address(this), this.fulfill.selector);
         req.add('get', url);
         req.add('path', path);
         // Sends the request
@@ -158,9 +158,9 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
     /**
      * @notice Requests, from Enetpulse, the tournament games either to be created or to be resolved on a specific date.
      */
-    function requestSchedule(bytes32 jobId, uint256 fee, uint256 market, uint256 leagueId, uint256 date) external {
+    function requestSchedule(string memory jobId, uint256 fee, uint256 market, uint256 leagueId, uint256 date) external {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
-        Chainlink.Request memory req = buildOperatorRequest(jobId, this.fulfillSchedule.selector);
+        Chainlink.Request memory req = buildOperatorRequest(stringToBytes32(jobId), this.fulfillSchedule.selector);
         //0: create, 1: resolved
         req.addUint("market", market);
         // 77: FIFA World Cup
@@ -271,5 +271,17 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
             result[i] = _data[_start + i];
         }
         return result;
+    }
+
+    function stringToBytes32(string memory source) private pure returns (bytes32 result) {
+        bytes memory tempEmptyStringTest = bytes(source);
+        if (tempEmptyStringTest.length == 0) {
+            return 0x0;
+        }
+
+        assembly {
+        // solhint-disable-line no-inline-assembly
+            result := mload(add(source, 32))
+        }
     }
 }

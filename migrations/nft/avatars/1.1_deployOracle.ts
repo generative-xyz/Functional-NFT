@@ -14,7 +14,7 @@ import {AvatarsOracle} from "./avatarsOracle";
             process.env.PUBLIC_KEY,
             "0xe7b336ca34b2ed9e52460ab7ec5e0b8562d61510",
             "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
-            "0x40193c8518BB267228Fc409a613bDbD8eC5a97b3");
+            "0xbE7eBA96CFdaB4C721637056cb116837FB1f766A");
         console.log("%s AVATARS address: %s", process.env.NETWORK, address);
     } catch (e) {
         // Deal with the fact the chain failed

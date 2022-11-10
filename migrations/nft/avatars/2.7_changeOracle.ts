@@ -12,9 +12,9 @@ import {AvatarsOracle} from "./avatarsOracle";
             console.log("wrong network");
             return;
         }
-        const contract = '0x5c3f447fe260c23E7FB34d04F46Ad3919A4Afbcf';
+        const contract = '0x4A7BdbDE55C4D70b81E9154405327B9502Fb9e85';
         const nft = new AvatarsOracle(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
-        const tx = await nft.changeOracle(contract, '0xd5821b900e44db9490da9b09541bbd027fBecF4E', 0);
+        const tx = await nft.changeOracle(contract, '0xeE3BC809fFa9BB32A88d39d40DF6425d5d712B16', 0);
         console.log("tx:", tx);
     } catch (e) {
         // Deal with the fact the chain failed

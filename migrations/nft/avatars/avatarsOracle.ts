@@ -97,7 +97,7 @@ class AvatarsOracle {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
 
-        const fun = temp?.nftContract.methods.requestData('0x3764613237303266333766643438653562316239613537313565333530396236', eth1.utils.parseEther("0.1"), 'https://ipfs.io/ipfs/QmZgsvrA1o1C8BGCrx6mHTqR1Ui1XqbCrtbMVrRLHtuPVD?filename=big-api-response.json', 'image');
+        const fun = temp?.nftContract.methods.requestData('ef28cb879c2741f8b98fb686d26bad86', eth1.utils.parseEther("0.1"), 'https://rove-dev.moshwithme.io/api/v1/football/game/636b6fb0e7f7dbca3529c3b4', 'DATA,GAME');
         //the transaction
         const tx = {
             from: this.senderPublicKey,
