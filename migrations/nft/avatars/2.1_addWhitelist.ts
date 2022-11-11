@@ -11,10 +11,10 @@ import {AVATARS} from "./avatars";
             console.log("wrong network");
             return;
         }
-        const contract = '0xdFa0D7551C9553D52296781fc2C0B74065af2390';
+        const contract = '0x0248cCc4Efcd59763D8d760e8eA7903c15EFFbB5';
         const nft = new AVATARS(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
-        const tx = await nft.setBE(contract, "0xe7B336ca34B2eD9e52460AB7eC5e0b8562D61510", 0);
+        const tx = await nft.addWhitelist(contract, ["0xF61234046A18b07Bf1486823369B22eFd2C4507F"], 1, 0);
         console.log("tx:", tx);
     } catch (e) {
         // Deal with the fact the chain failed

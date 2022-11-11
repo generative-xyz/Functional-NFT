@@ -135,10 +135,10 @@ class AVATARS {
         return await this.signedAndSendTx(temp?.web3, tx);
     }
 
-    async setBE(contractAddress: any, be: any, gas: number) {
+    async addWhitelist(contractAddress: any, whitelist: any, count: number, gas: number) {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
-        const fun = temp?.nftContract.methods.setBE(be);
+        const fun = temp?.nftContract.methods.addWhitelist(whitelist, count);
         //the transaction
         const tx = {
             from: this.senderPublicKey,
