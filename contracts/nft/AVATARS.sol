@@ -7,18 +7,18 @@ import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "../lib/helpers/Errors.sol";
+import "../interfaces/ICallback.sol";
 
-contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgradeable, OwnableUpgradeable, IERC2981Upgradeable {
+contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgradeable, OwnableUpgradeable, ICallback, IERC2981Upgradeable {
     using SafeMathUpgradeable for uint256;
     event RequestFulfilledData(bytes32 indexed requestId, bytes indexed data);
 
     // @dev: supply for collection
-    uint256 constant _max = 5000;
-    uint256 constant _maxUser = 4500;
+    uint256 constant _max = 10000;
+    uint256 constant _maxUser = 9000;
 
     // @dev: handler
     address public _admin;
-    address public _be;
     address public _paramsAddress;
     address public _oracle;
     mapping(bytes32 => bytes) public _requestIdData;
@@ -44,25 +44,6 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
 
     mapping(string => Mood) _moods;
     enum Result {U, H_W, A_W, D}
-
-    /** @dev Avatars traits
-    */
-    string[] private _nations;
-    string[] private _emotions;
-    string[] private _emotionTimes;
-
-    string[] private _dnas;
-    string[] private _beards3;
-    string[] private _hair10;
-    string[] private _hairs7;
-
-    string[] private _undershirts;
-    string[] private _tops;
-    string[] private _bottoms;
-    string[] private _shoes;
-    string[] private _tatoos;
-    string[] private _glasses;
-    string[] private _captains;
 
     struct Player {
         string _emotion;
@@ -92,57 +73,6 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         _paramsAddress = paramsAddress;
         _admin = admin;
         // init traits
-        initTraits();
-    }
-
-    function initTraits() internal {
-        _nations = [
-        "Qatar", "Ecuador", "Senegal", "Netherlands", // GA
-        "England", "IR_Iran", "USA", "Wales", // GB
-        "Argentina", "Saudi Arabia", "Mexico", "Poland", // GC
-        "France", "Australia", "Denmark", "Tunisia", //GD
-        "Spain", "Costa_Rica", "Germany", "Japan", //GE
-        "Belgium", "Canada", "Morocco", "Croatia", //GF
-        "Brazil", "Serbia", "Switzerland", "Cameroon", //GG
-        "Portugal", "Ghana", "Uruguay", "Korea_Republic" // GH
-        ];
-
-        _emotions = ["1", "2", "3"];
-        //["normal", "sad", "happy"];
-
-        _emotionTimes = ["1", "2", "3", "4"];
-        //["Forever", "1 day", "7 days", "30 days"];
-
-        _dnas = ["1", "2", "3", "4", "5", "6", "7"];
-        //["male", "female", "robot", "ape", "alien", "ball head"];
-
-        _beards3 = ["0", "1", "2"];
-        //["none", "shape 1", "shape 2", "shape 3"];
-
-        _hair10 = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
-        //["none", "short", "long", "crazy"];
-        _hairs7 = ["1", "2", "3", "4", "5", "6", "7"];
-        //["short", "long", "crazy"];
-
-        _undershirts = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17"];
-
-        _tops = ["0", "1"];
-        //["tshirt", "hoodie"];
-
-        _bottoms = ["0", "1"];
-        //["shorts", "jogger"];
-
-        _shoes = ["1", "2", "3"];
-        //["reg 1", "reg 2", "reg 3", "spe 1", "spe 2", "spe 3"];
-
-        _tatoos = ["0", "1", "2", "3", "4"];
-        //["none", "shape 1", "shape 2", "shape 3", "shape 4", "shape 5"];
-
-        _glasses = ["0", "1", "2", "3", "4", "5"];
-        //["none", "shape 1", "shape 2", "shape 3"];
-        _captains = ["0", "1"];
-        //["none", "have"];
-
     }
 
     function changeAdmin(address newAdm) external {
@@ -153,11 +83,6 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     function changeToken(address sweet) external {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
         _tokenAddrErc721 = sweet;
-    }
-
-    function setBE(address be) external {
-        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
-        _be = be;
     }
 
     function setAlgo(string memory algo) public {
@@ -209,10 +134,6 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
 
     /* @TRAITS: Get data for render
     */
-    function rand(uint256 id, string memory trait, string[] memory values) internal pure returns (string memory) {
-        return values[seeding(id, trait) % values.length];
-    }
-
     function randUint256(uint256 id, string memory trait, uint256 min, uint256 max) internal pure returns (uint256) {
         return (min + seeding(id, trait) % (max - min + 1));
     }
@@ -222,54 +143,72 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }
 
     function getNation(uint256 id) internal view returns (string memory) {
-        return rand(id, "nation", _nations);
+        string[32] memory _nations = [
+        "Qatar", "Ecuador", "Senegal", "Netherlands", // GA
+        "England", "IR Iran", "USA", "Wales", // GB
+        "Argentina", "Saudi Arabia", "Mexico", "Poland", // GC
+        "France", "Australia", "Denmark", "Tunisia", //GD
+        "Spain", "Costa Rica", "Germany", "Japan", //GE
+        "Belgium", "Canada", "Morocco", "Croatia", //GF
+        "Brazil", "Serbia", "Switzerland", "Cameroon", //GG
+        "Portugal", "Ghana", "Uruguay", "Korea Republic" // GH
+        ];
+        return _nations[seeding(id, "nation") % _nations.length];
     }
 
     function getDNA(uint256 id) internal view returns (string memory) {
-        return rand(id, "dna", _dnas);
+        string[6] memory _dnas = ["1", "2", "3", "4", "5", "6"];
+        // male, female, robot, ape, alien, ballhead
+
+        uint256 prob = randUint256(id, "dna", 1, 10000);
+        if (prob > 3000) {
+            return _dnas[0];
+        } else if (prob >= 1 && prob <= 2000) {
+            return _dnas[1];
+        } else if (prob >= 2001 && prob <= 2600) {
+            return _dnas[2];
+        } else if (prob >= 2601 && prob <= 2900) {
+            return _dnas[3];
+        } else if (prob >= 2901 && prob <= 2990) {
+            return _dnas[4];
+        } else {
+            return _dnas[5];
+        }
     }
 
     function getBeard(uint256 id) internal view returns (string memory) {
+        string[3] memory _beards3 = ["0", "1", "2"];
         string memory dna = getDNA(id);
 
-        if (
-            compareStrings(dna, _dnas[1])
-            || compareStrings(dna, _dnas[2])
-            || compareStrings(dna, _dnas[3])
-            || compareStrings(dna, _dnas[4])
-            || compareStrings(dna, _dnas[5])
-            || compareStrings(dna, _dnas[6])
-        ) {
-            return "0";
+        if (compareStrings(dna, "1")) {// male
+            return _beards3[seeding(id, "beard") % _beards3.length];
         }
-        return rand(id, "beard", _beards3);
+        return "0";
     }
 
     function getHair(uint256 id) internal view returns (string memory) {
+        string[10] memory _hair10 = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+        string[7] memory _hairs7 = ["1", "2", "3", "4", "5", "6", "7"];
         string memory dna = getDNA(id);
 
-        if (
-            compareStrings(dna, _dnas[2])
-            || compareStrings(dna, _dnas[3])
-            || compareStrings(dna, _dnas[4])
-            || compareStrings(dna, _dnas[5])
-            || compareStrings(dna, _dnas[6])) {
-            return "0";
-        } else if (compareStrings(dna, _dnas[1])) {
-            return rand(id, "hair", _hairs7);
+        if (compareStrings(dna, "2")) {// female
+            return _hairs7[seeding(id, "hair") % _hairs7.length];
+        } else if (compareStrings(dna, "1")) {// male
+            return _hair10[seeding(id, "hair") % _hair10.length];
         }
-        return rand(id, "hair", _hair10);
+        return "0";
     }
 
     function getUndershirt(uint256 id) internal view returns (string memory) {
+        string[17] memory _undershirts = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17"];
         string memory dna = getDNA(id);
 
-        if (compareStrings(dna, _dnas[0])) {
+        if (compareStrings(dna, "1")) {// only male
             string memory top = getTop(id);
-            if (compareStrings(top, _tops[0])) {
+            if (compareStrings(top, "1")) {// top 1
                 uint256 number = getNumber(id);
-                if (number != 0) {
-                    return rand(id, "undershirt", _undershirts);
+                if (number != 0) {// has number
+                    return _undershirts[seeding(id, "undershirt") % _undershirts.length];
                 }
             }
         }
@@ -277,38 +216,66 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }
 
     function getTop(uint256 id) internal view returns (string memory) {
-        return rand(id, "top", _tops);
+        string[3] memory _tops = ["1", "2", "3"];
+        string[3] memory _topsF = ["1", "2", "4"];
+        string memory dna = getDNA(id);
+
+        if (compareStrings(dna, "2")) {// female
+            return _topsF[seeding(id, "top") % _topsF.length];
+        }
+        return _tops[seeding(id, "top") % _tops.length];
     }
 
     function getBottom(uint256 id) internal view returns (string memory) {
-        return rand(id, "bottom", _bottoms);
+        string[2] memory _bottomsF = ["3", "4"];
+        string[2] memory _bottoms = ["1", "2"];
+        string memory dna = getDNA(id);
+
+        if (compareStrings(dna, "2")) {// female
+            return _bottomsF[seeding(id, "bottom") % _bottomsF.length];
+        }
+        return _bottoms[seeding(id, "bottom") % _bottoms.length];
     }
 
     function getNumber(uint256 id) internal view returns (uint256) {
-        return randUint256(id, "number", 0, 26);
+        uint256[26] memory _number = [uint256(1), 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26];
+
+        uint256 prob = randUint256(id, "number", 1, 100);
+        if (prob > 78) {
+            return 0;
+        }
+        return _number[seeding(id, "number") % _number.length];
     }
 
     function getShoes(uint256 id) internal view returns (string memory) {
-        return rand(id, "shoe", _shoes);
+        string[3] memory _shoes = ["1", "2", "3"];
+        return _shoes[seeding(id, "shoe") % _shoes.length];
     }
 
     function getTatoo(uint256 id) internal view returns (string memory) {
-        return rand(id, "tatoo", _tatoos);
+        string[5] memory _tatoos = ["0", "1", "2", "3", "4"];
+        return _tatoos[seeding(id, "tatoo") % _tatoos.length];
     }
 
     function getGlasses(uint256 id) internal view returns (string memory) {
-        return rand(id, "glasses", _glasses);
+        string[6] memory _glasses = ["0", "1", "2", "3", "4", "5"];
+        return _glasses[seeding(id, "glasses") % _glasses.length];
     }
 
     function getCaptain(uint256 id) internal view returns (string memory) {
-        return rand(id, "glovers", _captains);
+        string[2] memory _captains = ["0", "1"];
+        return _captains[seeding(id, "captain") % _captains.length];
     }
 
     function getEmotionTime(uint256 id) internal view returns (string memory) {
-        return rand(id, "emotionTime", _emotionTimes);
+        string[4] memory _emotionTimes = ["1", "2", "3", "4"];
+        return _emotionTimes[seeding(id, "emotionTime") % _emotionTimes.length];
     }
 
     function getParamValues(uint256 tokenId) public view returns (Player memory player) {
+        string[3] memory _emotions = ["1", "2", "3"];
+        string[4] memory _emotionTimes = ["1", "2", "3", "4"];
+
         string memory nation = getNation(tokenId);
         string memory emotionTime = getEmotionTime(tokenId);
         string memory emo = _moods[nation].tempEmo;
@@ -424,6 +391,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         _requestIdData[requestId] = gameData;
         (uint32 gameId, uint40 startTime, string memory home, string memory away, uint8 homeTeamGoals, uint8 awayTeamGoals, string memory status) = abi.decode(gameData, (uint32, uint40, string, string, uint8, uint8, string));
         Result result = determineResult(homeTeamGoals, awayTeamGoals);
+        string[3] memory _emotions = ["1", "2", "3"];
         if (result == Result.H_W) {
             _moods[home].tempEmo = _emotions[2];
             _moods[away].tempEmo = _emotions[1];
