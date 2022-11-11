@@ -240,8 +240,8 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     function getNumber(uint256 id) internal view returns (uint256) {
         uint256[26] memory _number = [uint256(1), 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26];
 
-        uint256 prob = randUint256(id, "number", 1, 100);
-        if (prob > 78) {
+        uint256 prob = randUint256(id, "number", 1, 10000);
+        if (prob > 7800) {
             return 0;
         }
         return _number[seeding(id, "number") % _number.length];
