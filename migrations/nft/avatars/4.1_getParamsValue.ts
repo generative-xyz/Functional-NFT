@@ -17,9 +17,13 @@ import {AVATARS} from "./avatars";
         // const a = await nft.getParamValues(contract, args[0]);
         for (var i = 1; i < 10000; i++) {
             const a = await nft.getParamValues(contract, i);
-            console.log(a);
+            // console.log(a);
             if (a._nation == "USA") {
                 // console.log(a);
+                // return;
+            }
+            if (a._dna == "6") {
+                console.log(a);
                 // return;
             }
         }

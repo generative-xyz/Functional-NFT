@@ -59,7 +59,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         uint256 _number;
         string _tatoo;
         string _glasses;
-        string _gloves;
+        string _captain;
     }
 
     function initialize(
