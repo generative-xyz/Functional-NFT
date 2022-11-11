@@ -253,7 +253,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }
 
     function getTatoo(uint256 id) internal view returns (string memory) {
-        string[5] memory _tatoos = ["0", "1", "2", "3", "4"];
+        string[4] memory _tatoos = ["0", "1", "2", "3"];
         return _tatoos[seeding(id, "tatoo") % _tatoos.length];
     }
 
