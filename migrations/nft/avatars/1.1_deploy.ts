@@ -10,8 +10,8 @@ import {AVATARS} from "./avatars";
         }
         const nft = new AVATARS(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
         const address = await nft.deployUpgradeable(
-            "AVATARS",
-            "AVATARS",
+            "FOOTBALLΞRS",
+            "FOOTBALLΞRS",
             process.env.PUBLIC_KEY,
             "0x46C02B9113DcA70a8C2e878Df0B24Dc895836b75"
         );
