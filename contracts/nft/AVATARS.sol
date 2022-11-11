@@ -267,29 +267,27 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         return _captains[seeding(id, "captain") % _captains.length];
     }
 
-    function getEmotionTime(uint256 id) internal view returns (string memory) {
-        string[4] memory _emotionTimes = ["1", "2", "3", "4"];
-        return _emotionTimes[seeding(id, "emotionTime") % _emotionTimes.length];
+    function getEmotionTime(uint256 id) internal view returns (string memory, string[3] memory) {
+        string[3] memory _emotionTimes = ["1", "2", "3"];
+        return (_emotionTimes[seeding(id, "emotionTime") % _emotionTimes.length], _emotionTimes);
     }
 
     function getParamValues(uint256 tokenId) public view returns (Player memory player) {
         string[3] memory _emotions = ["1", "2", "3"];
-        string[4] memory _emotionTimes = ["1", "2", "3", "4"];
 
         string memory nation = getNation(tokenId);
-        string memory emotionTime = getEmotionTime(tokenId);
+        (string memory emotionTime, string[3] memory _emotionTimes) = getEmotionTime(tokenId);
         string memory emo = _moods[nation].tempEmo;
-        if (!compareStrings(emotionTime, _emotionTimes[0])) {
-            uint256 eT = 86400;
-            if (compareStrings(emotionTime, _emotionTimes[3])) {
-                eT = eT * 30;
-            }
-            else if (compareStrings(emotionTime, _emotionTimes[2])) {
-                eT = eT * 7;
-            }
-            if (block.timestamp - _moods[nation].tempLastTime > eT) {
-                emo = _emotions[0];
-            }
+        //1 day
+        uint256 eT = 86400;
+        if (compareStrings(emotionTime, _emotionTimes[2])) {// 30 days
+            eT = eT * 30;
+        }
+        else if (compareStrings(emotionTime, _emotionTimes[1])) {// 1 week
+            eT = eT * 7;
+        }
+        if (block.timestamp - _moods[nation].tempLastTime > eT) {
+            emo = _emotions[0];
         }
         player = Player(
             emo,

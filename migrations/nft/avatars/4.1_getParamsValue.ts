@@ -11,15 +11,16 @@ import {AVATARS} from "./avatars";
             console.log("wrong network");
             return;
         }
-        const contract = '0x15eEc244625b07346f3735afbcbB924e5DA1134e';
+        const contract = '0x0248cCc4Efcd59763D8d760e8eA7903c15EFFbB5';
         const nft = new AVATARS(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
         // const args = process.argv.slice(2)
         // const a = await nft.getParamValues(contract, args[0]);
-        for (var i = 1; i < 100; i++) {
+        for (var i = 1; i < 10000; i++) {
             const a = await nft.getParamValues(contract, i);
+            console.log(a);
             if (a._nation == "USA") {
-                console.log(a);
-                return;
+                // console.log(a);
+                // return;
             }
         }
     } catch (e) {
