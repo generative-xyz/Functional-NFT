@@ -377,11 +377,6 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         _oracle = oracle;
     }
 
-    /**
-     * @notice Stores, from any API, the scheduled games.
-     * @param requestId the request ID for fulfillment.
-     * @param gameData the games data is resolved.
-     */
     function fulfill(bytes32 requestId, bytes memory gameData) external {
         require(msg.sender == _oracle, Errors.INV_ADD);
         emit RequestFulfilledData(requestId, gameData);
