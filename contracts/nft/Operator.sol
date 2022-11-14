@@ -1,8 +1,4 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
-/*
-import "@chainlink/contracts/src/v0.7/Operator.sol";
+pragma solidity ^0.7.0;
 
-contract Operator is Operator {
-    
-}*/
+import "@chainlink/contracts/src/v0.7/Operator.sol";
