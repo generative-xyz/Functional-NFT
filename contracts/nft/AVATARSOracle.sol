@@ -5,6 +5,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import '@chainlink/contracts/src/v0.8/ChainlinkClient.sol';
 import "../lib/helpers/Errors.sol";
+import "../lib/helpers/StringUtils.sol";
+import "../lib/helpers/BytesUtils.sol";
 import "../interfaces/ICallback.sol";
 
 contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
@@ -122,7 +124,7 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
         emit RequestFulfilled(requestId, result);
 
         requestIdGames[requestId] = result;
-        uint32 gameId = uint32(bytes4(_sliceDynamicArray(0, 4, result[0])));
+        uint32 gameId = uint32(bytes4(BytesUtils._sliceDynamicArray(0, 4, result[0])));
         if (games[gameId].startTime == 0) {
             // create
             GameCreate memory g = _getGameCreateStruct(requestIdGames[requestId][0]);
@@ -146,7 +148,7 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
     */
     function requestData(string memory jobId, uint256 fee, string memory url, string memory path) public returns (bytes32 requestId) {
         require(msg.sender == _admin || msg.sender == _be, Errors.ONLY_ADMIN_ALLOWED);
-        Chainlink.Request memory req = buildChainlinkRequest(stringToBytes32(jobId), address(this), this.fulfill.selector);
+        Chainlink.Request memory req = buildChainlinkRequest(StringUtils.stringToBytes32(jobId), address(this), this.fulfill.selector);
         req.add('get', url);
         req.add('path', path);
         // Sends the request
@@ -158,7 +160,7 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
      */
     function requestSchedule(string memory jobId, uint256 fee, uint256 market, uint256 leagueId, uint256 date) external {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
-        Chainlink.Request memory req = buildOperatorRequest(stringToBytes32(jobId), this.fulfillSchedule.selector);
+        Chainlink.Request memory req = buildOperatorRequest(StringUtils.stringToBytes32(jobId), this.fulfillSchedule.selector);
         //0: create, 1: resolved
         req.addUint("market", market);
         // 77: FIFA World Cup
@@ -240,46 +242,22 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
     }
 
     function _getGameCreateStruct(bytes memory _data) private pure returns (GameCreate memory) {
-        uint32 gameId = uint32(bytes4(_sliceDynamicArray(0, 4, _data)));
-        uint40 startTime = uint40(bytes5(_sliceDynamicArray(4, 9, _data)));
+        uint32 gameId = uint32(bytes4(BytesUtils._sliceDynamicArray(0, 4, _data)));
+        uint40 startTime = uint40(bytes5(BytesUtils._sliceDynamicArray(4, 9, _data)));
         uint8 homeTeamLength = uint8(bytes1(_data[9]));
         uint256 endHomeTeam = 10 + homeTeamLength;
-        string memory homeTeam = string(_sliceDynamicArray(10, endHomeTeam, _data));
-        string memory awayTeam = string(_sliceDynamicArray(endHomeTeam, _data.length, _data));
+        string memory homeTeam = string(BytesUtils._sliceDynamicArray(10, endHomeTeam, _data));
+        string memory awayTeam = string(BytesUtils._sliceDynamicArray(endHomeTeam, _data.length, _data));
         GameCreate memory gameCreate = GameCreate(gameId, startTime, homeTeam, awayTeam);
         return gameCreate;
     }
 
     function _getGameResolveStruct(bytes memory _data) private pure returns (GameResolve memory) {
-        uint32 gameId = uint32(bytes4(_sliceDynamicArray(0, 4, _data)));
+        uint32 gameId = uint32(bytes4(BytesUtils._sliceDynamicArray(0, 4, _data)));
         uint8 homeScore = uint8(bytes1(_data[4]));
         uint8 awayScore = uint8(bytes1(_data[5]));
-        string memory status = string(_sliceDynamicArray(6, _data.length, _data));
+        string memory status = string(BytesUtils._sliceDynamicArray(6, _data.length, _data));
         GameResolve memory gameResolve = GameResolve(gameId, homeScore, awayScore, status);
         return gameResolve;
-    }
-
-    function _sliceDynamicArray(
-        uint256 _start,
-        uint256 _end,
-        bytes memory _data
-    ) private pure returns (bytes memory) {
-        bytes memory result = new bytes(_end - _start);
-        for (uint256 i = 0; i < _end - _start; ++i) {
-            result[i] = _data[_start + i];
-        }
-        return result;
-    }
-
-    function stringToBytes32(string memory source) private pure returns (bytes32 result) {
-        bytes memory tempEmptyStringTest = bytes(source);
-        if (tempEmptyStringTest.length == 0) {
-            return 0x0;
-        }
-
-        assembly {
-        // solhint-disable-line no-inline-assembly
-            result := mload(add(source, 32))
-        }
     }
 }
