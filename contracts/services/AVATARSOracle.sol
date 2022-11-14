@@ -159,7 +159,7 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
      * @notice Requests, from Enetpulse, the tournament games either to be created or to be resolved on a specific date.
      */
     function requestSchedule(string memory jobId, uint256 fee, uint256 market, uint256 leagueId, uint256 date) external {
-        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
+        require(msg.sender == _admin || msg.sender == _be, Errors.ONLY_ADMIN_ALLOWED);
         Chainlink.Request memory req = buildOperatorRequest(StringUtils.stringToBytes32(jobId), this.fulfillSchedule.selector);
         //0: create, 1: resolved
         req.addUint("market", market);
@@ -177,6 +177,7 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
         uint256 _date,
         uint256[] calldata _gameIds
     ) external {
+        require(msg.sender == _admin || msg.sender == _be, Errors.ONLY_ADMIN_ALLOWED);
         Chainlink.Request memory req = buildOperatorRequest(_specId, this.fulfillSchedule.selector);
         req.addUint("market", _market);
         req.addUint("leagueId", _leagueId);
@@ -191,14 +192,17 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
         bytes4 _callbackFunctionId,
         uint256 _expiration
     ) external {
+        require(msg.sender == _admin || msg.sender == _be, Errors.ONLY_ADMIN_ALLOWED);
         cancelChainlinkRequest(_requestId, _payment, _callbackFunctionId, _expiration);
     }
 
     function setOracle(address _oracle) external {
+        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
         setChainlinkOracle(_oracle);
     }
 
     function setRequestIdGames(bytes32 _requestId, bytes[] memory _games) external {
+        require(msg.sender == _admin || msg.sender == _be, Errors.ONLY_ADMIN_ALLOWED);
         requestIdGames[_requestId] = _games;
     }
 
@@ -206,6 +210,12 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
         LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
         require(link.transfer(msg.sender, link.balanceOf(address(this))), 'Unable to transfer');
+    }
+
+    function withdraw(uint256 amount) external nonReentrant {
+        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
+        (bool success,) = msg.sender.call{value : address(this).balance}("");
+        require(success);
     }
 
     /* ========== EXTERNAL VIEW FUNCTIONS ========== */
