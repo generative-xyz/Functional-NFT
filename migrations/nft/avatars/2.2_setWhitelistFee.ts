@@ -14,7 +14,7 @@ import {AVATARS} from "./avatars";
         const contract = '0x0248cCc4Efcd59763D8d760e8eA7903c15EFFbB5';
         const nft = new AVATARS(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
-        const tx = await nft.setWhitelistFee(contract, ethers.utils.parseEther("0.001"), 0);
+        const tx = await nft.setWhitelistFee(contract, ethers.utils.parseEther("1.0"), 0);
         console.log("tx:", tx);
     } catch (e) {
         // Deal with the fact the chain failed
