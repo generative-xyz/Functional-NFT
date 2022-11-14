@@ -31,7 +31,7 @@ class AvatarsOracle {
         return nftDeployed.address;
     }
 
-    getContract(contractAddress: any, contractName: any = "./artifacts/contracts/nft/AVATARSOracle.sol/AVATARSOracle.json") {
+    getContract(contractAddress: any, contractName: any = "./artifacts/contracts/services/AVATARSOracle.sol/AVATARSOracle.json") {
         console.log("Network run", this.network, hardhatConfig.networks[this.network].url);
         if (this.network == "local") {
             console.log("not run local");
