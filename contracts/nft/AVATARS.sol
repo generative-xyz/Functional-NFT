@@ -60,6 +60,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         string _tatoo;
         string _glasses;
         string _captain;
+        string _facePaint;
     }
 
     function initialize(
@@ -264,7 +265,23 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
 
     function getCaptain(uint256 id) internal view returns (string memory) {
         string[2] memory _captains = ["0", "1"];
-        return _captains[seeding(id, "captain") % _captains.length];
+        string memory dna = getDNA(id);
+
+        if (compareStrings(dna, "1")) {// only male
+            string memory top = getTop(id);
+            if (compareStrings(top, "1")) {// top 1
+                uint256 number = getNumber(id);
+                if (number != 0) {// has number
+                    return _captains[seeding(id, "captain") % _captains.length];
+                }
+            }
+        }
+        return "0";
+    }
+
+    function getFacePaint(uint256 id) internal view returns (string memory) {
+        string[2] memory _facePaints = ["0", "1"];
+        return _facePaints[seeding(id, "facepaint") % _facePaints.length];
     }
 
     function getEmotionTime(uint256 id) internal view returns (string memory, string[3] memory) {
@@ -303,7 +320,8 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
             getNumber(tokenId),
             getTatoo(tokenId),
             getGlasses(tokenId),
-            getCaptain(tokenId)
+            getCaptain(tokenId),
+            getFacePaint(tokenId)
         );
         return player;
     }
