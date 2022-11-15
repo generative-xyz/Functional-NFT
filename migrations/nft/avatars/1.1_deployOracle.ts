@@ -13,8 +13,8 @@ import {AvatarsOracle} from "./avatarsOracle";
         const address = await nft.deploy(
             process.env.PUBLIC_KEY,
             "0xe7B336ca34B2eD9e52460AB7eC5e0b8562D61510",
-            "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
-            "0xeE3BC809fFa9BB32A88d39d40DF6425d5d712B16");
+            "0x514910771af9ca656af840dff83e8264ecf986ca",
+            "0x262aBFeD55b03A41451e16E4591837E7A7af04d3");
         console.log("%s AVATARS address: %s", process.env.NETWORK, address);
     } catch (e) {
         // Deal with the fact the chain failed

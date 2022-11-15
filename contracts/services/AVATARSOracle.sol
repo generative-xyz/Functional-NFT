@@ -97,6 +97,11 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
         setChainlinkOracle(oracle);
     }
 
+    function changeLINKToken(address LINK_TOKEN) external {
+        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
+        setChainlinkToken(LINK_TOKEN);
+    }
+
     function changeCallbackAddress(address add) external {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
         _callbackAddress = add;
