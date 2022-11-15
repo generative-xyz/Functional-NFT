@@ -54,9 +54,9 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
      * Mumbai polygon Testnet details:
      * Link Token: 0x326C977E6efc84E512bB9C30f76E30c160eD06FB
      ** - Any API
-     * Oracle: 0x40193c8518BB267228Fc409a613bDbD8eC5a97b3 (Chainlink DevRel)
-     * jobId: 7da2702f37fd48e5b1b9a5715e3509b6
-     * jobId bytes32: 0x3764613237303266333766643438653562316239613537313565333530396236
+     * Oracle: 0xeE3BC809fFa9BB32A88d39d40DF6425d5d712B16
+     * jobId: ef28cb879c2741f8b98fb686d26bad86
+     * jobId bytes32: 
      ** - Enetpulse Sports Data Oracle
      * Oracle: 0xd5821b900e44db9490da9b09541bbd027fBecF4E
      * jobId: d110b5c4b83d42dca20e410ac537cd94
@@ -65,11 +65,13 @@ contract AVATARSOracle is ReentrancyGuard, Ownable, ChainlinkClient {
      *
      * Ethereum Mainnet details:
      * Link Token: 0x514910771af9ca656af840dff83e8264ecf986ca
-     * Oracle: 0x6A9e45568261c5e0CBb1831Bd35cA5c4b70375AE (Chainlink DevRel)
-     * jobId: 7da2702f37fd48e5b1b9a5715e3509b6
-     * jobId bytes32: 0x3764613237303266333766643438653562316239613537313565333530396236
+     * Oracle: 0x262aBFeD55b03A41451e16E4591837E7A7af04d3
+     * jobId: ef28cb879c2741f8b98fb686d26bad86
+     * jobId bytes32: 
      ** - Enetpulse Sports Data Oracle
      * Oracle: 0x6A9e45568261c5e0CBb1831Bd35cA5c4b70375AE (Chainlink DevRel)
+     * jobId: 5dd848c329e8444f8241a1bea4fcadb7
+     * jobId bytes32: 0x3564643834386333323965383434346638323431613162656134666361646237
      */
     constructor (address admin, address be, address LINK_TOKEN, address ORACLE) {
         _admin = admin;
