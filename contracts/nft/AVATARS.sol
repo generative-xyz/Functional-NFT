@@ -339,8 +339,11 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
 
     /* @MINT mint nft
     */
-    function mintByToken(uint256 tokenIdGated) public nonReentrant {
+    function mintByToken(uint256 tokenIdGated) public {
         require(_tokenAddrErc721 != address(0), Errors.INV_ADD);
+        require(_counter < _maxUser);
+        _counter++;
+        _safeMint(msg.sender, _counter);
         // check shapes
         // string[] private shapes = ["Pillhead", "Smiler", "Spektral", "Helix", "Tesseract", "Torus", "Obelisk"];
         // accept Pillhead
@@ -349,20 +352,16 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         IERC721Upgradeable token = IERC721Upgradeable(_tokenAddrErc721);
         // burn
         token.transferFrom(msg.sender, address(this), tokenIdGated);
-
-        require(_counter < _maxUser);
-        _counter++;
-        _safeMint(msg.sender, _counter);
     }
 
-    function mint() public nonReentrant payable {
+    function mint() public payable {
         require(_fee > 0 && msg.value >= _fee, Errors.INV_FEE_PROJECT);
         require(_counter < _maxUser);
         _counter++;
         _safeMint(msg.sender, _counter);
     }
 
-    function mintWhitelist() public nonReentrant payable {
+    function mintWhitelist() public payable {
         //        require(_whiteList[msg.sender] > 0, Errors.INV_ADD);
         require(_whitelistFee > 0 && msg.value >= _whitelistFee, Errors.INV_FEE_PROJECT);
         require(_counter < _maxUser);
@@ -371,7 +370,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         //        _whiteList[msg.sender] -= 1;
     }
 
-    function ownerMint(uint256 id) public nonReentrant {
+    function ownerMint(uint256 id) public {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
         require(id > _maxUser && id <= _max);
         _safeMint(msg.sender, id);
