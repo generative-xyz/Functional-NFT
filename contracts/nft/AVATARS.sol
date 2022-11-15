@@ -144,6 +144,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }
 
     function getNation(uint256 id) internal view returns (string memory) {
+        // 3% for each
         string[32] memory _nations = [
         "Qatar", "Ecuador", "Senegal", "Netherlands", // GA
         "England", "IR Iran", "USA", "Wales", // GB
@@ -162,17 +163,17 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         // male, female, robot, ape, alien, ballhead
 
         uint256 prob = randUint256(id, "dna", 1, 10000);
-        if (prob > 3000) {
+        if (prob > 3000) {/// 70%
             return _dnas[0];
-        } else if (prob >= 1 && prob <= 2000) {
+        } else if (prob >= 1 && prob <= 2000) {// 20%
             return _dnas[1];
-        } else if (prob >= 2001 && prob <= 2600) {
+        } else if (prob >= 2001 && prob <= 2600) {// 6%
             return _dnas[2];
-        } else if (prob >= 2601 && prob <= 2900) {
+        } else if (prob >= 2601 && prob <= 2900) {// 3%
             return _dnas[3];
-        } else if (prob >= 2901 && prob <= 2990) {
+        } else if (prob >= 2901 && prob <= 2990) {//0.9%
             return _dnas[4];
-        } else {
+        } else {// 0.1%
             return _dnas[5];
         }
     }
@@ -182,20 +183,31 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         string memory dna = getDNA(id);
 
         if (compareStrings(dna, "1")) {// male
-            return _beards3[seeding(id, "beard") % _beards3.length];
+            uint256 prob = randUint256(id, "beard", 1, 7000);
+            if (prob > 700) {// 90%
+                return _beards3[0];
+            } else if (prob >= 1 && prob <= 560) {// 8%
+                return _beards3[1];
+            } else {// 2%
+                return _beards3[2];
+            }
         }
         return "0";
     }
 
     function getHair(uint256 id) internal view returns (string memory) {
-        string[10] memory _hair10 = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+        string[9] memory _hair9 = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
         string[7] memory _hairs7 = ["1", "2", "3", "4", "5", "6", "7"];
         string memory dna = getDNA(id);
 
         if (compareStrings(dna, "2")) {// female
             return _hairs7[seeding(id, "hair") % _hairs7.length];
         } else if (compareStrings(dna, "1")) {// male
-            return _hair10[seeding(id, "hair") % _hair10.length];
+            uint256 prob = randUint256(id, "hair", 1, 7000);
+            if (prob > 6860) {// 2%
+                return "0";
+            }
+            return _hair9[seeding(id, "hair") % _hair9.length];
         }
         return "0";
     }
@@ -209,7 +221,12 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
             if (compareStrings(top, "1")) {// top 1
                 uint256 number = getNumber(id);
                 if (number != 0) {// has number
-                    return _undershirts[seeding(id, "undershirt") % _undershirts.length];
+                    uint256 prob = randUint256(id, "undershirt", 1, 3276);
+                    if (prob >= 327) {// 90%
+                        return "0";
+                    } else {// 1%
+                        return _undershirts[seeding(id, "undershirt") % _undershirts.length];
+                    }
                 }
             }
         }
@@ -222,9 +239,24 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         string memory dna = getDNA(id);
 
         if (compareStrings(dna, "2")) {// female
-            return _topsF[seeding(id, "top") % _topsF.length];
+            uint256 prob = randUint256(id, "top", 1, 2000);
+            if (prob > 800) {// 60%
+                return _topsF[0];
+            } else if (prob >= 1 && prob <= 600) {// 30%
+                return _topsF[1];
+            } else {// 10%
+                return _topsF[2];
+            }
+        } else {// non-female
+            uint256 prob = randUint256(id, "top", 1, 8000);
+            if (prob > 3200) {// 60%
+                return _tops[0];
+            } else if (prob >= 1 && prob <= 2400) {// 30%
+                return _tops[1];
+            } else {// 10%
+                return _tops[2];
+            }
         }
-        return _tops[seeding(id, "top") % _tops.length];
     }
 
     function getBottom(uint256 id) internal view returns (string memory) {
@@ -242,25 +274,58 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         uint256[26] memory _number = [uint256(1), 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26];
 
         uint256 prob = randUint256(id, "number", 1, 10000);
-        if (prob > 7800) {
+        if (prob > 7800) {// 22% blank
             return 0;
         }
+        // 3% for each
         return _number[seeding(id, "number") % _number.length];
     }
 
     function getShoes(uint256 id) internal view returns (string memory) {
         string[3] memory _shoes = ["1", "2", "3"];
-        return _shoes[seeding(id, "shoe") % _shoes.length];
+        uint256 prob = randUint256(id, "shoes", 1, 10000);
+
+        if (prob > 1000) {// 90%
+            return _shoes[0];
+        } else if (prob >= 1 && prob <= 900) {// 9%
+            return _shoes[1];
+        } else {// 1%
+            return _shoes[2];
+        }
     }
 
     function getTatoo(uint256 id) internal view returns (string memory) {
         string[4] memory _tatoos = ["0", "1", "2", "3"];
-        return _tatoos[seeding(id, "tatoo") % _tatoos.length];
+
+        uint256 prob = randUint256(id, "tatoo", 1, 10000);
+        if (prob > 2500) {// 75%
+            return _tatoos[0];
+        } else if (prob >= 1 && prob <= 100) {//1%
+            return _tatoos[1];
+        } else if (prob >= 101 && prob <= 500) {// 4%
+            return _tatoos[2];
+        } else {// 20%
+            return _tatoos[3];
+        }
     }
 
     function getGlasses(uint256 id) internal view returns (string memory) {
         string[6] memory _glasses = ["0", "1", "2", "3", "4", "5"];
-        return _glasses[seeding(id, "glasses") % _glasses.length];
+
+        uint256 prob = randUint256(id, "glasses", 1, 10000);
+        if (prob > 4000) {// 60%
+            return _glasses[0];
+        } else if (prob >= 1 && prob <= 2000) {//20%
+            return _glasses[1];
+        } else if (prob >= 2001 && prob <= 3000) {// 10%
+            return _glasses[2];
+        } else if (prob >= 3001 && prob <= 3500) {// 5%
+            return _glasses[3];
+        } else if (prob >= 3501 && prob <= 3900) {//4%
+            return _glasses[4];
+        } else {// 1%
+            return _glasses[5];
+        }
     }
 
     function getCaptain(uint256 id) internal view returns (string memory) {
@@ -272,7 +337,12 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
             if (compareStrings(top, "1")) {// top 1
                 uint256 number = getNumber(id);
                 if (number != 0) {// has number
-                    return _captains[seeding(id, "captain") % _captains.length];
+                    uint256 prob = randUint256(id, "captain", 1, 3276);
+                    if (prob >= 327) {// 90%
+                        return _captains[0];
+                    } else {// 1%
+                        return _captains[1];
+                    }
                 }
             }
         }
@@ -281,12 +351,25 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
 
     function getFacePaint(uint256 id) internal view returns (string memory) {
         string[2] memory _facePaints = ["0", "1"];
-        return _facePaints[seeding(id, "facepaint") % _facePaints.length];
+        uint256 prob = randUint256(id, "facepaint", 1, 10000);
+        if (prob > 1000) {
+            return _facePaints[0];
+        } else {
+            return _facePaints[1];
+        }
     }
 
     function getEmotionTime(uint256 id) internal view returns (string memory, string[3] memory) {
         string[3] memory _emotionTimes = ["1", "2", "3"];
-        return (_emotionTimes[seeding(id, "emotionTime") % _emotionTimes.length], _emotionTimes);
+        uint256 prob = randUint256(id, "emotionTime", 1, 10000);
+        // 70%
+        string memory e = _emotionTimes[0];
+        if (prob >= 1 && prob <= 2000) {//20%
+            e = _emotionTimes[1];
+        } else if (prob >= 2001 && prob <= 3000) {//10%
+            e = _emotionTimes[2];
+        }
+        return (e, _emotionTimes);
     }
 
     function getParamValues(uint256 tokenId) public view returns (Player memory player) {
