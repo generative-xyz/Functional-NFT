@@ -399,6 +399,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         require(msg.sender == _oracle, Errors.INV_ADD);
         emit RequestFulfilledData(requestId, gameData);
 
+        require(_requestIdData[requestId].length == 0, Errors.INV_PARAMS);
         _requestIdData[requestId] = gameData;
         (uint32 gameId, uint40 startTime, string memory home, string memory away, uint8 homeTeamGoals, uint8 awayTeamGoals, string memory status) = abi.decode(gameData, (uint32, uint40, string, string, uint8, uint8, string));
         Result result = determineResult(homeTeamGoals, awayTeamGoals);
