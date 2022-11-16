@@ -81,6 +81,11 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         _admin = newAdm;
     }
 
+    function changeParam(address newP) external {
+        require(msg.sender == _admin && newP != address(0) && _paramsAddress != newP, Errors.ONLY_ADMIN_ALLOWED);
+        _paramsAddress = newP;
+    }
+
     function changeToken(address sweet) external {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
         _tokenAddrErc721 = sweet;
