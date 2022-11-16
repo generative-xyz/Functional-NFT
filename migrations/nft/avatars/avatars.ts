@@ -99,7 +99,7 @@ class AVATARS {
         return val;
     }
 
-    async aaaa(contractAddress: any, tokenId: any) {
+    async getMood(contractAddress: any, team: any) {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
 
@@ -110,7 +110,7 @@ class AVATARS {
             nonce: nonce,
         }
 
-        const val: any = await temp?.nftContract.methods.aaaa(tokenId).call(tx);
+        const val: any = await temp?.nftContract.methods._moods(team).call(tx);
         return val;
     }
 
