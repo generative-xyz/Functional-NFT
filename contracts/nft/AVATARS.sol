@@ -57,7 +57,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         string _top;
         string _bottom;
         uint256 _number;
-        string _tatoo;
+        string _tattoo;
         string _glasses;
         string _captain;
         string _facePaint;
@@ -294,18 +294,18 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         }
     }
 
-    function getTatoo(uint256 id) internal view returns (string memory) {
-        string[4] memory _tatoos = ["0", "1", "2", "3"];
+    function getTattoo(uint256 id) internal view returns (string memory) {
+        string[4] memory _tattoos = ["0", "1", "2", "3"];
 
-        uint256 prob = randUint256(id, "tatoo", 1, 10000);
+        uint256 prob = randUint256(id, "tattoo", 1, 10000);
         if (prob > 2500) {// 75%
-            return _tatoos[0];
+            return _tattoos[0];
         } else if (prob >= 1 && prob <= 100) {//1%
-            return _tatoos[1];
+            return _tattoos[1];
         } else if (prob >= 101 && prob <= 500) {// 4%
-            return _tatoos[2];
+            return _tattoos[2];
         } else {// 20%
-            return _tatoos[3];
+            return _tattoos[3];
         }
     }
 
@@ -401,7 +401,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
             getTop(tokenId),
             getBottom(tokenId),
             getNumber(tokenId),
-            getTatoo(tokenId),
+            getTattoo(tokenId),
             getGlasses(tokenId),
             getCaptain(tokenId),
             getFacePaint(tokenId)
