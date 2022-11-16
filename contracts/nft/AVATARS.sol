@@ -343,7 +343,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
                     uint256 prob = randUint256(id, "captain", 1, 3276);
                     if (prob >= 327) {// 90%
                         return _captains[0];
-                    } else {// 1%
+                    } else {// 10%
                         return _captains[1];
                     }
                 }
