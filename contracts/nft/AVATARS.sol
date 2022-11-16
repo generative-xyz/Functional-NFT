@@ -42,7 +42,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         uint256 tempLastTime;
     }
 
-    mapping(string => Mood) _moods;
+    mapping(string => Mood) public _moods;
     enum Result {U, H_W, A_W, D}
 
     struct Player {
