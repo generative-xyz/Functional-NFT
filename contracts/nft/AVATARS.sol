@@ -213,7 +213,8 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }
 
     function getUndershirt(uint256 id) internal view returns (string memory) {
-        string[17] memory _undershirts = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17"];
+        string[12] memory _undershirtsText = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+        string[5] memory _undershirtsImg = ["13", "14", "15", "16", "17"];
         string memory dna = getDNA(id);
 
         if (compareStrings(dna, "1")) {// only male
@@ -222,10 +223,12 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
                 uint256 number = getNumber(id);
                 if (number != 0) {// has number
                     uint256 prob = randUint256(id, "undershirt", 1, 3276);
-                    if (prob >= 327) {// 90%
+                    if (prob >= 1310) {// 60%
                         return "0";
-                    } else {// 1%
-                        return _undershirts[seeding(id, "undershirt") % _undershirts.length];
+                    } else if (prob >= 1 && prob <= 982) {// 30%
+                        return _undershirtsText[seeding(id, "undershirt") % _undershirtsText.length];
+                    } else {// 10%
+                        return _undershirtsImg[seeding(id, "undershirt") % _undershirtsImg.length];
                     }
                 }
             }
