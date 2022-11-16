@@ -8,8 +8,9 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "../lib/helpers/Errors.sol";
 import "../interfaces/ICallback.sol";
+import "../operator-filter-registry/upgradeable/DefaultOperatorFiltererUpgradeable.sol";
 
-contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgradeable, OwnableUpgradeable, ICallback, IERC2981Upgradeable {
+contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgradeable, OwnableUpgradeable, ICallback, IERC2981Upgradeable, DefaultOperatorFiltererUpgradeable {
     using SafeMathUpgradeable for uint256;
     event RequestFulfilledData(bytes32 indexed requestId, bytes indexed data);
 
@@ -73,7 +74,9 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         __ERC721_init(name, symbol);
         _paramsAddress = paramsAddress;
         _admin = admin;
-        // init traits
+
+        __Ownable_init();
+        __DefaultOperatorFilterer_init();
     }
 
     function changeAdmin(address newAdm) external {
@@ -512,5 +515,21 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         if (homeTeam > awayTeam) {return Result.H_W;}
         if (homeTeam == awayTeam) {return Result.D;}
         return Result.A_W;
+    }
+
+    function transferFrom(address from, address to, uint256 tokenId) public override onlyAllowedOperator(from) {
+        super.transferFrom(from, to, tokenId);
+    }
+
+    function safeTransferFrom(address from, address to, uint256 tokenId) public override onlyAllowedOperator(from) {
+        super.safeTransferFrom(from, to, tokenId);
+    }
+
+    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data)
+    public
+    override
+    onlyAllowedOperator(from)
+    {
+        super.safeTransferFrom(from, to, tokenId, data);
     }
 }
