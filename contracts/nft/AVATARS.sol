@@ -80,6 +80,8 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
 
         __Ownable_init();
         __DefaultOperatorFilterer_init();
+        __ReentrancyGuard_init();
+        __ERC721Pausable_init();
     }
 
     function changeAdmin(address newAdm) external {
