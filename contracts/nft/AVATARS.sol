@@ -64,6 +64,8 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         string _facePaint;
     }
 
+    uint256 public _limit;
+
     function initialize(
         string memory name,
         string memory symbol,
@@ -74,6 +76,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         __ERC721_init(name, symbol);
         _paramsAddress = paramsAddress;
         _admin = admin;
+        _limit = 2000;
 
         __Ownable_init();
         __DefaultOperatorFilterer_init();
@@ -107,6 +110,11 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     function setWhitelistFee(uint256 whitelistFee) public {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
         _whitelistFee = whitelistFee;
+    }
+
+    function setLimit(uint256 limit) public {
+        require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
+        _limit = limit;
     }
 
     function pause() external {
@@ -434,8 +442,8 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     /* @MINT mint nft
     */
     function mintByToken(uint256 tokenIdGated) public {
-        require(_tokenAddrErc721 != address(0), Errors.INV_ADD);
-        require(_counter < _maxUser);
+        require(_tokenAddrErc721 != address(0) && _limit > 0, Errors.INV_ADD);
+        require(_counter < _maxUser && _counter < _limit);
         _counter++;
         _safeMint(msg.sender, _counter);
         // check shapes
@@ -449,16 +457,16 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }
 
     function mint() public payable {
-        require(_fee > 0 && msg.value >= _fee, Errors.INV_FEE_PROJECT);
-        require(_counter < _maxUser);
+        require(_fee > 0 && msg.value >= _fee && _limit > 0, Errors.INV_FEE_PROJECT);
+        require(_counter < _maxUser && _counter < _limit);
         _counter++;
         _safeMint(msg.sender, _counter);
     }
 
     function mintWhitelist() public payable {
         //        require(_whiteList[msg.sender] > 0, Errors.INV_ADD);
-        require(_whitelistFee > 0 && msg.value >= _whitelistFee, Errors.INV_FEE_PROJECT);
-        require(_counter < _maxUser);
+        require(_whitelistFee > 0 && msg.value >= _whitelistFee && _limit > 0, Errors.INV_FEE_PROJECT);
+        require(_counter < _maxUser && _counter < _limit);
         _counter++;
         _safeMint(msg.sender, _counter);
         //        _whiteList[msg.sender] -= 1;
