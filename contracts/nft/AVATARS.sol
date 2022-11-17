@@ -154,7 +154,7 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     /* @TRAITS: Get data for render
     */
     function randUint256(uint256 id, string memory trait, uint256 min, uint256 max) internal pure returns (uint256) {
-        return (min + seeding(id, trait) % (max - min + 1));
+        return (min + (seeding(id, trait) % (max - min + 1)));
     }
 
     function compareStrings(string memory a, string memory b) internal view returns (bool) {
