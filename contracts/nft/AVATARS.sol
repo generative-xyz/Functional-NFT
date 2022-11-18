@@ -214,18 +214,31 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }
 
     function getHair(uint256 id) internal view returns (string memory) {
-        string[9] memory _hair9 = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
-        string[7] memory _hairs7 = ["1", "2", "3", "4", "5", "6", "7"];
+        string[4] memory _hairsM4 = ["1", "2", "8", "9"];
+        string[5] memory _hairsM5 = ["3", "4", "5", "6", "7"];
+        string[2] memory _hairsF2 = ["1", "2"];
+        string[5] memory _hairsF5 = ["3", "4", "5", "6", "7"];
         string memory dna = getDNA(id);
 
         if (compareStrings(dna, "2")) {// female
-            return _hairs7[seeding(id, "hair") % _hairs7.length];
+            uint256 prob = randUint256(id, "hair", 1, 2000);
+            if (prob > 600) {// 70%
+                return _hairsF2[seeding(id, "hair") % _hairsF2.length];
+            } else {// 30%
+                return _hairsF5[seeding(id, "hair") % _hairsF5.length];
+            }
         } else if (compareStrings(dna, "1")) {// male
             uint256 prob = randUint256(id, "hair", 1, 7000);
             if (prob > 6860) {// 2%
                 return "0";
+            } else {
+                uint256 prob1 = randUint256(id, "hair", 1, 6860);
+                if (prob1 > 2058) {// 70% of 6860
+                    return _hairsM4[seeding(id, "hair") % _hairsM4.length];
+                } else {// 30% of 6860
+                    return _hairsM5[seeding(id, "hair") % _hairsM5.length];
+                }
             }
-            return _hair9[seeding(id, "hair") % _hair9.length];
         }
         return "0";
     }
