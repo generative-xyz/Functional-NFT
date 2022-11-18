@@ -85,6 +85,7 @@ class SWEETS {
             nonce: nonce,
             gas: gas,
             data: fun.encodeABI(),
+            // gasPrice: temp?.web3.utils.toWei("13", 'gwei'),
         }
 
         if (tx.gas == 0) {
