@@ -15,7 +15,7 @@ import {SWEETS} from "./sweets";
         const nft = new SWEETS(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
         let count = 0;
         let tokenIds = [];
-        for (var i = 4526; i <= 5000; i++) {
+        for (let i = 4526; i <= 5000; i++) {
             const a = await nft.getParamValues(contract, i);
             if (a.shape == "Pillhead") {
                 console.log(i, a);
