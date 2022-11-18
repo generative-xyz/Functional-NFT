@@ -16,7 +16,7 @@ import {AVATARS} from "./avatars";
         const tokenIds: any = [];
         for (let i = 0; i < tokenIds.length; i++) {
             const tx = await nft.ownerMint(contract, tokenIds[i], 0);
-            console.log("tx:", tx);
+            console.log("Mint - ", i, " - tx:", tx?.transactionHash);
         }
     } catch (e) {
         // Deal with the fact the chain failed

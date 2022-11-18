@@ -16,8 +16,8 @@ import {AVATARS} from "./avatars";
         const tokenGatedIds: any = [];
         for (let i = 0; i < tokenGatedIds.length; i++) {
             await nft.setApproveSweet("0x432390f5DFF811f826A0E0Ab912cb93eb704a9c8", contract, tokenGatedIds[i], 0);
-            const tx = await nft.mintByToken(contract, 4518, 0);
-            console.log("tx:", tx);
+            const tx = await nft.mintByToken(contract, tokenGatedIds[i], 0);
+            console.log("Mint - tokenID:", tokenGatedIds[i], "- tx:", tx?.transactionHash);
         }
     } catch (e) {
         // Deal with the fact the chain failed
