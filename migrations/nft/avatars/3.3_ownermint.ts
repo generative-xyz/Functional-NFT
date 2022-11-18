@@ -13,9 +13,11 @@ import {AVATARS} from "./avatars";
         }
         const contract = '0x9e339b1b85b00feffa44b1a120702c5a40935391';
         const nft = new AVATARS(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
-
-        const tx = await nft.ownerMint(contract, 4501, 0);
-        console.log("tx:", tx);
+        const tokenIds: any = [];
+        for (let i = 0; i < tokenIds.length; i++) {
+            const tx = await nft.ownerMint(contract, tokenIds[i], 0);
+            console.log("tx:", tx);
+        }
     } catch (e) {
         // Deal with the fact the chain failed
         console.log(e);
