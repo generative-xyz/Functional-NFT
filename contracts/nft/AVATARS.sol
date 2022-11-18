@@ -527,6 +527,8 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
         return Result.A_W;
     }
 
+    /* @notice: opensea operator filter registry
+    */
     function transferFrom(address from, address to, uint256 tokenId) public override onlyAllowedOperator(from) {
         super.transferFrom(from, to, tokenId);
     }
