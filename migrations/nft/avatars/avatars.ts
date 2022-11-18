@@ -364,7 +364,7 @@ class AVATARS {
         return await this.signedAndSendTx(temp?.web3, tx);
     }
 
-    async setApproveSweet(sweet: any, operator: any, tokenGateId: any, gas: number) {
+    async setApproveSweet(sweet: any, operator: any, gas: number) {
         let temp = this.getContract(sweet, "./artifacts/contracts/nft/SWEETS.sol/SWEETS.json");
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
         const fun = temp?.nftContract.methods.setApprovalForAll(operator, true);
