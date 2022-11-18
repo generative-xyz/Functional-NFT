@@ -331,21 +331,23 @@ contract AVATARS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpg
     }
 
     function getGlasses(uint256 id) internal view returns (string memory) {
-        string[6] memory _glasses = ["0", "1", "2", "3", "4", "5"];
+        string[5] memory _glasses = ["0", "1", "2", "3", "4"];
+        string memory dna = getDNA(id);
 
-        uint256 prob = randUint256(id, "glasses", 1, 10000);
-        if (prob > 4000) {// 60%
+        if (compareStrings(dna, "3")) {// only robot
+            return "0";
+        }
+        uint256 prob = randUint256(id, "glasses", 1, 9400);
+        if (prob > 3760) {// 60%
             return _glasses[0];
-        } else if (prob >= 1 && prob <= 2000) {//20%
+        } else if (prob >= 1 && prob <= 1880) {//20%
             return _glasses[1];
-        } else if (prob >= 2001 && prob <= 3000) {// 10%
+        } else if (prob >= 1881 && prob <= 2820) {// 10%
             return _glasses[2];
-        } else if (prob >= 3001 && prob <= 3500) {// 5%
+        } else if (prob >= 2821 && prob <= 3666) {// 9%
             return _glasses[3];
-        } else if (prob >= 3501 && prob <= 3900) {//4%
-            return _glasses[4];
         } else {// 1%
-            return _glasses[5];
+            return _glasses[4];
         }
     }
 
