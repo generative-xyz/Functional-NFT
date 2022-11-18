@@ -33,6 +33,31 @@ class SWEETS {
         return {web3, nftContract};
     }
 
+    async signedAndSendTx(web3: any, tx: any) {
+        const signedTx = await web3.eth.accounts.signTransaction(tx, this.senderPrivateKey)
+        if (signedTx.rawTransaction != null) {
+            let sentTx = await web3.eth.sendSignedTransaction(
+                signedTx.rawTransaction,
+                function (err: any, hash: any) {
+                    if (!err) {
+                        console.log(
+                            "The hash of your transaction is: ",
+                            hash,
+                            "\nCheck Alchemy's Mempool to view the status of your transaction!"
+                        )
+                    } else {
+                        console.log(
+                            "Something went wrong when submitting your transaction:",
+                            err
+                        )
+                    }
+                }
+            )
+            return sentTx;
+        }
+        return null;
+    }
+
     async getParamValues(contractAddress: any, tokenId: any) {
         let temp = this.getContract(contractAddress);
         const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
@@ -46,6 +71,27 @@ class SWEETS {
 
         const val: any = await temp?.nftContract.methods.getParamValues(tokenId).call(tx);
         return val;
+    }
+
+    async ownerMint(contractAddress: any, tokenId: any, gas: number) {
+        let temp = this.getContract(contractAddress);
+        const nonce = await temp?.web3.eth.getTransactionCount(this.senderPublicKey, "latest") //get latest nonce
+
+        const fun = temp?.nftContract.methods.ownerMint(tokenId);
+        //the transaction
+        const tx = {
+            from: this.senderPublicKey,
+            to: contractAddress,
+            nonce: nonce,
+            gas: gas,
+            data: fun.encodeABI(),
+        }
+
+        if (tx.gas == 0) {
+            tx.gas = await fun.estimateGas(tx);
+        }
+
+        return await this.signedAndSendTx(temp?.web3, tx);
     }
 }
 
