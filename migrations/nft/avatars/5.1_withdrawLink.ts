@@ -4,6 +4,7 @@ import {ethers} from "ethers";
 import * as fs from "fs";
 import {keccak256} from "ethers/lib/utils";
 import {AVATARS} from "./avatars";
+import {AvatarsOracle} from "./avatarsOracle";
 
 (async () => {
     try {
@@ -12,7 +13,7 @@ import {AVATARS} from "./avatars";
             return;
         }
         const contract = '0x54a8d190d360a6AD5F806034284A1b9FcF2950b6';
-        const nft = new AVATARS(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
+        const nft = new AvatarsOracle(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
 
         const tx = await nft.withdrawLink(contract, 0);
         console.log("tx:", tx);
