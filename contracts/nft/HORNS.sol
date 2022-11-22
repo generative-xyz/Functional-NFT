@@ -213,6 +213,7 @@ contract HORNS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgra
         require(_tokenAddrErc721 != address(0) && _limit > 0, Errors.INV_ADD);
         // owner erc-721
         IERC721Upgradeable token = IERC721Upgradeable(_tokenAddrErc721);
+        require(token.ownerOf(tokenIdGated) == msg.sender);
 
         require(_counter < _maxUser && _counter < _limit);
         _counter++;
