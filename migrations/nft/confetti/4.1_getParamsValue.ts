@@ -11,7 +11,7 @@ import {CONFETTI} from "./confetti";
             console.log("wrong network");
             return;
         }
-        const contract = '0x29324bb75158f0C0089E465257b81805280744e5';
+        const contract = '0x1F0A3f7209967D18f12e1CA396D75A7caa8a68b1';
         const nft = new CONFETTI(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
         let count = 0;
         let tokenIds = [];

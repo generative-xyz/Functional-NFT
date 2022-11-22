@@ -13,7 +13,7 @@ import {HORNS} from "./horns";
         }
         const contract = '0x29324bb75158f0C0089E465257b81805280744e5';
         const nft = new HORNS(process.env.NETWORK, process.env.PRIVATE_KEY, process.env.PUBLIC_KEY);
-        const tokenIds: any = [];
+        const tokenIds: any = [9001, 9002, 9003];
         for (let i = 0; i < tokenIds.length; i++) {
             const tx = await nft.ownerMint(contract, tokenIds[i], 0);
             console.log("Mint - ", i, " - tx:", tx?.transactionHash);
