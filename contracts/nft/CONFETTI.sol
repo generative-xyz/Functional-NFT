@@ -13,8 +13,8 @@ contract CONFETTI is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUp
     using SafeMathUpgradeable for uint256;
 
     // @dev: supply for collection
-    uint256 constant _max = 10000;
-    uint256 constant _maxUser = 9000;
+    uint256 constant _max = 1000;
+    uint256 constant _maxUser = 900;
 
     // @dev: handler
     address public _admin;
@@ -34,7 +34,7 @@ contract CONFETTI is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUp
         string shapeCanon;
         string shapeConfetti;
         string[4] palletteCanon;
-        string[4] palletteConfetti;
+        string[2] palletteConfetti;
     }
 
     uint256 public _limit;
@@ -130,11 +130,11 @@ contract CONFETTI is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUp
 
     function getPaletteCanon(uint256 id) public view returns (string[4] memory) {
         string[25] memory colors = [
-        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7",
-        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7",
-        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7",
-        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7",
-        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7"
+        '#ABDEE6', '#CBAACB', '#FFFFB5', '#FFCCB6', '#F3B0C3',
+        '#C6DBDA', '#FEE1E8', '#FED7C3', '#F6EAC2', '#ECD5E3',
+        '#FF968A', '#FFAEA5', '#FFC5BF', '#FFD8BE', '#FFC8A2',
+        '#D4F0F0', '#8FCACA', '#CCE2CB', '#B6CFB6', '#97C1A9',
+        '#FCB9AA', '#FFDBCC', '#ECEAE4', '#A2E1DB', '#55CBCD'
         ];
         string[4] memory palette;
         palette[0] = colors[seeding(id, "color 0") % colors.length];
@@ -144,19 +144,19 @@ contract CONFETTI is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUp
         return palette;
     }
 
-    function getPaletteConfetti(uint256 id) public view returns (string[4] memory) {
-        string[25] memory colors = [
-        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7",
-        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7",
-        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7",
-        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7",
-        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7"
+    function getPaletteConfetti(uint256 id) public view returns (string[2] memory) {
+        string[35] memory colors = [
+        '#00A5E3', '#8DD7BF', '#FF96C5', '#FF5768', '#FFBF65',
+        '#FC6238', '#FFD872', '#F2D4CC', '#E77577', '#6C88C4',
+        '#C05780', '#FF828B', '#E7C582', '#00B0BA', '#0065A2',
+        '#00CDAC', '#FF6F68', '#FFDACC', '#FF60A8', '#CFF800',
+        '#FF5C77', '#4DD091', '#FFEC59', '#FFA23A', '#74737A',
+        '#FFF100', '#FF8C00', '#E81123', '#EC008C', '#68217A',
+        '#00188F', '#00BCF2', '#00B294', '#009E49', '#BAD80A'
         ];
-        string[4] memory palette;
+        string[2] memory palette;
         palette[0] = colors[seeding(id, "color 0") % colors.length];
         palette[1] = colors[seeding(id, "color 1") % colors.length];
-        palette[2] = colors[seeding(id, "color 2") % colors.length];
-        palette[3] = colors[seeding(id, "color 3") % colors.length];
         return palette;
     }
 
