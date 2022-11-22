@@ -110,14 +110,6 @@ contract CONFETTI is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUp
 
     /* @TRAITS: Get data for render
     */
-    function randUint256(uint256 id, string memory trait, uint256 min, uint256 max) internal pure returns (uint256) {
-        return (min + (seeding(id, trait) % (max - min + 1)));
-    }
-
-    function compareStrings(string memory a, string memory b) internal view returns (bool) {
-        return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
-    }
-
     function getShapeCanon(uint256 id) internal view returns (string memory) {
         string[7] memory _shapes = ["1", "2", "3", "4", "5", "6", "7"];
         return _shapes[seeding(id, "shapeCanon") % _shapes.length];

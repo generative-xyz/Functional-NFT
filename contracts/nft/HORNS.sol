@@ -109,14 +109,6 @@ contract HORNS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgra
 
     /* @TRAITS: Get data for render
     */
-    function randUint256(uint256 id, string memory trait, uint256 min, uint256 max) internal pure returns (uint256) {
-        return (min + (seeding(id, trait) % (max - min + 1)));
-    }
-
-    function compareStrings(string memory a, string memory b) internal view returns (bool) {
-        return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
-    }
-
     function getNation(uint256 id) internal view returns (string memory) {
         // 3% for each
         string[32] memory _nations = [
