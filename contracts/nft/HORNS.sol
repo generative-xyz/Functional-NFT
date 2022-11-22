@@ -96,7 +96,7 @@ contract HORNS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgra
         _unpause();
     }
 
-    function withdraw(uint256 amount) external nonReentrant {
+    function withdraw() external nonReentrant {
         require(msg.sender == _admin, Errors.ONLY_ADMIN_ALLOWED);
         (bool success,) = msg.sender.call{value : address(this).balance}("");
         require(success);
