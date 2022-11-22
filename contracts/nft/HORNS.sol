@@ -142,7 +142,7 @@ contract HORNS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgra
         '#FFF100', '#FF8C00', '#E81123', '#EC008C', '#68217A',
         '#00188F', '#00BCF2', '#00B294', '#009E49', '#BAD80A'
         ];
-        return colors[seeding(id, "palletTop") % colors.length];
+        return colors[seeding(id, "palletBottom") % colors.length];
     }
 
     function getPaletteTop(uint256 id) public view returns (string memory) {
@@ -153,7 +153,7 @@ contract HORNS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgra
         '#D4F0F0', '#8FCACA', '#CCE2CB', '#B6CFB6', '#97C1A9',
         '#FCB9AA', '#FFDBCC', '#ECEAE4', '#A2E1DB', '#55CBCD'
         ];
-        return colors[seeding(id, "palletBottom") % colors.length];
+        return colors[seeding(id, "palletTop") % colors.length];
     }
 
     function getParamValues(uint256 tokenId) public view returns (Horn memory horn) {
