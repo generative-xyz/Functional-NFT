@@ -13,8 +13,8 @@ contract HORNS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgra
     using SafeMathUpgradeable for uint256;
 
     // @dev: supply for collection
-    uint256 constant _max = 10000;
-    uint256 constant _maxUser = 9000;
+    uint256 constant _max = 1000;
+    uint256 constant _maxUser = 900;
 
     // @dev: handler
     address public _admin;
@@ -133,45 +133,25 @@ contract HORNS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgra
     }
 
     function getPaletteBottom(uint256 id) public view returns (string memory) {
-        string[16] memory colors = [
-        "#E7434F",
-        "#E7973D",
-        "#E7DC4E",
-        "#5CE75D",
-        "#2981E7",
-        "#5D21E7",
-        "#E777E4",
-        "#E7E7E7",
-        "#312624",
-        "#E7969F",
-        "#E7B277",
-        "#E7DD8F",
-        "#8CE7C3",
-        "#87B2E7",
-        "#A082E7",
-        "#E4B7E7"
+        string[35] memory colors = [
+        '#00A5E3', '#8DD7BF', '#FF96C5', '#FF5768', '#FFBF65',
+        '#FC6238', '#FFD872', '#F2D4CC', '#E77577', '#6C88C4',
+        '#C05780', '#FF828B', '#E7C582', '#00B0BA', '#0065A2',
+        '#00CDAC', '#FF6F68', '#FFDACC', '#FF60A8', '#CFF800',
+        '#FF5C77', '#4DD091', '#FFEC59', '#FFA23A', '#74737A',
+        '#FFF100', '#FF8C00', '#E81123', '#EC008C', '#68217A',
+        '#00188F', '#00BCF2', '#00B294', '#009E49', '#BAD80A'
         ];
         return colors[seeding(id, "palletTop") % colors.length];
     }
 
     function getPaletteTop(uint256 id) public view returns (string memory) {
-        string[16] memory colors = [
-        "#E7434F",
-        "#E7973D",
-        "#E7DC4E",
-        "#5CE75D",
-        "#2981E7",
-        "#5D21E7",
-        "#E777E4",
-        "#E7E7E7",
-        "#312624",
-        "#E7969F",
-        "#E7B277",
-        "#E7DD8F",
-        "#8CE7C3",
-        "#87B2E7",
-        "#A082E7",
-        "#E4B7E7"
+        string[25] memory colors = [
+        '#ABDEE6', '#CBAACB', '#FFFFB5', '#FFCCB6', '#F3B0C3',
+        '#C6DBDA', '#FEE1E8', '#FED7C3', '#F6EAC2', '#ECD5E3',
+        '#FF968A', '#FFAEA5', '#FFC5BF', '#FFD8BE', '#FFC8A2',
+        '#D4F0F0', '#8FCACA', '#CCE2CB', '#B6CFB6', '#97C1A9',
+        '#FCB9AA', '#FFDBCC', '#ECEAE4', '#A2E1DB', '#55CBCD'
         ];
         return colors[seeding(id, "palletBottom") % colors.length];
     }
