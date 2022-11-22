@@ -19,8 +19,6 @@ contract HORNS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgra
     // @dev: handler
     address public _admin;
     address public _paramsAddress;
-    address public _oracle;
-    mapping(bytes32 => bytes) public _requestIdData;
 
     string public _algorithm;
     uint256 public _counter;
@@ -31,15 +29,6 @@ contract HORNS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgra
     address public _tokenAddrErc721;
     // base on fee
     uint256 public _fee;
-
-    // @dev: living data for collection
-    struct Mood {
-        string tempEmo;
-        uint256 tempLastTime;
-    }
-
-    mapping(string => Mood) public _moods;
-    enum Result {U, H_W, A_W, D}
 
     struct Horn {
         string nation;
