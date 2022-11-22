@@ -6,7 +6,7 @@ import {ethers as eth1} from "ethers";
 const {ethers, upgrades} = require("hardhat");
 const hardhatConfig = require("../../../hardhat.config");
 
-class CONFETTIS {
+class CONFETTI {
     network: string;
     senderPublicKey: string;
     senderPrivateKey: string;
@@ -24,25 +24,25 @@ class CONFETTIS {
             return;
         }
 
-        const contract = await ethers.getContractFactory("HORNS");
-        console.log("CONFETTIS.deploying ...")
+        const contract = await ethers.getContractFactory("CONFETTI");
+        console.log("CONFETTI.deploying ...")
         const proxy = await upgrades.deployProxy(contract, [name, symbol, adminAddress, paramAdd], {
             initializer: 'initialize(string, string, address, address)',
         });
         await proxy.deployed();
-        console.log("CONFETTIS deployed at proxy:", proxy.address);
+        console.log("CONFETTI deployed at proxy:", proxy.address);
         return proxy.address;
     }
 
     async upgradeContract(proxyAddress: any) {
-        const contractUpdated = await ethers.getContractFactory("CONFETTIS");
-        console.log('Upgrading CONFETTIS... by proxy ' + proxyAddress);
+        const contractUpdated = await ethers.getContractFactory("CONFETTI");
+        console.log('Upgrading CONFETTI... by proxy ' + proxyAddress);
         const tx = await upgrades.upgradeProxy(proxyAddress, contractUpdated);
-        console.log('CONFETTIS upgraded on tx address ' + tx.address);
+        console.log('CONFETTI upgraded on tx address ' + tx.address);
         return tx;
     }
 
-    getContract(contractAddress: any, contractName: any = "./artifacts/contracts/nft/CONFETTIS.sol/CONFETTIS.json") {
+    getContract(contractAddress: any, contractName: any = "./artifacts/contracts/nft/CONFETTI.sol/CONFETTI.json") {
         console.log("Network run", this.network, hardhatConfig.networks[this.network].url);
         if (this.network == "local") {
             console.log("not run local");
@@ -163,4 +163,4 @@ class CONFETTIS {
     }
 }
 
-export {CONFETTIS};
+export {CONFETTI};

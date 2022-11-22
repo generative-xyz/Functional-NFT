@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "../lib/helpers/Errors.sol";
 import "../operator-filter-registry/upgradeable/DefaultOperatorFiltererUpgradeable.sol";
 
-contract CONFETTIS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgradeable, OwnableUpgradeable, IERC2981Upgradeable, DefaultOperatorFiltererUpgradeable {
+contract CONFETTI is Initializable, ERC721PausableUpgradeable, ReentrancyGuardUpgradeable, OwnableUpgradeable, IERC2981Upgradeable, DefaultOperatorFiltererUpgradeable {
     using SafeMathUpgradeable for uint256;
 
     // @dev: supply for collection
@@ -34,7 +34,7 @@ contract CONFETTIS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardU
         string shapeCanon;
         string shapeConfetti;
         string[4] palletteCanon;
-        string[2] palletteConfetti;
+        string[4] palletteConfetti;
     }
 
     uint256 public _limit;
@@ -130,33 +130,33 @@ contract CONFETTIS is Initializable, ERC721PausableUpgradeable, ReentrancyGuardU
 
     function getPaletteCanon(uint256 id) public view returns (string[4] memory) {
         string[25] memory colors = [
-        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7", "#5D21E7",
-        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7", "#5D21E7",
-        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7", "#5D21E7",
-        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7", "#5D21E7",
-        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7", "#5D21E7"
+        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7",
+        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7",
+        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7",
+        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7",
+        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7"
         ];
         string[4] memory palette;
-        palette[0] = rand(id, "color 0", colors);
-        palette[1] = rand(id, "color 1", colors);
-        palette[2] = rand(id, "color 2", colors);
-        palette[3] = rand(id, "color 3", colors);
+        palette[0] = colors[seeding(id, "color 0") % colors.length];
+        palette[1] = colors[seeding(id, "color 1") % colors.length];
+        palette[2] = colors[seeding(id, "color 2") % colors.length];
+        palette[3] = colors[seeding(id, "color 3") % colors.length];
         return palette;
     }
 
-    function getPaletteConfetti(uint256 id) public view returns (string memory) {
+    function getPaletteConfetti(uint256 id) public view returns (string[4] memory) {
         string[25] memory colors = [
-        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7", "#5D21E7",
-        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7", "#5D21E7",
-        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7", "#5D21E7",
-        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7", "#5D21E7",
-        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7", "#5D21E7"
+        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7",
+        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7",
+        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7",
+        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7",
+        "#E7434F", "#E7973D", "#E7DC4E", "#5CE75D", "#2981E7"
         ];
         string[4] memory palette;
-        palette[0] = rand(id, "color 0", colors);
-        palette[1] = rand(id, "color 1", colors);
-        palette[2] = rand(id, "color 2", colors);
-        palette[3] = rand(id, "color 3", colors);
+        palette[0] = colors[seeding(id, "color 0") % colors.length];
+        palette[1] = colors[seeding(id, "color 1") % colors.length];
+        palette[2] = colors[seeding(id, "color 2") % colors.length];
+        palette[3] = colors[seeding(id, "color 3") % colors.length];
         return palette;
     }
 
